@@ -20,8 +20,8 @@ venue:
     type: Working Group
     mail: cbor@ietf.org
     arch: "https://mailarchive.ietf.org/arch/browse/cbor/"
-    github: "anr-bmbf-pivot/draft-lenders-dns-cbor"
-    latest: "https://anr-bmbf-pivot.github.io/draft-lenders-dns-cbor/draft-lenders-dns-cbor.html"
+    github: "cbor-wg/cbor-dns"
+    latest: "https://cbor-wg.github.io/cbor-dns/draft-lenders-dns-cbor.html"
 
 author:
  -  fullname: Martine Sophie Lenders
