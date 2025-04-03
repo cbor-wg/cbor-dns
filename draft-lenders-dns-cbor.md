@@ -212,19 +212,6 @@ For instance, the name "www.example.org" can be encountered twice in the example
 ~~~
 {: #fig:name-compression-example title="Example for name compression." }
 
-<!--
-For name compression, a tag TBDt encapsulating an unsigned integer _i_ can be appended to the sequence of text strings.
-To extend the name suffix, the unsigned integer _i_ points to the _i_-th text string (counted depth first) in the overall DNS message.
-That string and all text strings or another tag TBDt following the string at the _i_-th position are appended to the name sequence.
-If another tag TBDt is encountered, it is resolved in the same way.
-Strings following a tag TBDt MUST NOT be appended to the name sequence.
-To prevent circular references, this DNS name suffix extension algorithm should error whenever a string position is encountered more than once during the extension of a name.
-Likewise, the algorithm should error whenever the _i_ is greater than the position of the previous seen string from this occurrence of tag TBDt.
-Only backward referencing is allowed for tag TBDt.
-Decompression stops when any other type than a text string or any other tag than tag TBDt are
-encountered.
--->
-
 The pseudo-code for this DNS name suffix extension algorithm can be seen in {{fig:decode-name}}.
 
 ~~~
@@ -656,65 +643,6 @@ consist of one question most of the time, i.e., there is close to no redundancy.
 ## Compression {#sec:pack-compression}
 
 The method of the compressor to construct the packing table, i.e., how the compression is applied, is out of scope of this document. Several potential compression algorithms were evaluated in \[TBD\].
-
-<!--
-Discussion TBD:
-
-- For queries, as they are only one question, i.e. at most one value of each at most,
-  compression is not necessary.
-- Address and name compression are mostly about affix compression
-  (i.e. straight/inverse referencing)<br>
-  ==> For occasions where value is the affix (e.g., "example.org" in ANY example in
-  {{sec:response-examples}}) use shared item referencing to argument table to safe bytes (no extra
-  shared item table, no, e.g., 216(""), just simple(0))
-  - **Example:** Using Basic Packed CBOR ({{-cbor-packed}}, section 3.1):
-    - 130 bytes (Basic Packed CBOR)
-    - 200 bytes (plain CBOR, see {{sec:response-examples}})
-    - 194 bytes (classic DNS format)
-
-    >     113(
-    >       [
-    >         ["_coap._udp.local", "example.org", 3600, 28],
-    >         [h'20010db800000000000000000000', simple(1)],
-    >         [
-    >           [simple(1), 12, 1],
-    >           [[simple(1), simple(0)]],
-    >           [
-    >             [simple(1), 2, 217("ns1.")],
-    >             [simple(1), 2, 217("ns2.")]
-    >           ],
-    >           [
-    >             [simple(0), simple(1), simple(3), 6(h'0001')],
-    >             [simple(0), simple(1), simple(3), 6(h'0002')],
-    >             [217("ns1."), simple(1), simple(3), 6(h'0035')],
-    >             [217("ns2."), simple(1), simple(3), 6(h'3535')]
-    >           ]
-    >         ]
-    >       ]
-    >     )
-
-    vs. application/dns+cbor;packed=1 (shared and argument table as one) 126&nbsp;bytes:
-
-    >     [
-    >       [
-    >         h'20010db800000000000000000000',
-    >         "_coap._udp.local", "example.org", 3600, 28
-    >       ],
-    >       [
-    >         [simple(2), 12, 1],
-    >         [[simple(3), simple(1)]],
-    >         [
-    >           [simple(2), 2, 218("ns1.")],
-    >           [simple(2), 2, 218("ns2.")]
-    >         ],
-    >         [
-    >           [simple(1), simple(3), simple(4), 6(h'0001')],
-    >           [simple(1), simple(3), simple(4), 6(h'0002')],
-    >           [218("ns1."), simple(3), simple(4), 6(h'0035')],
-    >           [218("ns2."), simple(3), simple(4), 6(h'3535')]
-    >         ]
-    >       ]
-    >     ] -->
 
 # Implementation Status
 
