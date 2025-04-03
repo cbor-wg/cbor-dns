@@ -106,7 +106,7 @@ this document also specifies a Media Type header for DoH and a Content-Format op
 
 Note, that there is another format that expresses DNS messages in CBOR, C-DNS {{-cdns}}.
 C-DNS is primarily a file format to minimize traces of multiple DNS messages and uses the fact that there are multiple messages to do its compression.
-Common values such as names or addresses are collected in separate tables which are referenced from the messages, comparable to CBOR-packed {{-cbor-packed}}.
+Common values such as names or addresses are collected in separate tables which are referenced from the messages, comparable to Packed CBOR {{-cbor-packed}}.
 However, this may add overhead for individual DNS messages.
 
 The format described in this document is a transfer format that aims to provide conciseness and compression for individual DNS messages to be sent over the network.
@@ -115,7 +115,7 @@ This is achieved applying the following objectives:
 1. Encoding DNS messages in CBOR (conciseness),
 2. Omitting (redundant) fields in DNS queries and responses (conciseness),
 3. Providing easy to implement name compression that allows for on-the-fly construction of DNS queries and responses (compression), and
-4. Providing optional address and value compression in DNS responses using CBOR-packed {{-cbor-packed}} (compression).
+4. Providing optional address and value compression in DNS responses using Packed CBOR {{-cbor-packed}} (compression).
 
 # Terminology
 
@@ -189,7 +189,7 @@ This tag TBDt encapsulates an unsigned integer _i_ which points to a label at po
 _i_ MUST be smaller than _c_.
 A name then is decoded as any label that then preceded tag TBDt(_i_) and all labels including and following at position _i_ are appended.
 This includes any further occurrence of tag TBDt after the referenced label sequence, though the decoding stops after this tag was recursively decoded.
-Note, that this also may include simple values or tags that reference the packing table with CBOR-packed (see {{sec:cbor-packed}}).
+Note, that this also may include simple values or tags that reference the packing table with Packed CBOR (see {{sec:cbor-packed}}).
 
 For instance, the name "www.example.org" can be encountered twice in the example in
 {{fig:name-compression-example}} (notated in CBOR Extended Diagnostic Notation, see {{-edn}}).
@@ -627,9 +627,9 @@ dns-response = [
 ~~~
 {:cddl #fig:dns-response title="DNS Response Definition"}
 
-# Further Compression with CBOR-packed {#sec:cbor-packed}
+# Further Compression with Packed CBOR {#sec:cbor-packed}
 
-If both DNS server and client support CBOR-packed {{-cbor-packed}}, it MAY be used for further
+If both DNS server and client support Packed CBOR {{-cbor-packed}}, it MAY be used for further
 compression in DNS responses.
 Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to
 compress common address prefixes.
@@ -639,14 +639,14 @@ compress common address prefixes.
 A DNS client uses the media type "application/dns+cbor;packed=1" to negotiate (see, e.g.,
 {{-http-semantics}} or {{-coap}}, Section 5.5.4) with the DNS server whether the server supports packed
 CBOR.
-If it does, it MAY request the response to be in CBOR-packed (media type
+If it does, it MAY request the response to be in Packed CBOR (media type
 "application/dns+cbor;packed=1").
-The server then SHOULD reply with the response in CBOR-packed, which it also signals with media type
+The server then SHOULD reply with the response in Packed CBOR, which it also signals with media type
 "application/dns+cbor;packed=1".
 
-## DNS Representation in CBOR-packed
+## DNS Representation in Packed CBOR
 
-The representation of DNS responses in CBOR-packed has the same semantics as for tag TBD113
+The representation of DNS responses in Packed CBOR has the same semantics as for tag TBD113
 ({{-cbor-packed}}, Section 3.1) with the rump being the compressed response.
 The difference to {{-cbor-packed}} is that tag TBD113 is OPTIONAL.
 
@@ -667,8 +667,8 @@ Discussion TBD:
   ==> For occasions where value is the affix (e.g., "example.org" in ANY example in
   {{sec:response-examples}}) use shared item referencing to argument table to safe bytes (no extra
   shared item table, no, e.g., 216(""), just simple(0))
-  - **Example:** Using Basic CBOR-packed ({{-cbor-packed}}, section 3.1):
-    - 130 bytes (Basic CBOR-packed)
+  - **Example:** Using Basic Packed CBOR ({{-cbor-packed}}, section 3.1):
+    - 130 bytes (Basic Packed CBOR)
     - 200 bytes (plain CBOR, see {{sec:response-examples}})
     - 194 bytes (classic DNS format)
 
