@@ -18,10 +18,9 @@ Expires: 5 October 2025                           Universität Bremen TZI
 
 Abstract
 
-   This document specifies a compressed data format of DNS messages
-   using the Concise Binary Object Representation [RFC8949].  The
-   primary purpose is to keep DNS messages small in constrained
-   networks.
+   This document specifies a compact data format of DNS messages using
+   the Concise Binary Object Representation [RFC8949].  The primary
+   purpose is to keep DNS messages small in constrained networks.
 
 About This Document
 
@@ -49,6 +48,7 @@ Status of This Memo
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
    Drafts is at https://datatracker.ietf.org/drafts/current/.
+
 
 
 
@@ -91,9 +91,9 @@ Table of Contents
        3.2.2.  EDNS OPT Pseudo-RRs . . . . . . . . . . . . . . . . .  13
      3.3.  DNS Queries . . . . . . . . . . . . . . . . . . . . . . .  14
      3.4.  DNS Responses . . . . . . . . . . . . . . . . . . . . . .  16
-   4.  Further Compression with CBOR-packed  . . . . . . . . . . . .  18
+   4.  Further Compression with Packed CBOR  . . . . . . . . . . . .  18
      4.1.  Media Type Negotiation  . . . . . . . . . . . . . . . . .  18
-     4.2.  DNS Representation in CBOR-packed . . . . . . . . . . . .  18
+     4.2.  DNS Representation in Packed CBOR . . . . . . . . . . . .  18
      4.3.  Compression . . . . . . . . . . . . . . . . . . . . . . .  18
    5.  Implementation Status . . . . . . . . . . . . . . . . . . . .  18
      5.1.  Python decoder/encoder  . . . . . . . . . . . . . . . . .  19
@@ -151,8 +151,8 @@ Internet-Draft                  dns+cbor                      April 2025
    packet loss multiplies the likelihood of loss.  Hence, a compression
    format that reduces fragmentation of DNS messages is beneficial.
 
-   This document specifies a compressed data format for DNS messages
-   using Concise Binary Object Representation (CBOR) [RFC8949] encoding.
+   This document specifies a compact data format for DNS messages using
+   Concise Binary Object Representation (CBOR) [RFC8949] encoding.
    Additionally, unnecessary or redundant information are stripped off
    DNS messages.  To use the outcome of this specification in DoH and
    DoC, this document also specifies a Media Type header for DoH and a
@@ -171,7 +171,7 @@ Internet-Draft                  dns+cbor                      April 2025
 
 
    or addresses are collected in separate tables which are referenced
-   from the messages, comparable to CBOR-packed [I-D.ietf-cbor-packed].
+   from the messages, comparable to Packed CBOR [I-D.ietf-cbor-packed].
    However, this may add overhead for individual DNS messages.
 
    The format described in this document is a transfer format that aims
@@ -189,7 +189,7 @@ Internet-Draft                  dns+cbor                      April 2025
        and
 
    4.  Providing optional address and value compression in DNS responses
-       using CBOR-packed [I-D.ietf-cbor-packed] (compression).
+       using Packed CBOR [I-D.ietf-cbor-packed] (compression).
 
 2.  Terminology
 
@@ -246,7 +246,7 @@ Internet-Draft                  dns+cbor                      April 2025
                                     CDDL
 
    If, for any reason, a DNS message cannot be represented in the CBOR
-   format specified in this document, or if unreasonable overehead is
+   format specified in this document, or if unreasonable overhead is
    introduced, a fallback to another DNS message format, e.g., the
    classic DNS format specified in [RFC1035], MUST always be possible.
 
@@ -303,7 +303,7 @@ Internet-Draft                  dns+cbor                      April 2025
    any further occurrence of tag TBDt after the referenced label
    sequence, though the decoding stops after this tag was recursively
    decoded.  Note, that this also may include simple values or tags that
-   reference the packing table with CBOR-packed (see Section 4).
+   reference the packing table with Packed CBOR (see Section 4).
 
    For instance, the name "www.example.org" can be encountered twice in
    the example in Figure 3 (notated in CBOR Extended Diagnostic
@@ -954,9 +954,9 @@ Lenders, et al.          Expires 5 October 2025                [Page 17]
 Internet-Draft                  dns+cbor                      April 2025
 
 
-4.  Further Compression with CBOR-packed
+4.  Further Compression with Packed CBOR
 
-   If both DNS server and client support CBOR-packed
+   If both DNS server and client support Packed CBOR
    [I-D.ietf-cbor-packed], it MAY be used for further compression in DNS
    responses.  Especially IPv6 addresses, e.g., in AAAA resource records
    can benefit from straight referencing to compress common address
@@ -967,14 +967,14 @@ Internet-Draft                  dns+cbor                      April 2025
    A DNS client uses the media type "application/dns+cbor;packed=1" to
    negotiate (see, e.g., [RFC9110] or [RFC7252], Section 5.5.4) with the
    DNS server whether the server supports packed CBOR.  If it does, it
-   MAY request the response to be in CBOR-packed (media type
+   MAY request the response to be in Packed CBOR (media type
    "application/dns+cbor;packed=1").  The server then SHOULD reply with
-   the response in CBOR-packed, which it also signals with media type
+   the response in Packed CBOR, which it also signals with media type
    "application/dns+cbor;packed=1".
 
-4.2.  DNS Representation in CBOR-packed
+4.2.  DNS Representation in Packed CBOR
 
-   The representation of DNS responses in CBOR-packed has the same
+   The representation of DNS responses in Packed CBOR has the same
    semantics as for tag TBD113 ([I-D.ietf-cbor-packed], Section 3.1)
    with the rump being the compressed response.  The difference to
    [I-D.ietf-cbor-packed] is that tag TBD113 is OPTIONAL.
@@ -1293,9 +1293,9 @@ Internet-Draft                  dns+cbor                      April 2025
    [I-D.ietf-core-dns-over-coap]
               Lenders, M. S., Amsüss, C., Gündoğan, C., Schmidt, T. C.,
               and M. Wählisch, "DNS over CoAP (DoC)", Work in Progress,
-              Internet-Draft, draft-ietf-core-dns-over-coap-13, 3 March
+              Internet-Draft, draft-ietf-core-dns-over-coap-14, 3 April
               2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
-              core-dns-over-coap-13>.
+              core-dns-over-coap-14>.
 
    [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
               "Transmission of IPv6 Packets over IEEE 802.15.4
