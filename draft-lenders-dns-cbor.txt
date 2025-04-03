@@ -5,12 +5,12 @@
 CBOR                                                       M. S. Lenders
 Internet-Draft                                                TU Dresden
 Intended status: Standards Track                              C. Bormann
-Expires: 4 September 2025                         Universität Bremen TZI
+Expires: 5 October 2025                           Universität Bremen TZI
                                                            T. C. Schmidt
                                                              HAW Hamburg
                                                              M. Wählisch
                                         TU Dresden & Barkhausen Institut
-                                                            3 March 2025
+                                                            3 April 2025
 
 
      A Concise Binary Object Representation (CBOR) of DNS Messages
@@ -27,9 +27,9 @@ About This Document
 
    This note is to be removed before publishing as an RFC.
 
-   The latest revision of this draft can be found at https://anr-bmbf-
-   pivot.github.io/draft-lenders-dns-cbor/draft-lenders-dns-cbor.html.
-   Status information for this document may be found at
+   The latest revision of this draft can be found at https://cbor-
+   wg.github.io/cbor-dns/draft-lenders-dns-cbor.html.  Status
+   information for this document may be found at
    https://datatracker.ietf.org/doc/draft-lenders-dns-cbor/.
 
    Discussion of this document takes place on the CBOR Working Group
@@ -38,7 +38,7 @@ About This Document
    https://www.ietf.org/mailman/listinfo/cbor/.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/anr-bmbf-pivot/draft-lenders-dns-cbor.
+   https://github.com/cbor-wg/cbor-dns.
 
 Status of This Memo
 
@@ -53,9 +53,9 @@ Status of This Memo
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 1]
+Lenders, et al.          Expires 5 October 2025                 [Page 1]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    Internet-Drafts are draft documents valid for a maximum of six months
@@ -63,7 +63,7 @@ Internet-Draft                  dns+cbor                      March 2025
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 September 2025.
+   This Internet-Draft will expire on 5 October 2025.
 
 Copyright Notice
 
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 2]
+Lenders, et al.          Expires 5 October 2025                 [Page 2]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  22
@@ -165,9 +165,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 3]
+Lenders, et al.          Expires 5 October 2025                 [Page 3]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    or addresses are collected in separate tables which are referenced
@@ -221,9 +221,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 4]
+Lenders, et al.          Expires 5 October 2025                 [Page 4]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
 3.  CBOR Representations (application/dns+cbor)
@@ -277,9 +277,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 5]
+Lenders, et al.          Expires 5 October 2025                 [Page 5]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    domain-name = (
@@ -333,9 +333,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 6]
+Lenders, et al.          Expires 5 October 2025                 [Page 6]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    function decode_name(obj: cbor_obj, cbor_ptr: cbor_major_type): list
@@ -389,9 +389,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 7]
+Lenders, et al.          Expires 5 October 2025                 [Page 7]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
 3.2.1.  Standard RRs
@@ -445,9 +445,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 8]
+Lenders, et al.          Expires 5 October 2025                 [Page 8]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    Depending on the record type, the record data may also be expressed
@@ -501,9 +501,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025                [Page 9]
+Lenders, et al.          Expires 5 October 2025                 [Page 9]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    *  MINIMUM as an unsigned integer, and
@@ -557,9 +557,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 10]
+Lenders, et al.          Expires 5 October 2025                [Page 10]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    $$structured-ts-rd //= (
@@ -613,9 +613,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 11]
+Lenders, et al.          Expires 5 October 2025                [Page 11]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    $$structured-ts-rd //= (
@@ -669,9 +669,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 12]
+Lenders, et al.          Expires 5 October 2025                [Page 12]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    The definition for SVCB and HTTPS record data can be seen in
@@ -725,9 +725,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 13]
+Lenders, et al.          Expires 5 October 2025                [Page 13]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    to be 0 if elided).  They are dependent on each of their previous
@@ -781,9 +781,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 14]
+Lenders, et al.          Expires 5 October 2025                [Page 14]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    If the first item of the query is an array, it is the question
@@ -837,9 +837,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 15]
+Lenders, et al.          Expires 5 October 2025                [Page 15]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    As such, the highest precedence in elision is given to the answer
@@ -893,9 +893,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 16]
+Lenders, et al.          Expires 5 October 2025                [Page 16]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    4.  An optional authority section (as array), and
@@ -949,9 +949,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 17]
+Lenders, et al.          Expires 5 October 2025                [Page 17]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
 4.  Further Compression with CBOR-packed
@@ -1005,9 +1005,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 18]
+Lenders, et al.          Expires 5 October 2025                [Page 18]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    exist.
@@ -1061,9 +1061,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 19]
+Lenders, et al.          Expires 5 October 2025                [Page 19]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
 7.1.  Media Type Registration
@@ -1117,9 +1117,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 20]
+Lenders, et al.          Expires 5 October 2025                [Page 20]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    Author: Martine S.  Lenders m.lenders@fu-berlin.de
@@ -1173,9 +1173,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 21]
+Lenders, et al.          Expires 5 October 2025                [Page 21]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
      +========+===========+=================+========================+
@@ -1203,9 +1203,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
    [I-D.ietf-cbor-packed]
               Bormann, C. and M. Gütschow, "Packed CBOR", Work in
-              Progress, Internet-Draft, draft-ietf-cbor-packed-13, 1
-              September 2024, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-cbor-packed-13>.
+              Progress, Internet-Draft, draft-ietf-cbor-packed-14, 3
+              March 2025, <https://datatracker.ietf.org/doc/html/draft-
+              ietf-cbor-packed-14>.
 
    [IANA.cbor-tags]
               IANA, "Concise Binary Object Representation (CBOR) Tags",
@@ -1229,9 +1229,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 22]
+Lenders, et al.          Expires 5 October 2025                [Page 22]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    [RFC3596]  Thomson, S., Huitema, C., Ksinant, V., and M. Souissi,
@@ -1285,17 +1285,17 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 23]
+Lenders, et al.          Expires 5 October 2025                [Page 23]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    [I-D.ietf-core-dns-over-coap]
               Lenders, M. S., Amsüss, C., Gündoğan, C., Schmidt, T. C.,
               and M. Wählisch, "DNS over CoAP (DoC)", Work in Progress,
-              Internet-Draft, draft-ietf-core-dns-over-coap-12, 14
-              February 2025, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-core-dns-over-coap-12>.
+              Internet-Draft, draft-ietf-core-dns-over-coap-13, 3 March
+              2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              core-dns-over-coap-13>.
 
    [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
               "Transmission of IPv6 Packets over IEEE 802.15.4
@@ -1341,9 +1341,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 24]
+Lenders, et al.          Expires 5 October 2025                [Page 24]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    [RFC8724]  Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC.
@@ -1397,9 +1397,9 @@ A.2.  DNS Responses
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 25]
+Lenders, et al.          Expires 5 October 2025                [Page 25]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    [[[300, h'20010db8000000000000000000000001']]]
@@ -1453,9 +1453,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 26]
+Lenders, et al.          Expires 5 October 2025                [Page 26]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    [
@@ -1509,9 +1509,9 @@ Appendix B.  Comparison to Classic DNS Wire Format
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 27]
+Lenders, et al.          Expires 5 October 2025                [Page 27]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    +========+==============+===========================================+
@@ -1565,9 +1565,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 28]
+Lenders, et al.          Expires 5 October 2025                [Page 28]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    +===========+=======================================================+
@@ -1621,9 +1621,9 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 29]
+Lenders, et al.          Expires 5 October 2025                [Page 29]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
 Appendix C.  Change Log
@@ -1677,9 +1677,9 @@ C.3.  Since draft-lenders-dns-cbor-08
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 30]
+Lenders, et al.          Expires 5 October 2025                [Page 30]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    *  Update examples and comparison table in appendices
@@ -1733,9 +1733,9 @@ C.8.  Since draft-lenders-dns-cbor-03
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 31]
+Lenders, et al.          Expires 5 October 2025                [Page 31]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
 C.9.  Since draft-lenders-dns-cbor-02
@@ -1789,9 +1789,9 @@ Authors' Addresses
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 32]
+Lenders, et al.          Expires 5 October 2025                [Page 32]
 
-Internet-Draft                  dns+cbor                      March 2025
+Internet-Draft                  dns+cbor                      April 2025
 
 
    Thomas C. Schmidt
@@ -1845,4 +1845,4 @@ Internet-Draft                  dns+cbor                      March 2025
 
 
 
-Lenders, et al.         Expires 4 September 2025               [Page 33]
+Lenders, et al.          Expires 5 October 2025                [Page 33]
