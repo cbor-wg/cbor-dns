@@ -81,7 +81,7 @@ informative:
 
 --- abstract
 
-This document specifies a compressed data format of DNS messages using
+This document specifies a compact data format of DNS messages using
 the Concise Binary Object Representation {{-cbor}}.
 The primary purpose is to keep DNS messages small in constrained networks.
 
@@ -101,7 +101,7 @@ comply with small MTUs, fragmentation should be avoided in constrained networks.
 Fragmentation combined with high packet loss multiplies the likelihood of loss.
 Hence, a compression format that reduces fragmentation of DNS messages is beneficial.
 
-This document specifies a compressed data format for DNS messages using Concise Binary Object Representation (CBOR) {{-cbor}} encoding. Additionally,  unnecessary or redundant information are stripped off DNS messages.  To use the outcome of this specification in DoH and DoC,
+This document specifies a compact data format for DNS messages using Concise Binary Object Representation (CBOR) {{-cbor}} encoding. Additionally,  unnecessary or redundant information are stripped off DNS messages.  To use the outcome of this specification in DoH and DoC,
 this document also specifies a Media Type header for DoH and a Content-Format option for DoC.
 
 Note, that there is another format that expresses DNS messages in CBOR, C-DNS {{-cdns}}.
@@ -148,7 +148,7 @@ dns-message = dns-query / dns-response
 ~~~
 {:cddl #fig:dns-msg title="This document defines both DNS Queries and Responses in CDDL"}
 
-If, for any reason, a DNS message cannot be represented in the CBOR format specified in this document, or if unreasonable overehead is introduced, a fallback to another DNS message format, e.g., the classic DNS format specified in {{-dns}}, MUST always be possible.
+If, for any reason, a DNS message cannot be represented in the CBOR format specified in this document, or if unreasonable overhead is introduced, a fallback to another DNS message format, e.g., the classic DNS format specified in {{-dns}}, MUST always be possible.
 
 ## Domain Name Representation {#sec:domain-names}
 
