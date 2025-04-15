@@ -921,10 +921,10 @@ Internet-Draft                  dns+cbor                      April 2025
    items within the rump MUST not be added to _V_. If a domain name for
    which an array of the flat representation is already in _V_ is
    encountered, a shared item reference _i_ to that array in V replaces
-   this sequence.  This shared item reference _i_ means: take the
-   sequence from the array at _V_[_i_] and put it into the surrounding
-   array in place of _i_. The resulting rump should look like
-   referencing the _i_-th string (depth first) in the sequence.
+   this sequence.  This shared item reference _i_ means: take the array
+   at _V_[_i_] and put it into the surrounding array in place of _i_.
+   The resulting rump should look like referencing the _i_-th string
+   (depth first) in the message.
 
    The "application/dns+cbor" media type comes with an optional
    parameter "packed".  If it is not provided, the value of it, i.e. the
