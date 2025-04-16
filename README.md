@@ -1,3 +1,5 @@
+<!-- regenerate: on (set to off if you edit this file) -->
+
 # A Concise Binary Object Representation (CBOR) of DNS Messages
 
 This is the working area for the individual Internet-Draft, "A Concise Binary Object Representation (CBOR) of DNS Messages".
