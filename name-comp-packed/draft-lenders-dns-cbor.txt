@@ -927,13 +927,13 @@ Internet-Draft                  dns+cbor                      April 2025
    (depth first) in the message.
 
    The "application/dns+cbor" media type comes with an optional
-   parameter "packed".  If it is not provided, the value of it is
-   assumed to be 0.  With packed=0, any CBOR object obj marked by the
-   "application/dns+cbor" media type MUST explicitly be understood as
-   TBD28259(obj), unless it is already obj itself is already tagged
-   explicitly with TBD28259 as a whole.  This also means, that an
-   "application/dns+cbor" encoder and decoder MUST support packed value
-   0.
+   parameter "packed".  If it is not provided, the value of it, i.e. the
+   level of packedness, is assumed to be 0.  With packed=0, any CBOR
+   object obj marked by the "application/dns+cbor" media type MUST
+   explicitly be understood as TBD28259(obj), unless it is already obj
+   itself is already tagged explicitly with TBD28259 as a whole.  This
+   also means, that an "application/dns+cbor" encoder and decoder MUST
+   support level of packedness 0.
 
 4.1.1.  Example
 
@@ -1032,7 +1032,7 @@ Internet-Draft                  dns+cbor                      April 2025
 
 4.2.  Further DNS Representation with tag 113
 
-   The representation of DNS responses with packed value 1, i.e.
+   The representation of DNS responses with level of packedness 1, i.e.
    "application/dns+cbor;packed=1", has the same semantics as for tag
    TBD113 (see Section 3.1 of [I-D.ietf-cbor-packed]) with the rump
    being the compressed response.  The difference to
@@ -1054,10 +1054,10 @@ Internet-Draft                  dns+cbor                      April 2025
    A DNS client uses the media type "application/dns+cbor;packed=1" to
    negotiate (see, e.g., [RFC9110] or [RFC7252], Section 5.5.4) with the
    DNS server whether the server supports setup table tag TBD113.  If it
-   does, it MAY request the response to be in packed value 1 (media type
-   "application/dns+cbor;packed=1").  The server then SHOULD reply with
-   the response in CBOR-packed, which it also signals with media type
-   "application/dns+cbor;packed=1".  Otherwise, both fall back to the
+   does, it MAY request the response to be in level of packedness 1
+   (media type "application/dns+cbor;packed=1").  The server then SHOULD
+   reply with the response in CBOR-packed, which it also signals with
+   media type "application/dns+cbor;packed=1".  Otherwise, both fall
 
 
 
@@ -1066,7 +1066,7 @@ Lenders, et al.          Expires 18 October 2025               [Page 19]
 Internet-Draft                  dns+cbor                      April 2025
 
 
-   implicit "packed=0".
+   back to the implicit "packed=0".
 
 4.4.  Compression
 
