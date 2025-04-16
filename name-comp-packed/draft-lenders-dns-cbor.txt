@@ -90,7 +90,7 @@ Table of Contents
        3.2.2.  EDNS OPT Pseudo-RRs . . . . . . . . . . . . . . . . .  11
      3.3.  DNS Queries . . . . . . . . . . . . . . . . . . . . . . .  12
      3.4.  DNS Responses . . . . . . . . . . . . . . . . . . . . . .  15
-   4.  Compression with CBOR-packed  . . . . . . . . . . . . . . . .  16
+   4.  Compression with Packed CBOR  . . . . . . . . . . . . . . . .  16
      4.1.  Name Compression  . . . . . . . . . . . . . . . . . . . .  17
        4.1.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  17
      4.2.  Further DNS Representation with tag 113 . . . . . . . . .  19
@@ -282,8 +282,8 @@ Lenders, et al.          Expires 18 October 2025                [Page 5]
 Internet-Draft                  dns+cbor                      April 2025
 
 
-   Name compression is implemented using an extension to CBOR-packed,
-   see Section 4.1.  For readers unfamiliar with CBOR-packed this name
+   Name compression is implemented using an extension to Packed CBOR,
+   see Section 4.1.  For readers unfamiliar with Packed CBOR this name
    compression can be abstracted to a name compression similar to that
    described in Section 4.1.4 of [RFC1035].  However, instead of using
    the byte index as reference within the message, text strings are
@@ -881,9 +881,9 @@ Internet-Draft                  dns+cbor                      April 2025
 
                      Figure 11: DNS Response Definition
 
-4.  Compression with CBOR-packed
+4.  Compression with Packed CBOR
 
-   CBOR-packed [I-D.ietf-cbor-packed] is used for name compression in
+   Packed CBOR [I-D.ietf-cbor-packed] is used for name compression in
    application/dns+cbor.
 
 
@@ -909,7 +909,7 @@ Internet-Draft                  dns+cbor                      April 2025
    Text-String-Suffix-Sequence-Packed-CBOR = #6.28259(rump)
 
    For name compression, a new packing table setup tag TBD28259 ('n' and
-   'c' in ASCII) for CBOR-packed [I-D.ietf-cbor-packed] is defined.  It
+   'c' in ASCII) for Packed CBOR [I-D.ietf-cbor-packed] is defined.  It
    provides an implicit text string suffix sequence table for shared
    items _V_ which is appended to the existing table for shared items of
    any table setup tag within the content of tag TBD28259 (by default
@@ -1056,7 +1056,7 @@ Internet-Draft                  dns+cbor                      April 2025
    DNS server whether the server supports setup table tag TBD113.  If it
    does, it MAY request the response to be in packed value 1 (media type
    "application/dns+cbor;packed=1").  The server then SHOULD reply with
-   the response in CBOR-packed, which it also signals with media type
+   the response in Packed CBOR, which it also signals with media type
    "application/dns+cbor;packed=1".  Otherwise, both fall back to the
 
 
