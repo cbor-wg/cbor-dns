@@ -19,10 +19,10 @@ subject to a Simplified BSD License) in Contributions.
 
 ## Working Group Information
 
-Discussion of this work occurs on the [Domain Name System
- mailing list](mailto:namedroppers@nic.ddn.mil)
-([archive](nicfs.nic.ddn.mil:~/namedroppers/*.Z),
-[subscribe](namedroppers-request@nic.ddn.mil)).
+Discussion of this work occurs on the [Concise Binary Object Representation Maintenance and
+Extensions (CBOR) Working Group mailing list](mailto:cbor@ietf.org)
+([archive](https://mailarchive.ietf.org/arch/browse/cbor/),
+[subscribe](https://www.ietf.org/mailman/listinfo/cbor/)).
 In addition to contributions in GitHub, you are encouraged to participate in
 discussions there.
 
