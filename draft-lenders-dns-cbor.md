@@ -1061,6 +1061,14 @@ a name overhead of 1 byte to its CBOR type header.[^10]{: mlenders}
 
 # Change Log
 
+Since [draft-lenders-dns-cbor-11]
+---------------------------------
+- Update repo links to cbor-wg org in draft
+- `s/CBOR-packed/Packed CBOR/`
+- Small pass on wording
+- Remove commented-out parts
+- Make name compression be based on Packed CBOR
+
 Since [draft-lenders-dns-cbor-10]
 ---------------------------------
 - Address IANA #1392416 early review
@@ -1134,6 +1142,7 @@ Since [draft-lenders-dns-cbor-00]
 - Name and Address compression utilizing CBOR-packed
 - Minor fixes to CBOR EDN and CDDL
 
+[draft-lenders-dns-cbor-11]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-10
 [draft-lenders-dns-cbor-10]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-10
 [draft-lenders-dns-cbor-09]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-09
 [draft-lenders-dns-cbor-08]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-08
