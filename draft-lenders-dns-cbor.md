@@ -625,7 +625,7 @@ The packed representation of _o_ would thus be:
 ~~~ edn
 TBD28259(
   [
-    ["www", "example", "org"],
+    "www", "example", "org",
     ["svc", simple(0)],
     "org", simple(1), 42,
     simple(3), 42
@@ -644,7 +644,7 @@ TBD113(
     [
       ["org", 42],
       [
-        ["www", "example", simple(5)],
+        "www", "example", simple(5),
         ["svc", simple(0)],
         simple(5), simple(1), simple(6),
         simple(3), simple(6)
