@@ -593,7 +593,7 @@ This also means, that an "application/dns+cbor" encoder and decoder MUST support
 
 ### Example
 
-Take the following CBOR object _o_ (note that this is intentionally not legal "application/dns+cbor" to illustrate generality).
+Take the following CBOR object _o_ (note that this is **intentionally not legal "application/dns+cbor"** to illustrate generality). A more DNS-specific example can be found in {{sec:response-examples}}.
 
 ~~~ edn
 [
@@ -626,15 +626,18 @@ The packed representation of _o_ would thus be:
 TBD28259(
   [
     "www", "example", "org",
-    ["svc", simple(0)],
-    "org", simple(1), 42,
-    simple(3), 42
+    ["svc", simple(0) / expands to ["www", "example", "org"] /],
+    "org", simple(1) / expands to ["example", "org"] /, 42,
+    simple(3) / expands to ["svc", ["www", "example", "org"]] /, 42
   ]
 )
 ~~~
 {: #fig:name-compression-example-packed title="The packed representation of the example."}
 
-Note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as application/dns+cbor).
+Note, the shared value references expand to arrays and thus the unpacked form of {{fig:name-compression-example-packed}} is syntactically not equivalent to {{fig:name-compression-example-unpacked}}.
+However, since, e.g., the domain name `"org",["example","org"]` in its flat representation is `"org","example","org"`, they are semantically equivalent in "application/dns+cbor" (see also {{sec:domain-names}}).
+
+Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as application/dns+cbor).
 
 With, e.g., table setup tag 113, further packing can be achieved via nesting table packing.
 
@@ -644,10 +647,13 @@ TBD113(
     [
       ["org", 42],
       [
-        "www", "example", simple(5),
-        ["svc", simple(0)],
-        simple(5), simple(1), simple(6),
-        simple(3), simple(6)
+        "www", "example", simple(5) / expands to "org" /,
+        ["svc", simple(0) / expands to ["www", "example", "org"] /],
+        simple(5),  / expands to "org" /
+        simple(1),  / expands to ["www", "example", "org"] /
+        simple(6),  / expands to 42 /
+        simple(3),  / expands to ["svc", ["www", "example", "org"]] /
+        simple(6)   / expands to 42 /
       ]
     ]
   )
@@ -851,13 +857,14 @@ A query of `ANY` record for that name is represented as
 ## DNS Responses {#sec:response-examples}
 
 The responses to the examples provided in {{sec:query-examples}} are shown
-below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}}).
+below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}}),
+most notably the "ip" extension to represent binary IP addresses as a IP address app-string literal.
 
 To represent an `AAAA` record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
 response to `[["example", "org"]]` could be
 
 ~~~ edn
-[[[300, h'20010db8000000000000000000000001']]]
+[[[300, ip'2001:db8::1']]]
 ~~~
 
 In this case, the name is derived from the query.
@@ -866,21 +873,21 @@ If the name or the context is required, the following response would also
 be valid:
 
 ~~~ edn
-[[["example", "org", 300, h'20010db8000000000000000000000001']]]
+[[["example", "org", 300, ip'2001:db8::1']]]
 ~~~
 
 If the query can not be mapped to the response for some reason, a response
 would look like:
 
 ~~~ edn
-[["example", "org"], [[300, h'20010db8000000000000000000000001']]]
+[["example", "org"], [[300, ip'2001:db8::1']]]
 ~~~
 
 To represent a minimal response of an `A` record with TTL 3600 seconds for the IPv4 address
 192.0.2.1, a minimal response to `[["example", "org", 1]]` could be
 
 ~~~ edn
-[[[300, h'c0000201']]]
+[[[300, ip'192.0.2.1']]]
 ~~~
 
 Note that here also the 1 of record type `A` can be elided, as this record
@@ -890,34 +897,77 @@ Lastly, a response to `[["example", "org", 255, 255]]` could be
 
 ~~~ edn
 [
-  ["example", "org", 12, 1],
-  [[3600, "_coap", "_udp", "local"]],
+  # PTR (12) question for "example.org"
   [
-    [3600, 2, "ns1", simple(0)],
-    [3600, 2, "ns2", simple(0)]
+    # appends 0 => ["example", "org"] to virtual packing table
+    "example",
+    # appends 1 => ["org"] to virtual packing table
+    "org",
+    12
   ],
+  # Answer section:
+  [[
+    # PTR (12) for "example.org"
+    # (both elided since they are the same as in question)
+    # is "_coap._udp.local" with TTL 3600
+    3600,
+    # appends 2 => ["_coap", "_udp", "local"] to virtual packing table
+    "_coap",
+    # appends 3 => ["_udp", "local"] to virtual packing table
+    "_udp",
+    # appends 4 => ["local"] to virtual packing table
+    "local"
+  ]],
+  # Authority section:
   [
     [
-      simple(2), 3600, 28,
-      h'20010db8000000000000000000000001'
+      # NS (2) for "example.org"
+      # (name elided since its the same as in question)
+      # is "ns1.example.org" with TTL 3600
+      3600, 2,
+      # appends 5 => ["ns1", simple(0)] to virtual packing table
+      "ns1", simple(0)  # expands to ["example", "org"]
     ],
     [
-      simple(2), 3600, 28,
-      h'20010db8000000000000000000000002'
+      # NS (2) for "example.org"
+      # (name elided since its the same as in question)
+      # is "ns2.example.org" with TTL 3600
+      3600, 2
+      # appends 6 => ["ns2", simple(0)] to virtual packing table
+      "ns2", simple(0)  # expands to ["example", "org"]
+    ]
+  ],
+  # Additional section
+  [
+    [
+      # AAAA (28) for "_coap._udp.local"
+      # is 2001:db8::1 with TTL 3600
+      simple(2),    # expands to ["_coap", "_udp", "local"]
+      3600, 28, ip'2001:db8::1'
     ],
     [
-      simple(5), 3600, 28,
-      h'20010db8000000000000000000000035'
+      # AAAA (28) for "_coap._udp.local"
+      # is 2001:db8::2 with TTL 3600
+      simple(2),    # expands to ["_coap", "_udp", "local"]
+      3600, 28, ip'2001:db8::2'
     ],
     [
-      simple(6), 3600, 28,
-      h'20010db8000000000000000000003535'
+      # AAAA (28) for "ns1.example.org"
+      # is 2001:db8::35 with TTL 3600
+      simple(5),    # expands to ["ns1", ["example", "org"]]
+      3600, 28, ip'2001:db8::35'
+    ],
+    [
+      # AAAA (28) for "ns2.example.org"
+      # is 2001:db8::3535 with TTL 3600
+      simple(6),    # expands to ["ns2", ["example", "org"]
+      3600, 28, ip'2001:db8::3535'
     ]
   ]
 ]
 ~~~
 
-This one advertises two local CoAP servers (identified by service name `_coap._udp.local`) at
+This response advertises two local CoAP servers (identified by service name `_coap._udp.local`) at
 2001:db8::1 and 2001:db8::2 and two nameservers for the example.org domain, ns1.example.org at
 2001:db8::35 and ns2.example.org at 2001.db8::3535. Each of the transmitted records has a TTL of
 3600 seconds.
