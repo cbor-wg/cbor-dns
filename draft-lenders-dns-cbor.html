@@ -1997,7 +1997,7 @@ This also means, that an "application/dns+cbor" encoder and decoder <span class=
           <h4 id="name-example">
 <a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-example" class="section-name selfRef">Example</a>
           </h4>
-<p id="section-4.1.1-1">Take the following CBOR object <em>o</em> (note that this is intentionally not legal "application/dns+cbor" to illustrate generality).<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-1">Take the following CBOR object <em>o</em> (note that this is <strong>intentionally not legal "application/dns+cbor"</strong> to illustrate generality). A more DNS-specific example can be found in <a href="#sec_response-examples" class="auto internal xref">Appendix A.2</a>.<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
 <span id="name-unpacked-example-for-implic"></span><div id="fig_name-compression-example-unpacked">
 <figure id="figure-12">
             <div class="lang-edn sourcecode" id="section-4.1.1-2.1">
@@ -2041,9 +2041,9 @@ This also means, that an "application/dns+cbor" encoder and decoder <span class=
 TBD28259(
   [
     "www", "example", "org",
-    ["svc", simple(0)],
-    "org", simple(1), 42,
-    simple(3), 42
+    ["svc", simple(0) / expands to ["www", "example", "org"] /],
+    "org", simple(1) / expands to ["example", "org"] /, 42,
+    simple(3) / expands to ["svc", ["www", "example", "org"]] /, 42
   ]
 )
 </pre>
@@ -2052,21 +2052,26 @@ TBD28259(
 <a href="#name-the-packed-representation-o" class="selfRef">The packed representation of the example.</a>
             </figcaption></figure>
 </div>
-<p id="section-4.1.1-8">Note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as application/dns+cbor).<a href="#section-4.1.1-8" class="pilcrow">¶</a></p>
-<p id="section-4.1.1-9">With, e.g., table setup tag 113, further packing can be achieved via nesting table packing.<a href="#section-4.1.1-9" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-8">Note, the shared value references expand to arrays and thus the unpacked form of <a href="#fig_name-compression-example-packed" class="auto internal xref">Figure 14</a> is syntactically not equivalent to <a href="#fig_name-compression-example-unpacked" class="auto internal xref">Figure 12</a>.
+However, since, e.g., the domain name <code>"org",["example","org"]</code> in its flat representation is <code>"org","example","org"</code>, they are semantically equivalent in "application/dns+cbor" (see also <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>).<a href="#section-4.1.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-9">Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as application/dns+cbor).<a href="#section-4.1.1-9" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-10">With, e.g., table setup tag 113, further packing can be achieved via nesting table packing.<a href="#section-4.1.1-10" class="pilcrow">¶</a></p>
 <span id="name-the-packed-representation-of"></span><div id="fig_name-compression-example-packed-113">
 <figure id="figure-15">
-            <div class="lang-edn sourcecode" id="section-4.1.1-10.1">
+            <div class="lang-edn sourcecode" id="section-4.1.1-11.1">
 <pre>
 TBD113(
   TBD28259(
     [
       ["org", 42],
       [
-        "www", "example", simple(5),
-        ["svc", simple(0)],
-        simple(5), simple(1), simple(6),
-        simple(3), simple(6)
+        "www", "example", simple(5) / expands to "org" /,
+        ["svc", simple(0) / expands to ["www", "example", "org"] /],
+        simple(5),  / expands to "org" /
+        simple(1),  / expands to ["www", "example", "org"] /
+        simple(6),  / expands to 42 /
+        simple(3),  / expands to ["svc", ["www", "example", "org"]] /
+        simple(6)   / expands to 42 /
       ]
     ]
   )
@@ -2077,7 +2082,7 @@ TBD113(
 <a href="#name-the-packed-representation-of" class="selfRef">The packed representation of the example with additional table setup.</a>
             </figcaption></figure>
 </div>
-<p id="section-4.1.1-11">Note, how the previous references in <a href="#fig_name-compression-example-packed" class="auto internal xref">Figure 14</a> do not changed, as the table <code>["org", 42]</code> is appended.<a href="#section-4.1.1-11" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-12">Note, how the previous references in <a href="#fig_name-compression-example-packed" class="auto internal xref">Figure 14</a> do not changed, as the table <code>["org", 42]</code> is appended.<a href="#section-4.1.1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2491,19 +2496,19 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
         </h3>
 <p id="appendix-A.1-1">A DNS query of the record <code>AAAA</code> in class <code>IN</code> for name "example.org" is
 represented in CBOR extended diagnostic notation (EDN) (see <span><a href="https://rfc-editor.org/rfc/rfc8949#section-8" class="relref">Section 8</a> of [<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc8610#appendix-G" class="relref">Appendix G</a> of [<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>) as follows:<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
-<div class="lang-cbor-diag sourcecode" id="appendix-A.1-2">
+<div class="lang-edn sourcecode" id="appendix-A.1-2">
 <pre>
 [["example", "org"]]
 </pre><a href="#appendix-A.1-2" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.1-3">A query of an <code>A</code> record for the same name is represented as<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
-<div class="lang-cbor-diag sourcecode" id="appendix-A.1-4">
+<div class="lang-edn sourcecode" id="appendix-A.1-4">
 <pre>
 [["example", "org", 1]]
 </pre><a href="#appendix-A.1-4" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.1-5">A query of <code>ANY</code> record for that name is represented as<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
-<div class="lang-cbor-diag sourcecode" id="appendix-A.1-6">
+<div class="lang-edn sourcecode" id="appendix-A.1-6">
 <pre>
 [["example", "org", 255, 255]]
 </pre><a href="#appendix-A.1-6" class="pilcrow">¶</a>
@@ -2516,70 +2521,114 @@ represented in CBOR extended diagnostic notation (EDN) (see <span><a href="https
 <a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-dns-responses-2" class="section-name selfRef">DNS Responses</a>
         </h3>
 <p id="appendix-A.2-1">The responses to the examples provided in <a href="#sec_query-examples" class="auto internal xref">Appendix A.1</a> are shown
-below. We use the CBOR extended diagnostic notation (EDN) (see <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc8610#appendix-G" class="relref">Appendix G</a> of [<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>).<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+below. We use the CBOR extended diagnostic notation (EDN) (see <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc8610#appendix-G" class="relref">Appendix G</a> of [<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>),
+most notably the "ip" extension to represent binary IP addresses as a IP address app-string literal.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
 <p id="appendix-A.2-2">To represent an <code>AAAA</code> record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
 response to <code>[["example", "org"]]</code> could be<a href="#appendix-A.2-2" class="pilcrow">¶</a></p>
-<div class="lang-cbor-diag sourcecode" id="appendix-A.2-3">
+<div class="lang-edn sourcecode" id="appendix-A.2-3">
 <pre>
-[[[300, h'20010db8000000000000000000000001']]]
+[[[300, ip'2001:db8::1']]]
 </pre><a href="#appendix-A.2-3" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-4">In this case, the name is derived from the query.<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
 <p id="appendix-A.2-5">If the name or the context is required, the following response would also
 be valid:<a href="#appendix-A.2-5" class="pilcrow">¶</a></p>
-<div class="lang-cbor-diag sourcecode" id="appendix-A.2-6">
+<div class="lang-edn sourcecode" id="appendix-A.2-6">
 <pre>
-[[["example", "org", 300, h'20010db8000000000000000000000001']]]
+[[["example", "org", 300, ip'2001:db8::1']]]
 </pre><a href="#appendix-A.2-6" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-7">If the query can not be mapped to the response for some reason, a response
 would look like:<a href="#appendix-A.2-7" class="pilcrow">¶</a></p>
-<div class="lang-cbor-diag sourcecode" id="appendix-A.2-8">
+<div class="lang-edn sourcecode" id="appendix-A.2-8">
 <pre>
-[["example", "org"], [[300, h'20010db8000000000000000000000001']]]
+[["example", "org"], [[300, ip'2001:db8::1']]]
 </pre><a href="#appendix-A.2-8" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-9">To represent a minimal response of an <code>A</code> record with TTL 3600 seconds for the IPv4 address
 192.0.2.1, a minimal response to <code>[["example", "org", 1]]</code> could be<a href="#appendix-A.2-9" class="pilcrow">¶</a></p>
-<div class="lang-cbor-diag sourcecode" id="appendix-A.2-10">
+<div class="lang-edn sourcecode" id="appendix-A.2-10">
 <pre>
-[[[300, h'c0000201']]]
+[[[300, ip'192.0.2.1']]]
 </pre><a href="#appendix-A.2-10" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-11">Note that here also the 1 of record type <code>A</code> can be elided, as this record
 type is specified in the question section.<a href="#appendix-A.2-11" class="pilcrow">¶</a></p>
 <p id="appendix-A.2-12">Lastly, a response to <code>[["example", "org", 255, 255]]</code> could be<a href="#appendix-A.2-12" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.2-13">
+<div class="breakable lang-edn sourcecode" id="appendix-A.2-13">
 <pre>
 [
-  ["example", "org", 12, 1],
-  [[3600, "_coap", "_udp", "local"]],
+  # PTR (12) question for "example.org"
   [
-    [3600, 2, "ns1", simple(0)],
-    [3600, 2, "ns2", simple(0)]
+    # appends 0 =&gt; ["example", "org"] to virtual packing table
+    "example",
+    # appends 1 =&gt; ["org"] to virtual packing table
+    "org",
+    12
   ],
+  # Answer section:
+  [[
+    # PTR (12) for "example.org"
+    # (both elided since they are the same as in question)
+    # is "_coap._udp.local" with TTL 3600
+    3600,
+    # appends 2 =&gt; ["_coap", "_udp", "local"] to virtual packing table
+    "_coap",
+    # appends 3 =&gt; ["_udp", "local"] to virtual packing table
+    "_udp",
+    # appends 4 =&gt; ["local"] to virtual packing table
+    "local"
+  ]],
+  # Authority section:
   [
     [
-      simple(2), 3600, 28,
-      h'20010db8000000000000000000000001'
+      # NS (2) for "example.org"
+      # (name elided since its the same as in question)
+      # is "ns1.example.org" with TTL 3600
+      3600, 2,
+      # appends 5 =&gt; ["ns1", simple(0)] to virtual packing table
+      "ns1", simple(0)  # expands to ["example", "org"]
     ],
     [
-      simple(2), 3600, 28,
-      h'20010db8000000000000000000000002'
+      # NS (2) for "example.org"
+      # (name elided since its the same as in question)
+      # is "ns2.example.org" with TTL 3600
+      3600, 2
+      # appends 6 =&gt; ["ns2", simple(0)] to virtual packing table
+      "ns2", simple(0)  # expands to ["example", "org"]
+    ]
+  ],
+  # Additional section
+  [
+    [
+      # AAAA (28) for "_coap._udp.local"
+      # is 2001:db8::1 with TTL 3600
+      simple(2),    # expands to ["_coap", "_udp", "local"]
+      3600, 28, ip'2001:db8::1'
     ],
     [
-      simple(5), 3600, 28,
-      h'20010db8000000000000000000000035'
+      # AAAA (28) for "_coap._udp.local"
+      # is 2001:db8::2 with TTL 3600
+      simple(2),    # expands to ["_coap", "_udp", "local"]
+      3600, 28, ip'2001:db8::2'
     ],
     [
-      simple(6), 3600, 28,
-      h'20010db8000000000000000000003535'
+      # AAAA (28) for "ns1.example.org"
+      # is 2001:db8::35 with TTL 3600
+      simple(5),    # expands to ["ns1", ["example", "org"]]
+      3600, 28, ip'2001:db8::35'
+    ],
+    [
+      # AAAA (28) for "ns2.example.org"
+      # is 2001:db8::3535 with TTL 3600
+      simple(6),    # expands to ["ns2", ["example", "org"]
+      3600, 28, ip'2001:db8::3535'
     ]
   ]
 ]
 </pre><a href="#appendix-A.2-13" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-14">This one advertises two local CoAP servers (identified by service name <code>_coap._udp.local</code>) at
+<p id="appendix-A.2-14">This response advertises two local CoAP servers (identified by service name <code>_coap._udp.local</code>) at
 2001:db8::1 and 2001:db8::2 and two nameservers for the example.org domain, ns1.example.org at
 2001:db8::35 and ns2.example.org at 2001.db8::3535. Each of the transmitted records has a TTL of
 3600 seconds.
