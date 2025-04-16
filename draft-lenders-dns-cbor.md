@@ -832,19 +832,19 @@ A DNS query of the record `AAAA` in class `IN` for name "example.org" is
 represented in CBOR extended diagnostic notation (EDN) (see {{Section 8 of
 -cbor}} and {{Appendix G of -cddl}}) as follows:
 
-~~~ cbor-diag
+~~~ edn
 [["example", "org"]]
 ~~~
 
 A query of an `A` record for the same name is represented as
 
-~~~ cbor-diag
+~~~ edn
 [["example", "org", 1]]
 ~~~
 
 A query of `ANY` record for that name is represented as
 
-~~~ cbor-diag
+~~~ edn
 [["example", "org", 255, 255]]
 ~~~
 
@@ -856,7 +856,7 @@ below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Ap
 To represent an `AAAA` record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
 response to `[["example", "org"]]` could be
 
-~~~ cbor-diag
+~~~ edn
 [[[300, h'20010db8000000000000000000000001']]]
 ~~~
 
@@ -865,21 +865,21 @@ In this case, the name is derived from the query.
 If the name or the context is required, the following response would also
 be valid:
 
-~~~ cbor-diag
+~~~ edn
 [[["example", "org", 300, h'20010db8000000000000000000000001']]]
 ~~~
 
 If the query can not be mapped to the response for some reason, a response
 would look like:
 
-~~~ cbor-diag
+~~~ edn
 [["example", "org"], [[300, h'20010db8000000000000000000000001']]]
 ~~~
 
 To represent a minimal response of an `A` record with TTL 3600 seconds for the IPv4 address
 192.0.2.1, a minimal response to `[["example", "org", 1]]` could be
 
-~~~ cbor-diag
+~~~ edn
 [[[300, h'c0000201']]]
 ~~~
 
@@ -888,7 +888,7 @@ type is specified in the question section.
 
 Lastly, a response to `[["example", "org", 255, 255]]` could be
 
-~~~
+~~~ edn
 [
   ["example", "org", 12, 1],
   [[3600, "_coap", "_udp", "local"]],
