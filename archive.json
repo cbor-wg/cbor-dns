@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-03T00:14:24.740244+00:00",
+  "timestamp": "2025-04-17T01:12:55.219452+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -263,15 +263,15 @@
       "url": "https://github.com/cbor-wg/cbor-dns/pull/6",
       "state": "OPEN",
       "author": "miri64",
-      "authorAssociation": "CONTRIBUTOR",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The capability to summarize resource records set was discussed in the past, but I stayed away from it so far, as it adds additional overhead. Well, we add overhead already, so lets add more overhead (but less that the overhead than duplicating TTL and type ;-)) to maybe still have it. This is my proposal to how to optionally provide summarized resource record sets.\r\n\r\nMaybe the CDDL can be streamlined, but at the moment, I don't see how.",
       "createdAt": "2024-11-07T11:05:10Z",
-      "updatedAt": "2024-11-07T15:55:24Z",
+      "updatedAt": "2025-04-16T07:26:36Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
-      "baseRefOid": "00568eab291f282baa08b9ce25fe24995083167a",
+      "baseRefOid": "8e7957afb85235f33056f94db03e9eae655760a1",
       "headRepository": "cbor-wg/cbor-dns",
       "headRefName": "rrsets",
       "headRefOid": "d0705dbe935cd7d7f628218ef6a149e30aa22e39",
@@ -287,25 +287,98 @@
       "id": "PR_kwDOIM0M7M6BVOlO",
       "title": "Make name compression be based on CBOR-packed",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/7",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "miri64",
-      "authorAssociation": "CONTRIBUTOR",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "During IETF 121 the idea came up to bring name compression to CBOR-packed after all by providing a special table setup tag. This is the work to that.",
       "createdAt": "2024-11-08T14:52:03Z",
-      "updatedAt": "2025-02-21T17:22:35Z",
+      "updatedAt": "2025-04-16T11:42:01Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
-      "baseRefOid": "0c8a8106c5a86d8cf11930b57b5866440f37fc5a",
+      "baseRefOid": "e82c5a3e5780d34bf78640c3a4ccab2c550e230f",
       "headRepository": "cbor-wg/cbor-dns",
       "headRefName": "name-comp-packed",
-      "headRefOid": "609af1cbc7c13ef796e958930a2699e90ac77699",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "ebe36d0bcce6732b153586fd2090a7401fe004c5",
+      "closedAt": "2025-04-16T07:00:02Z",
+      "mergedAt": "2025-04-16T07:00:02Z",
+      "mergedBy": "miri64",
+      "mergeCommit": {
+        "oid": "8942b3613df00c4f380dfe432966e52f7939fe62"
+      },
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Squashed...",
+          "createdAt": "2025-04-16T06:39:04Z",
+          "updatedAt": "2025-04-16T06:39:04Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "`s/level of packedness/packed value/g`",
+          "createdAt": "2025-04-16T06:47:31Z",
+          "updatedAt": "2025-04-16T06:47:31Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Huh? Somehow, I messed this up when force pushing...",
+          "createdAt": "2025-04-16T06:49:05Z",
+          "updatedAt": "2025-04-16T06:49:20Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> `s/level of packedness/packed value/g`\r\n\r\nThis was meant to reference https://github.com/cbor-wg/cbor-dns/compare/25006971e1f4cb8210e400bc7b439e9bf34748e1..ccf2a04b19c65ddadb716dd8b469d1a7ffb823d4",
+          "createdAt": "2025-04-16T06:50:19Z",
+          "updatedAt": "2025-04-16T06:50:19Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "`s/CBOR-packed/Packed CBOR/`",
+          "createdAt": "2025-04-16T06:55:13Z",
+          "updatedAt": "2025-04-16T06:55:13Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "And rebased.",
+          "createdAt": "2025-04-16T06:59:10Z",
+          "updatedAt": "2025-04-16T06:59:10Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@cabo gave his blessing to merge this offline but has not time to review this.",
+          "createdAt": "2025-04-16T06:59:54Z",
+          "updatedAt": "2025-04-16T06:59:54Z"
+        },
+        {
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "body": "> @cabo gave his blessing to merge this offline but has not time to review this.\r\n\r\nDon't have time to review right now either, but did we came to a conclusion about the right tag order regarding table prependment?",
+          "createdAt": "2025-04-16T10:26:01Z",
+          "updatedAt": "2025-04-16T10:26:01Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> did we came to a conclusion about the right tag order regarding table prependment?\r\n\r\nYes, see https://github.com/cbor-wg/cbor-dns/pull/7#discussion_r1888278854",
+          "createdAt": "2025-04-16T11:22:08Z",
+          "updatedAt": "2025-04-16T11:22:08Z"
+        },
+        {
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "body": "> Ok, so in this case, if I understand correctly, the outer tag should append to the packing table(s) of the inner tag.\r\n\r\nYes, correct. I've always phrased it as \"the inner tag prepends to the outer tag\", but that's the same statement.\r\n\r\n",
+          "createdAt": "2025-04-16T11:41:07Z",
+          "updatedAt": "2025-04-16T11:41:07Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOIM0M7M6Qe9sY",
@@ -411,7 +484,7 @@
             "abbreviatedOid": "f672f80"
           },
           "author": "miri64",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-11-08T16:30:30Z",
@@ -431,7 +504,7 @@
             "abbreviatedOid": "f672f80"
           },
           "author": "miri64",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-11-08T16:31:40Z",
@@ -451,7 +524,7 @@
             "abbreviatedOid": "cfeb452"
           },
           "author": "miri64",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-11-08T16:34:30Z",
@@ -569,7 +642,7 @@
             "abbreviatedOid": "f672f80"
           },
           "author": "miri64",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-11-11T13:03:39Z",
@@ -629,7 +702,7 @@
             "abbreviatedOid": "f672f80"
           },
           "author": "miri64",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-12-17T10:29:10Z",
@@ -649,7 +722,7 @@
             "abbreviatedOid": "034b61a"
           },
           "author": "miri64",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-12-17T13:04:09Z",
@@ -660,6 +733,26 @@
               "body": "I am not set on the term \u201clevel of packedness\u201d. In fact, I would love to get some alternative terms.",
               "createdAt": "2024-12-17T13:04:09Z",
               "updatedAt": "2024-12-17T13:04:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M6lPHvA",
+          "commit": {
+            "abbreviatedOid": "f672f80"
+          },
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-04-16T11:42:01Z",
+          "updatedAt": "2025-04-16T11:42:01Z",
+          "comments": [
+            {
+              "originalPosition": 210,
+              "body": "> Ok, so in this case, if I understand correctly, the outer tag should append to the packing table(s) of the inner tag.\r\n\r\nThat is a funny way to say \"prepend tables built from inner tags to those inherited from an outer table building tag\", but it definitely is what has worked well so far.\r\n(An on-the-fly implementation could start at the node with the reference, go up until it finds the next table building tag, use what it finds there if the reference is covered, or subtract the size of the table from a reference index that goes beyond that table and continue upwards.)",
+              "createdAt": "2025-04-16T11:42:01Z",
+              "updatedAt": "2025-04-16T11:42:01Z"
             }
           ]
         }
