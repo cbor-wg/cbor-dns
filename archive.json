@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-17T01:12:55.219452+00:00",
+  "timestamp": "2025-04-20T01:16:42.379260+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -119,6 +119,37 @@
       "updatedAt": "2024-12-11T16:05:01Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 9,
+      "id": "I_kwDOIM0M7M6y_aZu",
+      "title": "`AAAA` record compression",
+      "url": "https://github.com/cbor-wg/cbor-dns/issues/9",
+      "state": "OPEN",
+      "author": "JeremyRand",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hello; I'm working with Tor Project on compact DNS zone files for usage in onion service descriptors. This spec caught our attention as potentially relevant. I have a question about how IPv6 addresses are represented.\n\nThe spec mentions:\n\n> Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to compress common address prefixes.\n\nHowever, this doesn't (unless I'm misreading) cover compression of individual IPv6 addresses. The example address used in the draft, `2001:db8::1`, uses 16 bytes, but it quite clearly has less entropy than this, as evidenced by the fact that its ASCII notation (certainly not optimal) is only 11 bytes long.\n\nWould there be interest in compression of IPv6 addresses? I did some experiments with real-world zone files, and found that the following algorithm worked pretty well:\n\n1. Convert IPv6 address to ASCII notation.\n2. Remove any redundant colons.\n3. Parse as base17.\n\nMaybe there's a better approach, I'm not sure. Curious what your thoughts are on whether IPv6 address compression is a reasonable thing to include within the scope of CBOR-DNS.\n\nBest regards.",
+      "createdAt": "2025-04-17T16:34:16Z",
+      "updatedAt": "2025-04-17T16:50:23Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Interesting!\n\nThe assumption here was that \"hole\"-ey IPv6 addresses (with runs of zeros) mostly occur in manually constructed examples and that real-world IPv6 addresses are mostly filled with entropy.\n\nIs there a way you can provide some example data sets for us to look at?\n\nCBOR-Packed has a few tricks up its sleeve that we might want to use here, but then it does not focus on compression of the content of individual (atomic) data items.",
+          "createdAt": "2025-04-17T16:43:23Z",
+          "updatedAt": "2025-04-17T16:43:23Z"
+        },
+        {
+          "author": "JeremyRand",
+          "authorAssociation": "NONE",
+          "body": "Hi!\n\n> Is there a way you can provide some example data sets for us to look at?\n\nI *think* I can provide the dataset that I was given, but let me double-check to make sure it's OK for me to share it.",
+          "createdAt": "2025-04-17T16:50:22Z",
+          "updatedAt": "2025-04-17T16:50:22Z"
+        }
+      ]
     }
   ],
   "pulls": [
