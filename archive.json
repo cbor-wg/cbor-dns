@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-20T01:16:42.379260+00:00",
+  "timestamp": "2025-04-24T01:12:38.266880+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "Hello; I'm working with Tor Project on compact DNS zone files for usage in onion service descriptors. This spec caught our attention as potentially relevant. I have a question about how IPv6 addresses are represented.\n\nThe spec mentions:\n\n> Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to compress common address prefixes.\n\nHowever, this doesn't (unless I'm misreading) cover compression of individual IPv6 addresses. The example address used in the draft, `2001:db8::1`, uses 16 bytes, but it quite clearly has less entropy than this, as evidenced by the fact that its ASCII notation (certainly not optimal) is only 11 bytes long.\n\nWould there be interest in compression of IPv6 addresses? I did some experiments with real-world zone files, and found that the following algorithm worked pretty well:\n\n1. Convert IPv6 address to ASCII notation.\n2. Remove any redundant colons.\n3. Parse as base17.\n\nMaybe there's a better approach, I'm not sure. Curious what your thoughts are on whether IPv6 address compression is a reasonable thing to include within the scope of CBOR-DNS.\n\nBest regards.",
       "createdAt": "2025-04-17T16:34:16Z",
-      "updatedAt": "2025-04-17T16:50:23Z",
+      "updatedAt": "2025-04-22T10:14:19Z",
       "closedAt": null,
       "comments": [
         {
@@ -148,6 +148,13 @@
           "body": "Hi!\n\n> Is there a way you can provide some example data sets for us to look at?\n\nI *think* I can provide the dataset that I was given, but let me double-check to make sure it's OK for me to share it.",
           "createdAt": "2025-04-17T16:50:22Z",
           "updatedAt": "2025-04-17T16:50:22Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "That would be really interesting! I did some cursory analysis back when I was thinking about that, but came to the same conclusion @cabo was mentioning: runs of zeros do not appear as often so that a string conversion\u2014which more than doubles the number of required bytes compared to the binary representation before we even can think about removing stuff\u2014would bring any benefit.",
+          "createdAt": "2025-04-22T10:14:17Z",
+          "updatedAt": "2025-04-22T10:14:17Z"
         }
       ]
     }
