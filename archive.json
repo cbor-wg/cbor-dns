@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-24T01:12:38.266880+00:00",
+  "timestamp": "2025-05-13T01:15:36.775514+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "Hello; I'm working with Tor Project on compact DNS zone files for usage in onion service descriptors. This spec caught our attention as potentially relevant. I have a question about how IPv6 addresses are represented.\n\nThe spec mentions:\n\n> Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to compress common address prefixes.\n\nHowever, this doesn't (unless I'm misreading) cover compression of individual IPv6 addresses. The example address used in the draft, `2001:db8::1`, uses 16 bytes, but it quite clearly has less entropy than this, as evidenced by the fact that its ASCII notation (certainly not optimal) is only 11 bytes long.\n\nWould there be interest in compression of IPv6 addresses? I did some experiments with real-world zone files, and found that the following algorithm worked pretty well:\n\n1. Convert IPv6 address to ASCII notation.\n2. Remove any redundant colons.\n3. Parse as base17.\n\nMaybe there's a better approach, I'm not sure. Curious what your thoughts are on whether IPv6 address compression is a reasonable thing to include within the scope of CBOR-DNS.\n\nBest regards.",
       "createdAt": "2025-04-17T16:34:16Z",
-      "updatedAt": "2025-04-22T10:14:19Z",
+      "updatedAt": "2025-05-12T04:20:10Z",
       "closedAt": null,
       "comments": [
         {
@@ -155,6 +155,27 @@
           "body": "That would be really interesting! I did some cursory analysis back when I was thinking about that, but came to the same conclusion @cabo was mentioning: runs of zeros do not appear as often so that a string conversion\u2014which more than doubles the number of required bytes compared to the binary representation before we even can think about removing stuff\u2014would bring any benefit.",
           "createdAt": "2025-04-22T10:14:17Z",
           "updatedAt": "2025-04-22T10:14:17Z"
+        },
+        {
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@JeremyRand: We will have the next CBOR meeting on Wednesday this week, so having some real data that we could chew on and present would help us forward.\n",
+          "createdAt": "2025-05-11T16:54:35Z",
+          "updatedAt": "2025-05-11T16:54:35Z"
+        },
+        {
+          "author": "JeremyRand",
+          "authorAssociation": "NONE",
+          "body": "I've just emailed you the zone files I was given (please let me know if they failed to arrive). Apologies for the delay.\n\nBased on this dataset, my findings were that the base17 approach I described above yielded a smaller size than the DNS wire format in all but two of the `AAAA` records in the dataset. Which would suggest that a potentially valid approach would be to define the format as \"If the `AAAA` data found in the CBOR is 16 bytes, treat it as DNS wire format, if it's less than 16 bytes, treat it as base17.\"\n\n(The savings aren't exactly massive, but they are significant for space-constrained systems like what we're working with.)",
+          "createdAt": "2025-05-12T00:00:18Z",
+          "updatedAt": "2025-05-12T00:00:18Z"
+        },
+        {
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thank you.  The samples I find are highly skewed towards interface identifiers where only the lowest byte is non-zero; only some 3 % of the AAAA records have more bytes in use.  I don't think that is very typical, but it would be worth looking at this for a larger sample set.\n\nBesides the 97 % with a :: run of 7 bytes, there also may be some advantage from eliding leading zero nibbles in the hexlets -- normally the colon overhead would eat this advantage; but in the sample, 40 % of the hexlets don't have full quads (one would expect maybe 1 out of 16), and the average number of hex digits per quad is 2.92, with 30 % single-digit, so the colon conversion does help -- I'd consider this rather atypical as well.\n\nSo identifying a single run of zero bytes might be a near optimal solution that makes good use of the quirks of your sample data set.\nThis can be given as the start position of the run (0..15, and maybe 16 for no such run), and the length of the run can be derived as 16 minus the number of bytes remaining after removing the run.\nIn your sample, you would save almost 7 out of 16 bytes, minus paying a byte or so for the start position; a whopping 36 %.\n",
+          "createdAt": "2025-05-12T04:20:09Z",
+          "updatedAt": "2025-05-12T04:20:09Z"
         }
       ]
     }
