@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-13T01:15:36.775514+00:00",
+  "timestamp": "2025-05-15T01:12:33.362665+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "Hello; I'm working with Tor Project on compact DNS zone files for usage in onion service descriptors. This spec caught our attention as potentially relevant. I have a question about how IPv6 addresses are represented.\n\nThe spec mentions:\n\n> Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to compress common address prefixes.\n\nHowever, this doesn't (unless I'm misreading) cover compression of individual IPv6 addresses. The example address used in the draft, `2001:db8::1`, uses 16 bytes, but it quite clearly has less entropy than this, as evidenced by the fact that its ASCII notation (certainly not optimal) is only 11 bytes long.\n\nWould there be interest in compression of IPv6 addresses? I did some experiments with real-world zone files, and found that the following algorithm worked pretty well:\n\n1. Convert IPv6 address to ASCII notation.\n2. Remove any redundant colons.\n3. Parse as base17.\n\nMaybe there's a better approach, I'm not sure. Curious what your thoughts are on whether IPv6 address compression is a reasonable thing to include within the scope of CBOR-DNS.\n\nBest regards.",
       "createdAt": "2025-04-17T16:34:16Z",
-      "updatedAt": "2025-05-12T04:20:10Z",
+      "updatedAt": "2025-05-14T08:33:12Z",
       "closedAt": null,
       "comments": [
         {
@@ -176,6 +176,27 @@
           "body": "Thank you.  The samples I find are highly skewed towards interface identifiers where only the lowest byte is non-zero; only some 3 % of the AAAA records have more bytes in use.  I don't think that is very typical, but it would be worth looking at this for a larger sample set.\n\nBesides the 97 % with a :: run of 7 bytes, there also may be some advantage from eliding leading zero nibbles in the hexlets -- normally the colon overhead would eat this advantage; but in the sample, 40 % of the hexlets don't have full quads (one would expect maybe 1 out of 16), and the average number of hex digits per quad is 2.92, with 30 % single-digit, so the colon conversion does help -- I'd consider this rather atypical as well.\n\nSo identifying a single run of zero bytes might be a near optimal solution that makes good use of the quirks of your sample data set.\nThis can be given as the start position of the run (0..15, and maybe 16 for no such run), and the length of the run can be derived as 16 minus the number of bytes remaining after removing the run.\nIn your sample, you would save almost 7 out of 16 bytes, minus paying a byte or so for the start position; a whopping 36 %.\n",
           "createdAt": "2025-05-12T04:20:09Z",
           "updatedAt": "2025-05-12T04:20:09Z"
+        },
+        {
+          "author": "JeremyRand",
+          "authorAssociation": "NONE",
+          "body": "Thanks for the analysis @cabo!\n\nOf the `AAAA` records in my dataset that exhibit the quirks you noted (I am not sure how typical that is, would indeed be useful to get a larger / more diverse sample), the base17 approach I described yields a compressed size ranging from 7 to 10 bytes, with a mean compressed size of 8.41 bytes, which would be a mean of 47.4% savings for such `AAAA` records.\n\nI'm not purporting that the base17 approach is optimal, but so far I haven't managed to find anything that compresses better for this data.",
+          "createdAt": "2025-05-14T06:05:48Z",
+          "updatedAt": "2025-05-14T06:05:48Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Starting end of the week I will have some time to run this algorithm over my datasets. \n\n> 2\\. Remove any redundant colons.\n\nJust one question: What exactly do you mean by that? For instance, will `2001:db8::1` become `2001db8::1`, `2001db8:1`, `2001db81`, or something else?",
+          "createdAt": "2025-05-14T07:59:07Z",
+          "updatedAt": "2025-05-14T07:59:07Z"
+        },
+        {
+          "author": "JeremyRand",
+          "authorAssociation": "NONE",
+          "body": "> > 2. Remove any redundant colons.\n> \n> Just one question: What exactly do you mean by that? For instance, will `2001:db8::1` become `2001db8::1`, `2001db8:1`, `2001db81`, or something else?\n\n@miri64 Remove any colon that immediately follows 4 hex digits (since any such colon is just there for formatting convenience and can be inferred unambiguously). So, for example, `1234::5678:9abc:deff:0:0` becomes `1234:56789abcdeff0:0`. (I didn't carefully think about whether a colon at the start of the string could also be inferred unambiguously, e.g. `::1` becoming `:1`, but that might be workable.)",
+          "createdAt": "2025-05-14T08:33:11Z",
+          "updatedAt": "2025-05-14T08:33:11Z"
         }
       ]
     }
