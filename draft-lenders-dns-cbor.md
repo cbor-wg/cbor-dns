@@ -251,6 +251,10 @@ max-uint8 = 0..255
 max-uint16 = 0..65535
 max-uint32 = 0..4294967295
 ttl = max-uint32
+ipv4-addr = bstr .size 4
+ipv6-addr = bstr .size 16
+$ip-addr = ipv4-addr / ipv6-addr
+
 rr = [
   ? domain-name,
   ttl: ttl,
@@ -258,7 +262,7 @@ rr = [
 ]
 type-spec-rdata = (
   ? type-spec,
-  rdata: bstr // ( domain-name ) // ( rdata-set ),
+  rdata: bstr // ( $ip-addr ) // ( domain-name ) // ( rdata-set ),
 )
 rdata-set = ((
   is-rrset: true,
@@ -405,7 +409,7 @@ svc-param-pair = (
   svc-param-key: max-uint16,
   svc-param-value: $$svc-param-value,
 )
-$$svc-param-value = bstr
+$$svc-param-value = bstr / $ip-addr
 ~~~
 {:cddl #fig:dns-rdata-svcb title="SVCB and HTTPS Resource Record Data Definition"}
 
