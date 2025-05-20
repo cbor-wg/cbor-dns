@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-15T01:12:33.362665+00:00",
+  "timestamp": "2025-05-20T01:16:21.078254+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "Hello; I'm working with Tor Project on compact DNS zone files for usage in onion service descriptors. This spec caught our attention as potentially relevant. I have a question about how IPv6 addresses are represented.\n\nThe spec mentions:\n\n> Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to compress common address prefixes.\n\nHowever, this doesn't (unless I'm misreading) cover compression of individual IPv6 addresses. The example address used in the draft, `2001:db8::1`, uses 16 bytes, but it quite clearly has less entropy than this, as evidenced by the fact that its ASCII notation (certainly not optimal) is only 11 bytes long.\n\nWould there be interest in compression of IPv6 addresses? I did some experiments with real-world zone files, and found that the following algorithm worked pretty well:\n\n1. Convert IPv6 address to ASCII notation.\n2. Remove any redundant colons.\n3. Parse as base17.\n\nMaybe there's a better approach, I'm not sure. Curious what your thoughts are on whether IPv6 address compression is a reasonable thing to include within the scope of CBOR-DNS.\n\nBest regards.",
       "createdAt": "2025-04-17T16:34:16Z",
-      "updatedAt": "2025-05-14T08:33:12Z",
+      "updatedAt": "2025-05-19T12:57:09Z",
       "closedAt": null,
       "comments": [
         {
@@ -197,6 +197,20 @@
           "body": "> > 2. Remove any redundant colons.\n> \n> Just one question: What exactly do you mean by that? For instance, will `2001:db8::1` become `2001db8::1`, `2001db8:1`, `2001db81`, or something else?\n\n@miri64 Remove any colon that immediately follows 4 hex digits (since any such colon is just there for formatting convenience and can be inferred unambiguously). So, for example, `1234::5678:9abc:deff:0:0` becomes `1234:56789abcdeff0:0`. (I didn't carefully think about whether a colon at the start of the string could also be inferred unambiguously, e.g. `::1` becoming `:1`, but that might be workable.)",
           "createdAt": "2025-05-14T08:33:11Z",
           "updatedAt": "2025-05-14T08:33:11Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Interesting! With this transformation, and assuming after conversion the base17-string is stored as a (big) integer we only loose 2 bytes in the worst case (i.e., non of the quad-bytes within the hex representation start with a `0` nibble):\n\n![Results of using AAAA record compression for our datasets](https://github.com/user-attachments/assets/a46aed23-9031-47e6-a200-1f7a0f01c7bb)\n\nI used the IPv6 data from two datasets (both provided as PCAPS), namely the AAAA records and the IPv6hint from SVCB/HTTPS records:\n\n- **IoT:** traces from 3 publically available studies that were conducted in Testbeds with consumer-grade off-the-shelf IoT devices (see e.g. https://github.com/anr-bmbf-pivot/Artifacts-CoNEXT23-DoC/tree/main/03-dns-empirical/collect#scan_iot_datapy for details)\n- **Public:** Queried the names from the [Tranco list](https://tranco-list.eu/) from 3 public resolvers (1.1.1.1, 8.8.8.8, 9.9.9.9; there was no IPv6 available at the site we constructed this list from).\n\nI used this function to convert the IPv6 addresses (provided as full hex strings) to a CBOR integer:\n\n```py\ndef to_base17(addr):\n    addr = ipaddress.IPv6Address(bytes.fromhex(addr)).compressed\n    base17_str = re.sub(\"([0-9a-f]{4}):\", r\"\\1\", addr).replace(\":\", \"a\")\n    return cbor2.dumps(int(base17_str, base=17))\n```\n\nThe reference for the comparsion was the address as CBOR binary string (i.e. to length 17). So byte savings _b_ is\n\n$b = 17 - \\mathbf{length}(\\mathtt{to\\\\_base17}(\\mathtt{addr})))$\n\nand gain _g_ is\n\n$g = \\frac{b}{17}$\n\nThe idea case of this compression is in terms of DNS byte savings of 8 at the moment, when an address just about compresses to an 8-byte integer (9 byte in CBOR). The maximum in our dataset is a byte saving of 14 bytes for the address `::1`, i.e., the loopback address which should not really show up in DNS data. But it does apparently at some public resolver. It converts to the 2-byte integer 3061 (3 byte in CBOR). All other addresses compress to big integers.\n\nAs @cabo already confirmed: Your dataset somewhat skews to the ideal case with byte savings 8:\n\n![Results of using AAAA record compression for Jeremy's dataset](https://github.com/user-attachments/assets/a1a831b9-2e98-4de2-9127-f79dbce35e06)\n\nBut overall I'd say this compression is something that we should think about, but maybe only optionally. This might be even something that could be used generally, especially if the kink with the conversion of `::1` could be ironed out (I think it is as easy as adding the step \"If string starts with colon, remove it\" to the \"remove redundant colons\" step, but did not test if that is easily reversable).",
+          "createdAt": "2025-05-19T12:44:14Z",
+          "updatedAt": "2025-05-19T12:45:07Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> But overall I'd say this compression is something that we should think about, but maybe only optionally.\n\nSee https://github.com/cbor-wg/cbor-dns/pull/10 for an easy, unintrusive start.",
+          "createdAt": "2025-05-19T12:57:08Z",
+          "updatedAt": "2025-05-19T12:57:08Z"
         }
       ]
     }
@@ -837,6 +851,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 10,
+      "id": "PR_kwDOIM0M7M6WuEp8",
+      "title": "Provide extension point for IP addresses",
+      "url": "https://github.com/cbor-wg/cbor-dns/pull/10",
+      "state": "OPEN",
+      "author": "miri64",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "See #9.",
+      "createdAt": "2025-05-19T12:56:38Z",
+      "updatedAt": "2025-05-19T12:56:38Z",
+      "baseRepository": "cbor-wg/cbor-dns",
+      "baseRefName": "main",
+      "baseRefOid": "92e57e9e7de3dae8896a664de216ef083560779c",
+      "headRepository": "cbor-wg/cbor-dns",
+      "headRefName": "ip-addr-ext-point",
+      "headRefOid": "44324eca005c456aa8c1e5d3a6d8ae2cbb657da0",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
