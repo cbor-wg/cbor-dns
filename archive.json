@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-20T01:16:21.078254+00:00",
+  "timestamp": "2025-05-22T01:15:14.927805+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "Hello; I'm working with Tor Project on compact DNS zone files for usage in onion service descriptors. This spec caught our attention as potentially relevant. I have a question about how IPv6 addresses are represented.\n\nThe spec mentions:\n\n> Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to compress common address prefixes.\n\nHowever, this doesn't (unless I'm misreading) cover compression of individual IPv6 addresses. The example address used in the draft, `2001:db8::1`, uses 16 bytes, but it quite clearly has less entropy than this, as evidenced by the fact that its ASCII notation (certainly not optimal) is only 11 bytes long.\n\nWould there be interest in compression of IPv6 addresses? I did some experiments with real-world zone files, and found that the following algorithm worked pretty well:\n\n1. Convert IPv6 address to ASCII notation.\n2. Remove any redundant colons.\n3. Parse as base17.\n\nMaybe there's a better approach, I'm not sure. Curious what your thoughts are on whether IPv6 address compression is a reasonable thing to include within the scope of CBOR-DNS.\n\nBest regards.",
       "createdAt": "2025-04-17T16:34:16Z",
-      "updatedAt": "2025-05-19T12:57:09Z",
+      "updatedAt": "2025-05-20T12:03:39Z",
       "closedAt": null,
       "comments": [
         {
@@ -211,6 +211,13 @@
           "body": "> But overall I'd say this compression is something that we should think about, but maybe only optionally.\n\nSee https://github.com/cbor-wg/cbor-dns/pull/10 for an easy, unintrusive start.",
           "createdAt": "2025-05-19T12:57:08Z",
           "updatedAt": "2025-05-19T12:57:08Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Carsten asked me to provide some additional evaluation. Find them below with both for our datasets.\n\n![Image](https://github.com/user-attachments/assets/9bcaf62a-0828-428f-8267-8cd344957ef7)\n\n- **base17** is the same result as [above](https://github.com/cbor-wg/cbor-dns/issues/9#issuecomment-2890876490),\n- **base17 Improved** additionally removes the colon before the last hex-quad if it is complete and strips the front-colon if the string starts with one\n- **skip max-0 run** finds the longest run of 0-bytes that is longer than 2 bytes within an address, removes it and prepends the offset of that zero run to the address.\n- **skip max-0 run Improved** slightly improves on that by also removing the well-known ff:fe marker at bytes 11..12 that hints that the IID of the address was generated from a MAC48 address, if it is available and toggling the respective bit in the most significant byte of the IID. Since only 266/271889 addresses in our datasets contain this marker, the advantage is not very pronounced.\n\nApart from it perfoming slightly better, we think keeping it in the binary domain with **skip max-0 run** makes more sense for the constrained use case as it can be done without any dependencies, such as IPv6 text representation, base17, or bigint requirements.",
+          "createdAt": "2025-05-20T12:03:38Z",
+          "updatedAt": "2025-05-20T12:03:38Z"
         }
       ]
     }
@@ -864,13 +871,13 @@
       "labels": [],
       "body": "See #9.",
       "createdAt": "2025-05-19T12:56:38Z",
-      "updatedAt": "2025-05-19T12:56:38Z",
+      "updatedAt": "2025-05-20T11:52:53Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "92e57e9e7de3dae8896a664de216ef083560779c",
       "headRepository": "cbor-wg/cbor-dns",
       "headRefName": "ip-addr-ext-point",
-      "headRefOid": "44324eca005c456aa8c1e5d3a6d8ae2cbb657da0",
+      "headRefOid": "2233bc1ded2739955c6a6fa08ae37fd28089a013",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
