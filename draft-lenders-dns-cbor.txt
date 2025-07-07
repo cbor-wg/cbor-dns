@@ -1747,6 +1747,10 @@ C.1.  Since draft-lenders-dns-cbor-13
 
       -  Make domain names flat text string sequences again
 
+   *  Add capability to summarize rrsets
+
+   *  Provide extension point for IP addresses
+
 C.2.  Since draft-lenders-dns-cbor-12
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-12)
 
@@ -1783,16 +1787,14 @@ C.5.  Since draft-lenders-dns-cbor-09
 
    *  Provide extension points
 
-      -  Mark dns-rr specifically as extension point
-
-
-
 
 
 Lenders, et al.          Expires 8 January 2026                [Page 32]
 
 Internet-Draft                  dns+cbor                       July 2025
 
+
+      -  Mark dns-rr specifically as extension point
 
       -  Provide extension points for parameter values (options and svc-
          params)
@@ -1838,8 +1840,6 @@ C.8.  Since draft-lenders-dns-cbor-06
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-06)
 
    *  Fixes wording and spelling mistakes
-
-
 
 
 
