@@ -152,10 +152,8 @@ If, for any reason, a DNS message cannot be represented in the CBOR format speci
 
 ## Domain Name Representation {#sec:domain-names}
 
-Domain names are represented by a sequence of one or more (unicode) text strings optionally followed
-by an array containing another domain name.
-For instance, "example.org" would be represented as `"example","org"` or `"example",["org"]` in CBOR diagnostic notation.
-We call the representation without arrays, e.g., `"example","org"` the "flat representation" of a domain name throughout the document.
+Domain names are represented by a sequence of one or more (unicode) text strings.
+For instance, "example.org" would be represented as `"example","org"` in CBOR diagnostic notation.
 The root domain "." is represented as an empty string `""`.
 The absence of any label means the name is elided.
 For the purpose of this document, domain names remain case-insensitive as specified in {{-dns}}.
@@ -174,16 +172,14 @@ compression similar to that described in {{Section 4.1.4 of -dns}}.
 However, instead of using the byte index as reference within the message, text strings are counted,
 starting at 0, depth-first within the message.
 That number is used as index for the reference.
-Names MUST be sent in flat representation over the wire, i.e., they only can consist of text strings and references to
-another domain name, but no array of text strings.
-Since name labels are the only text strings, the end of a name can be identified when the decoder cursor
-does not point to a text string or reference to another domain name anymore.
+Since names are the only text strings, the end of a name can be identified when the decoder cursor
+does not point to a text string or reference to another text string anymore.
 For the reference itself, either simple values or tag 6 are used (see {{Section 2.2 of -cbor-packed}}).
 
 {:cddl: sourcecode-name="dns-cbor.cddl"}
 
 ~~~ cddl
-domain-name = ( *label, ?[ *domain-name ] )
+domain-name = ( *label )
 label = tstr
 ~~~
 {:cddl #fig:domain-name title="Domain Name Definition"}
@@ -580,11 +576,11 @@ Text-String-Suffix-Sequence-Packed-CBOR = #6.28259(rump)
 For name compression, a new packing table setup tag TBD28259 ('n' and 'c' in ASCII) for Packed CBOR {{-cbor-packed}} is defined.
 It provides an implicit text string suffix sequence table for shared items _V_ which is appended to the existing table for shared items of any table setup tag within the content of tag TBD28259 (by default empty table).
 This implicit (i.e. not explicitly represented) table _V_ is constructed as follows:
-Any coherent sequence of domain names encountered within the rump of tag TBD28259, as well as any of its non-empty suffixes, are added to the table as arrays in depth-first order.
-Domain names within any tables for shared items or argument items within the rump MUST not be added to _V_.
-If a domain name for which an array of the flat representation is already in _V_ is encountered, a shared item reference _i_ to that array in V replaces this sequence.
-This shared item reference _i_ means: take the array at _V_\[_i_\] and put it into the surrounding array in place of _i_.
-The resulting rump should look like referencing the _i_-th string (depth first) in the message.
+Any coherent sequence of text strings encountered within the rump of tag TBD28259, as well as any of its non-empty suffixes, are added to the table as arrays in depth-first order.
+Text string sequences within any tables for shared items or argument items within the rump MUST not be added to _V_.
+If a sequence for which an array is already in _V_ is encountered, a shared item reference _i_ to that array in V replaces this sequence.
+This shared item reference _i_ means: take the sequence from the array at _V_\[_i_\] and put it into the surrounding array in place of _i_.
+The resulting rump should look like referencing the _i_-th string (depth first) in the sequence.
 
 The "application/dns+cbor" media type comes with an optional parameter "packed".
 If it is not provided, the value of it is assumed to be 0.
