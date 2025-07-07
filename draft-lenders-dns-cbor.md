@@ -1128,6 +1128,8 @@ Since [draft-lenders-dns-cbor-13]
 ---------------------------------
 - Make use of splicing integration tag 1115
     - Make domain names flat text string sequences again
+- Add capability to summarize rrsets
+- Provide extension point for IP addresses
 
 Since [draft-lenders-dns-cbor-12]
 ---------------------------------
