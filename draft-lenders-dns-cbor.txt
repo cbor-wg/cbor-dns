@@ -87,12 +87,12 @@ Table of Contents
      3.1.  Domain Name Representation  . . . . . . . . . . . . . . .   5
      3.2.  DNS Resource Records  . . . . . . . . . . . . . . . . . .   6
        3.2.1.  Standard RRs  . . . . . . . . . . . . . . . . . . . .   6
-       3.2.2.  EDNS OPT Pseudo-RRs . . . . . . . . . . . . . . . . .  11
-     3.3.  DNS Queries . . . . . . . . . . . . . . . . . . . . . . .  12
+       3.2.2.  EDNS OPT Pseudo-RRs . . . . . . . . . . . . . . . . .  12
+     3.3.  DNS Queries . . . . . . . . . . . . . . . . . . . . . . .  13
      3.4.  DNS Responses . . . . . . . . . . . . . . . . . . . . . .  15
-   4.  Compression with Packed CBOR  . . . . . . . . . . . . . . . .  16
+   4.  Compression with Packed CBOR  . . . . . . . . . . . . . . . .  17
      4.1.  Name Compression  . . . . . . . . . . . . . . . . . . . .  17
-       4.1.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  17
+       4.1.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  18
      4.2.  Further DNS Representation with tag 113 . . . . . . . . .  19
      4.3.  Media Type Negotiation  . . . . . . . . . . . . . . . . .  20
      4.4.  Compression . . . . . . . . . . . . . . . . . . . . . . .  20
@@ -299,11 +299,7 @@ Internet-Draft                  dns+cbor                       July 2025
 
    This document specifies the representation of both standard DNS
    resource records (RRs, see [RFC1035]) and EDNS option pseudo-RRs (see
-   [RFC6891].
-   // Also add capability to summarize Resource Record Sets to one
-   // array, e.g. ["example","org",3600,1,[b'c0002563', h'c00021ab']]?
-   //
-   // -- —mlenders If for any reason, a resource record cannot be
+   [RFC6891].  If for any reason, a resource record cannot be
    represented in the given formats, they can be represented in their
    binary wire-format form as a byte string.
 
@@ -333,13 +329,21 @@ Internet-Draft                  dns+cbor                       July 2025
 
 
 
+
+
+
+
 Lenders, et al.          Expires 8 January 2026                 [Page 6]
 
 Internet-Draft                  dns+cbor                       July 2025
 
 
    5.  A record data entry (as byte string, domain name, or array for
-       dedicated record data representation).
+       dedicated record data representation) or a boolean (true) that
+       indicates that the resource record is actually a resource record
+       set with an array of one or more record data entries following.
+       In the latter case, individual domain names need to be put into
+       their own array.
 
    If the first item of the resource record is a text string, it is the
    first label of a domain name (see Section 3.1).  If the name is
@@ -385,14 +389,18 @@ Internet-Draft                  dns+cbor                       July 2025
 
 
 
-
-
-
-
 Lenders, et al.          Expires 8 January 2026                 [Page 7]
 
 Internet-Draft                  dns+cbor                       July 2025
 
+
+   Multiple resource records of the same type, class, and TTL can be
+   summarized to a resource record set.  A decoder can be notified about
+   this, by including the boolean true value before an array of multiple
+   record data entries of the same type.  Note, that this adds more
+   overhead to the message and should only really be considered, when
+   there are more than two resource records of the same type, class, and
+   TTL in the message.
 
    max-uint8 = 0..255
    max-uint16 = 0..65535
@@ -405,8 +413,15 @@ Internet-Draft                  dns+cbor                       July 2025
    ]
    type-spec-rdata = (
      ? type-spec,
-     rdata: bstr // ( domain-name ),
+     rdata: bstr // ( domain-name ) // ( rdata-set ),
    )
+   rdata-set = ((
+     is-rrset: true,
+     rdata-set: [ +bstr ]
+   ) // (
+     is-rrset: true,
+     rdata-set: [ +[ domain-name ] ],
+   ))
    type-spec-rdata //= ( $$structured-ts-rd )
    type-spec = (
      record-type: max-uint16,
@@ -427,6 +442,14 @@ Internet-Draft                  dns+cbor                       July 2025
 
    *  REFRESH as an unsigned integer,
 
+
+
+
+Lenders, et al.          Expires 8 January 2026                 [Page 8]
+
+Internet-Draft                  dns+cbor                       July 2025
+
+
    *  RETRY as an unsigned integer,
 
    *  EXPIRE as an unsigned integer,
@@ -440,20 +463,10 @@ Internet-Draft                  dns+cbor                       July 2025
 
    The definition for MX record data can be seen in Figure 5.
 
-
-
-
-
-
-Lenders, et al.          Expires 8 January 2026                 [Page 8]
-
-Internet-Draft                  dns+cbor                       July 2025
-
-
    $$structured-ts-rd //= (
      6,    ; record-type = SOA
      ? 1,  ; record-class = IN
-     soa,
+     ( soa // ( is-rrset: true, rdata-set: [ +soa ] ) ),
    )
 
    soa = [
@@ -480,10 +493,23 @@ Internet-Draft                  dns+cbor                       July 2025
 
    The definition for MX record data can be seen in Figure 6.
 
+
+
+
+
+
+
+
+
+Lenders, et al.          Expires 8 January 2026                 [Page 9]
+
+Internet-Draft                  dns+cbor                       July 2025
+
+
    $$structured-ts-rd //= (
      15,   ; record-type = MX
      ? 1,  ; record-class = IN
-     mx,
+     ( mx // ( is-rrset: true, rdata-set: [ +mx ] ) ),
    )
 
    mx = [
@@ -498,13 +524,6 @@ Internet-Draft                  dns+cbor                       July 2025
    The record data of RRs with record-type = 33 (SRV) MAY be expressed
    as an array with at least 3 entries representing the parts of the SRV
    resource record defined in [RFC2782] in the following order:
-
-
-
-Lenders, et al.          Expires 8 January 2026                 [Page 9]
-
-Internet-Draft                  dns+cbor                       July 2025
-
 
    *  Priority as an unsigned integer,
 
@@ -524,10 +543,29 @@ Internet-Draft                  dns+cbor                       July 2025
 
    The definition for SRV record data can be seen in Figure 7.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lenders, et al.          Expires 8 January 2026                [Page 10]
+
+Internet-Draft                  dns+cbor                       July 2025
+
+
    $$structured-ts-rd //= (
      33,   ; record-type = SRV
      ? 1,  ; record-class = IN
-     srv,
+     ( srv // ( is-rrset: true, rdata-set: [ +srv ] ) ),
    )
 
    srv = [
@@ -538,6 +576,11 @@ Internet-Draft                  dns+cbor                       July 2025
    ]
 
                Figure 7: SRV Resource Record Data Definition
+
+   -The next element is an array of the options, which are represented
+   two elements each, an unsigned -integer, the option code, followed by
+   a byte string, the option data. -Multiple options alternate between
+   unsigned integer and byte string within the array.
 
 3.2.1.4.  SVCB and HTTPS Record Data
 
@@ -554,14 +597,6 @@ Internet-Draft                  dns+cbor                       July 2025
       unsigned integer) and SvcParamValue (as byte string).  The type of
       SvcParamValue may be extended in future specifications.
 
-
-
-
-Lenders, et al.          Expires 8 January 2026                [Page 10]
-
-Internet-Draft                  dns+cbor                       July 2025
-
-
    If the SvcPriority is present can be determined by checking if the
    record data array starts with an unsigned integer or not.  If the
    array does not start with an unsigned integer, the SvcPriority is
@@ -575,6 +610,14 @@ Internet-Draft                  dns+cbor                       July 2025
    If there is no domain name after the SvcPriority, the TargetName is
    elided and defaults to the sequence of text strings "" (i.e. the root
    domain "." in the common name representation defined in Section 2.3.1
+
+
+
+Lenders, et al.          Expires 8 January 2026                [Page 11]
+
+Internet-Draft                  dns+cbor                       July 2025
+
+
    of [RFC1035], see Section 3.1) and Section 2.5 of [RFC9460].  If
    there is a domain name after the SvcPriority, the TargetName is not
    elided and in the domain name form specified in Section 3.1.
@@ -585,7 +628,7 @@ Internet-Draft                  dns+cbor                       July 2025
    $$structured-ts-rd //= (
      64 / 65,  ; record-type = SVCB or HTTPS
      ? 1,      ; record-class = IN
-     svcb,
+     ( svcb // ( is-rrset: true, rdata-set: [ +svcb ] ) ),
    )
 
    svcb = [
@@ -611,13 +654,6 @@ Internet-Draft                  dns+cbor                       July 2025
    EDNS OPT Pseudo-RRs are represented as a CBOR array.  To distinguish
    them from normal standard RRs, they are marked with tag TBD141.
 
-
-
-Lenders, et al.          Expires 8 January 2026                [Page 11]
-
-Internet-Draft                  dns+cbor                       July 2025
-
-
    Name and record type can be elided as they are always "." and OPT
    (41), respectively [RFC6891].
 
@@ -629,6 +665,14 @@ Internet-Draft                  dns+cbor                       July 2025
    The next element is a map of the options, with the option code
    (unsigned integer) as key and the option data (byte string) as value.
    The type of option data may be extended in future specifications.
+
+
+
+
+Lenders, et al.          Expires 8 January 2026                [Page 12]
+
+Internet-Draft                  dns+cbor                       July 2025
+
 
    After that, up to three unsigned integers are following.  The first
    being the extended flags as unsigned integer (implied to be 0 if
@@ -666,14 +710,6 @@ Internet-Draft                  dns+cbor                       July 2025
    DNS queries are encoded as CBOR arrays containing up to 6 entries in
    the following order:
 
-
-
-
-Lenders, et al.          Expires 8 January 2026                [Page 12]
-
-Internet-Draft                  dns+cbor                       July 2025
-
-
    1.  An optional boolean field,
 
    2.  An optional flag field (as unsigned integer),
@@ -685,6 +721,14 @@ Internet-Draft                  dns+cbor                       July 2025
    5.  An optional authority section (as array), and
 
    6.  An optional additional section (as array)
+
+
+
+
+Lenders, et al.          Expires 8 January 2026                [Page 13]
+
+Internet-Draft                  dns+cbor                       July 2025
+
 
    If the first item is a boolean and when true, it tells the responding
    resolver that it MUST include the question section in its response.
@@ -722,14 +766,6 @@ Internet-Draft                  dns+cbor                       July 2025
    question section is a flat array and not nested like the other
    sections.  This serves to safe overhead from the additional CBOR
    array header.  In the rare cases when there is more than one question
-
-
-
-Lenders, et al.          Expires 8 January 2026                [Page 13]
-
-Internet-Draft                  dns+cbor                       July 2025
-
-
    record in the question section, the next question just follows.  In
    this case, for every question but the last, the record type MUST be
    included, i.e., it is not optional.  This way it is ensured that the
@@ -742,6 +778,14 @@ Internet-Draft                  dns+cbor                       July 2025
    of the query as an array of DNS resource records (see Section 3.2).
    If two extra arrays are in the query, they encode, in that order, the
    authority and additional sections of the query each as an array of
+
+
+
+Lenders, et al.          Expires 8 January 2026                [Page 14]
+
+Internet-Draft                  dns+cbor                       July 2025
+
+
    DNS resource records (see Section 3.2).  If three extra arrays are in
    the query, they encode, in that order, the answer section, the
    authority, and additional sections of the query each as an array of
@@ -754,37 +798,6 @@ Internet-Draft                  dns+cbor                       July 2025
    (see Section 3.2.2).
 
    The representation of a DNS query is defined in Figure 10.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lenders, et al.          Expires 8 January 2026                [Page 14]
-
-Internet-Draft                  dns+cbor                       July 2025
-
 
    dns-query = [
      ? incl-question: bool .default false,
@@ -822,6 +835,13 @@ Internet-Draft                  dns+cbor                       July 2025
 
    1.  An optional flag field (as unsigned integer),
 
+
+
+Lenders, et al.          Expires 8 January 2026                [Page 15]
+
+Internet-Draft                  dns+cbor                       July 2025
+
+
    2.  An optional question section (as array, encoded as described in
        Section 3.3)
 
@@ -832,15 +852,6 @@ Internet-Draft                  dns+cbor                       July 2025
    5.  An optional additional section (as array)
 
    As for queries, the DNS transaction ID is elided and implied to be 0.
-
-
-
-
-
-Lenders, et al.          Expires 8 January 2026                [Page 15]
-
-Internet-Draft                  dns+cbor                       July 2025
-
 
    If the CBOR array is a response to a query for which the flags
    indicate that flags are set in the response, they MUST be set
@@ -879,17 +890,6 @@ Internet-Draft                  dns+cbor                       July 2025
      ? extra-sections,
    ]
 
-                     Figure 11: DNS Response Definition
-
-4.  Compression with Packed CBOR
-
-   Packed CBOR [I-D.ietf-cbor-packed] is used for name compression in
-   application/dns+cbor.
-
-
-
-
-
 
 
 
@@ -897,6 +897,13 @@ Lenders, et al.          Expires 8 January 2026                [Page 16]
 
 Internet-Draft                  dns+cbor                       July 2025
 
+
+                     Figure 11: DNS Response Definition
+
+4.  Compression with Packed CBOR
+
+   Packed CBOR [I-D.ietf-cbor-packed] is used for name compression in
+   application/dns+cbor.
 
    If both DNS server and client support table setup tag 113 as
    described in Section 3.1 of [I-D.ietf-cbor-packed], it MAY be used
@@ -935,13 +942,6 @@ Internet-Draft                  dns+cbor                       July 2025
    "application/dns+cbor" encoder and decoder MUST support packed value
    0.
 
-4.1.1.  Example
-
-   Take the following CBOR object _o_ (note that this is *intentionally
-   not legal "application/dns+cbor"* to illustrate generality).  A more
-   DNS-specific example can be found in Appendix A.2.
-
-
 
 
 
@@ -953,6 +953,12 @@ Lenders, et al.          Expires 8 January 2026                [Page 17]
 
 Internet-Draft                  dns+cbor                       July 2025
 
+
+4.1.1.  Example
+
+   Take the following CBOR object _o_ (note that this is *intentionally
+   not legal "application/dns+cbor"* to illustrate generality).  A more
+   DNS-specific example can be found in Appendix A.2.
 
    [
      "www", "example", "org",
@@ -997,18 +1003,15 @@ Internet-Draft                  dns+cbor                       July 2025
    TBD28259 can be elided (even though the content would not be parsable
    as application/dns+cbor).
 
-   With, e.g., table setup tag 113, further packing can be achieved via
-   nesting table packing.
-
-
-
-
 
 
 Lenders, et al.          Expires 8 January 2026                [Page 18]
 
 Internet-Draft                  dns+cbor                       July 2025
 
+
+   With, e.g., table setup tag 113, further packing can be achieved via
+   nesting table packing.
 
    TBD113(
      TBD28259(
@@ -1051,9 +1054,6 @@ Internet-Draft                  dns+cbor                       July 2025
    Packed compression of queries is not specified, as apart from EDNS(0)
    (see Section 3.2.2), they only consist of one question most of the
    time, i.e., there is close to no redundancy.
-
-
-
 
 
 
@@ -1371,9 +1371,9 @@ Internet-Draft                  dns+cbor                       July 2025
    [I-D.ietf-core-dns-over-coap]
               Lenders, M. S., Amsüss, C., Gündoğan, C., Schmidt, T. C.,
               and M. Wählisch, "DNS over CoAP (DoC)", Work in Progress,
-              Internet-Draft, draft-ietf-core-dns-over-coap-15, 19 June
+              Internet-Draft, draft-ietf-core-dns-over-coap-16, 7 July
               2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
-              core-dns-over-coap-15>.
+              core-dns-over-coap-16>.
 
    [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
               "Transmission of IPv6 Packets over IEEE 802.15.4

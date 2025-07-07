@@ -1467,7 +1467,7 @@ label = tstr
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-dns-resource-records" class="section-name selfRef">DNS Resource Records</a>
         </h3>
 <p id="section-3.2-1">This document specifies the representation of both standard DNS resource records (RRs, see <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>)
-and EDNS option pseudo-RRs (see <span>[<a href="#RFC6891" class="cite xref">RFC6891</a>]</span>.<span class="cref" id="_1">Also add capability to summarize Resource Record Sets to one array, e.g. <code>["example","org",3600,1,[b'c0002563', h'c00021ab']]</code>?<span class="crefSource">—mlenders</span></span>
+and EDNS option pseudo-RRs (see <span>[<a href="#RFC6891" class="cite xref">RFC6891</a>]</span>.
 If for any reason, a resource record cannot be represented in the given formats, they can be
 represented in their binary wire-format form as a byte string.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <p id="section-3.2-2">Further special records, e.g., TSIG can be defined in follow-up specifications and are out of scope
@@ -1504,7 +1504,10 @@ $$dns-rr = rr / #6.141(opt-rr) / bstr
               <p id="section-3.2.1-2.4.1">An optional record class (as unsigned integer), and lastly<a href="#section-3.2.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-3.2.1-2.5">
-              <p id="section-3.2.1-2.5.1">A record data entry (as byte string, domain name, or array for dedicated record data representation).<a href="#section-3.2.1-2.5.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.1-2.5.1">A record data entry (as byte string, domain name, or array for dedicated record data representation) or
+a boolean (true) that indicates that the resource record is actually a resource record set with
+an array of one or more record data entries following. In the latter case, individual domain
+names need to be put into their own array.<a href="#section-3.2.1-2.5.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 <p id="section-3.2.1-3">If the first item of the resource record is a text string, it is the first label of a domain name (see <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>).
@@ -1526,9 +1529,13 @@ Future specifications can extend the definition for <code>$rdata-array</code> in
 These extensions mainly serve to expose names to name compression (see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>).
 There is an argument to be made for CBOR-structured formats of other record data representations (e.g. DNSKEY or RRSIG), but structuring such records as an array usually adds more overhead than just transferring the byte representation.
 As such, structured record data that do not contain names are always to be represented as a byte string.<a href="#section-3.2.1-7" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-8">Multiple resource records of the same type, class, and TTL can be summarized to a resource record set.
+A decoder can be notified about this, by including the boolean true value before an array of multiple record data entries of the same type.
+Note, that this adds more overhead to the message and should only really be considered, when there are
+more than two resource records of the same type, class, and TTL in the message.<a href="#section-3.2.1-8" class="pilcrow">¶</a></p>
 <span id="name-dns-standard-resource-recor"></span><div id="fig_dns-standard-rr">
 <figure id="figure-4">
-            <div class="lang-cddl sourcecode" id="section-3.2.1-8.1">
+            <div class="lang-cddl sourcecode" id="section-3.2.1-9.1">
 <pre>
 max-uint8 = 0..255
 max-uint16 = 0..65535
@@ -1541,8 +1548,15 @@ rr = [
 ]
 type-spec-rdata = (
   ? type-spec,
-  rdata: bstr // ( domain-name ),
+  rdata: bstr // ( domain-name ) // ( rdata-set ),
 )
+rdata-set = ((
+  is-rrset: true,
+  rdata-set: [ +bstr ]
+) // (
+  is-rrset: true,
+  rdata-set: [ +[ domain-name ] ],
+))
 type-spec-rdata //= ( $$structured-ts-rd )
 type-spec = (
   record-type: max-uint16,
@@ -1592,7 +1606,7 @@ type-spec = (
 $$structured-ts-rd //= (
   6,    ; record-type = SOA
   ? 1,  ; record-class = IN
-  soa,
+  ( soa // ( is-rrset: true, rdata-set: [ +soa ] ) ),
 )
 
 soa = [
@@ -1634,7 +1648,7 @@ soa = [
 $$structured-ts-rd //= (
   15,   ; record-type = MX
   ? 1,  ; record-class = IN
-  mx,
+  ( mx // ( is-rrset: true, rdata-set: [ +mx ] ) ),
 )
 
 mx = [
@@ -1681,7 +1695,7 @@ The default of 0 was picked, as this is the value domain administrators should p
 $$structured-ts-rd //= (
   33,   ; record-type = SRV
   ? 1,  ; record-class = IN
-  srv,
+  ( srv // ( is-rrset: true, rdata-set: [ +srv ] ) ),
 )
 
 srv = [
@@ -1696,6 +1710,9 @@ srv = [
 <a href="#name-srv-resource-record-data-de" class="selfRef">SRV Resource Record Data Definition</a>
               </figcaption></figure>
 </div>
+<p id="section-3.2.1.3-6">-The next element is an array of the options, which are represented two elements each, an unsigned
+-integer, the option code, followed by a byte string, the option data.
+-Multiple options alternate between unsigned integer and byte string within the array.<a href="#section-3.2.1.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="svcb-and-https-record-data">
@@ -1731,7 +1748,7 @@ If there is a domain name after the SvcPriority, the TargetName is not elided an
 $$structured-ts-rd //= (
   64 / 65,  ; record-type = SVCB or HTTPS
   ? 1,      ; record-class = IN
-  svcb,
+  ( svcb // ( is-rrset: true, rdata-set: [ +svcb ] ) ),
 )
 
 svcb = [
@@ -2428,7 +2445,7 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
 <dl class="references">
 <dt id="I-D.ietf-core-dns-over-coap">[I-D.ietf-core-dns-over-coap]</dt>
         <dd>
-<span class="refAuthor">Lenders, M. S.</span>, <span class="refAuthor">Amsüss, C.</span>, <span class="refAuthor">Gündoğan, C.</span>, <span class="refAuthor">Schmidt, T. C.</span>, and <span class="refAuthor">M. Wählisch</span>, <span class="refTitle">"DNS over CoAP (DoC)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-core-dns-over-coap-15</span>, <time datetime="2025-06-19" class="refDate">19 June 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-core-dns-over-coap-15">https://datatracker.ietf.org/doc/html/draft-ietf-core-dns-over-coap-15</a>&gt;</span>. </dd>
+<span class="refAuthor">Lenders, M. S.</span>, <span class="refAuthor">Amsüss, C.</span>, <span class="refAuthor">Gündoğan, C.</span>, <span class="refAuthor">Schmidt, T. C.</span>, and <span class="refAuthor">M. Wählisch</span>, <span class="refTitle">"DNS over CoAP (DoC)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-core-dns-over-coap-16</span>, <time datetime="2025-07-07" class="refDate">7 July 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-core-dns-over-coap-16">https://datatracker.ietf.org/doc/html/draft-ietf-core-dns-over-coap-16</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC4944">[RFC4944]</dt>
         <dd>
