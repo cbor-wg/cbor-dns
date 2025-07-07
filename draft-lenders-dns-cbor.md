@@ -1103,6 +1103,11 @@ a name overhead of 1 byte to its CBOR type header.[^10]{: mlenders}
 
 # Change Log
 
+Since [draft-lenders-dns-cbor-13]
+---------------------------------
+- Make use of splicing integration tag 1115
+    - Make domain names flat text string sequences again
+
 Since [draft-lenders-dns-cbor-12]
 ---------------------------------
 - Fix bug in packed examples
@@ -1189,6 +1194,7 @@ Since [draft-lenders-dns-cbor-00]
 - Name and Address compression utilizing CBOR-packed
 - Minor fixes to CBOR EDN and CDDL
 
+[draft-lenders-dns-cbor-13]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-13
 [draft-lenders-dns-cbor-12]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-12
 [draft-lenders-dns-cbor-11]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-11
 [draft-lenders-dns-cbor-10]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-10
