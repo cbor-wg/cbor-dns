@@ -1541,6 +1541,10 @@ max-uint8 = 0..255
 max-uint16 = 0..65535
 max-uint32 = 0..4294967295
 ttl = max-uint32
+ipv4-addr = bstr .size 4
+ipv6-addr = bstr .size 16
+$ip-addr = ipv4-addr / ipv6-addr
+
 rr = [
   ? domain-name,
   ttl: ttl,
@@ -1548,7 +1552,7 @@ rr = [
 ]
 type-spec-rdata = (
   ? type-spec,
-  rdata: bstr // ( domain-name ) // ( rdata-set ),
+  rdata: bstr // ( $ip-addr ) // ( domain-name ) // ( rdata-set ),
 )
 rdata-set = ((
   is-rrset: true,
@@ -1761,7 +1765,7 @@ svc-param-pair = (
   svc-param-key: max-uint16,
   svc-param-value: $$svc-param-value,
 )
-$$svc-param-value = bstr
+$$svc-param-value = bstr / $ip-addr
 </pre>
 </div>
 <figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
@@ -2376,7 +2380,7 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
 <dl class="references">
 <dt id="I-D.ietf-cbor-edn-literals">[I-D.ietf-cbor-edn-literals]</dt>
         <dd>
-<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Extended Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-literals-17</span>, <time datetime="2025-05-12" class="refDate">12 May 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-17">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-17</a>&gt;</span>. </dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Extended Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-literals-18</span>, <time datetime="2025-07-07" class="refDate">7 July 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-18">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-18</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-cbor-packed">[I-D.ietf-cbor-packed]</dt>
         <dd>

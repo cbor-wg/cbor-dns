@@ -406,6 +406,10 @@ Internet-Draft                  dns+cbor                       July 2025
    max-uint16 = 0..65535
    max-uint32 = 0..4294967295
    ttl = max-uint32
+   ipv4-addr = bstr .size 4
+   ipv6-addr = bstr .size 16
+   $ip-addr = ipv4-addr / ipv6-addr
+
    rr = [
      ? domain-name,
      ttl: ttl,
@@ -413,7 +417,7 @@ Internet-Draft                  dns+cbor                       July 2025
    ]
    type-spec-rdata = (
      ? type-spec,
-     rdata: bstr // ( domain-name ) // ( rdata-set ),
+     rdata: bstr // ( $ip-addr ) // ( domain-name ) // ( rdata-set ),
    )
    rdata-set = ((
      is-rrset: true,
@@ -438,10 +442,6 @@ Internet-Draft                  dns+cbor                       July 2025
 
    *  MNAME as a domain name (see Section 3.1),
 
-   *  SERIAL as an unsigned integer,
-
-   *  REFRESH as an unsigned integer,
-
 
 
 
@@ -449,6 +449,10 @@ Lenders, et al.          Expires 8 January 2026                 [Page 8]
 
 Internet-Draft                  dns+cbor                       July 2025
 
+
+   *  SERIAL as an unsigned integer,
+
+   *  REFRESH as an unsigned integer,
 
    *  RETRY as an unsigned integer,
 
@@ -492,10 +496,6 @@ Internet-Draft                  dns+cbor                       July 2025
    *  EXCHANGE as a domain name (see Section 3.1).
 
    The definition for MX record data can be seen in Figure 6.
-
-
-
-
 
 
 
@@ -641,7 +641,7 @@ Internet-Draft                  dns+cbor                       July 2025
      svc-param-key: max-uint16,
      svc-param-value: $$svc-param-value,
    )
-   $$svc-param-value = bstr
+   $$svc-param-value = bstr / $ip-addr
 
           Figure 8: SVCB and HTTPS Resource Record Data Definition
 
@@ -1275,9 +1275,9 @@ Internet-Draft                  dns+cbor                       July 2025
    [I-D.ietf-cbor-edn-literals]
               Bormann, C., "CBOR Extended Diagnostic Notation (EDN)",
               Work in Progress, Internet-Draft, draft-ietf-cbor-edn-
-              literals-17, 12 May 2025,
+              literals-18, 7 July 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-cbor-
-              edn-literals-17>.
+              edn-literals-18>.
 
 
 
