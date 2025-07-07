@@ -329,13 +329,13 @@ type-spec-rdata = (
   ? type-spec,
   rdata: bstr // ( domain-name ) // ( rdata-set ),
 )
-rdata-set = (
+rdata-set = ((
   is-rrset: true,
   rdata-set: [ +bstr ]
-) / (
+) // (
   is-rrset: true,
   rdata-set: [ +[ domain-name ] ],
-)
+))
 type-spec-rdata //= ( $$structured-ts-rd )
 type-spec = (
   record-type: max-uint16,
