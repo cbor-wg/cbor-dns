@@ -576,10 +576,9 @@ Text-String-Suffix-Sequence-Packed-CBOR = #6.28259(rump)
 For name compression, a new packing table setup tag TBD28259 ('n' and 'c' in ASCII) for Packed CBOR {{-cbor-packed}} is defined.
 It provides an implicit text string suffix sequence table for shared items _V_ which is appended to the existing table for shared items of any table setup tag within the content of tag TBD28259 (by default empty table).
 This implicit (i.e. not explicitly represented) table _V_ is constructed as follows:
-Any coherent sequence of text strings encountered within the rump of tag TBD28259, as well as any of its non-empty suffixes, are added to the table as arrays in depth-first order.
+Any coherent sequence of text strings encountered within the rump of tag TBD28259, as well as any of its non-empty suffixes, are added to the table as arrays marked with the splice integration tag 1115 (see {{-cbor-packed, Section 5.1}}) in depth-first order.
 Text string sequences within any tables for shared items or argument items within the rump MUST not be added to _V_.
-If a sequence for which an array is already in _V_ is encountered, a shared item reference _i_ to that array in V replaces this sequence.
-This shared item reference _i_ means: take the sequence from the array at _V_\[_i_\] and put it into the surrounding array in place of _i_.
+If a sequence for which an array is already in _V_ is encountered, a shared item reference _i_ is added instead, splicing the content of 1115 tag and array into the existing array (see {{-cbor-packed, Section 5.1}}).
 The resulting rump should look like referencing the _i_-th string (depth first) in the sequence.
 
 The "application/dns+cbor" media type comes with an optional parameter "packed".
@@ -605,11 +604,11 @@ This would generate the following virtual table _V_.
 
 ~~~ edn
 [
-    ["www", "example", "org"],
-    ["example", "org"],
-    ["org"],
-    ["svc", simple(0)],
-    ["org", "example", "org"]
+    1115(["www", "example", "org"]),
+    1115(["example", "org"]),
+    1115(["org"]),
+    1115(["svc", simple(0)]),
+    1115(["org", "example", "org"])
 ]
 ~~~
 {: #fig:name-compression-example-table title="Implicit table of shared items for the example."}
@@ -622,16 +621,13 @@ The packed representation of _o_ would thus be:
 TBD28259(
   [
     "www", "example", "org",
-    ["svc", simple(0) / expands to ["www", "example", "org"] /],
-    "org", simple(1) / expands to ["example", "org"] /, 42,
-    simple(3) / expands to ["svc", ["www", "example", "org"]] /, 42
+    ["svc", simple(0) / expands to "www", "example", "org" /],
+    "org", simple(1) / expands to "example", "org" /, 42,
+    simple(3) / expands to "svc", "www", "example", "org" /, 42
   ]
 )
 ~~~
 {: #fig:name-compression-example-packed title="The packed representation of the example."}
-
-Note, the shared value references expand to arrays and thus the unpacked form of {{fig:name-compression-example-packed}} is syntactically not equivalent to {{fig:name-compression-example-unpacked}}.
-However, since, e.g., the domain name `"org",["example","org"]` in its flat representation is `"org","example","org"`, they are semantically equivalent in "application/dns+cbor" (see also {{sec:domain-names}}).
 
 Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as application/dns+cbor).
 
@@ -644,11 +640,11 @@ TBD113(
       ["org", 42],
       [
         "www", "example", simple(5) / expands to "org" /,
-        ["svc", simple(0) / expands to ["www", "example", "org"] /],
+        ["svc", simple(0) / expands to "www", "example", "org" /],
         simple(5),  / expands to "org" /
-        simple(1),  / expands to ["www", "example", "org"] /
+        simple(1),  / expands to "www", "example", "org" /
         simple(6),  / expands to 42 /
-        simple(3),  / expands to ["svc", ["www", "example", "org"]] /
+        simple(3),  / expands to "svc", "www", "example", "org" /
         simple(6)   / expands to 42 /
       ]
     ]
