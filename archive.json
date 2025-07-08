@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-27T01:14:46.334174+00:00",
+  "timestamp": "2025-07-08T01:18:38.935917+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "Hello; I'm working with Tor Project on compact DNS zone files for usage in onion service descriptors. This spec caught our attention as potentially relevant. I have a question about how IPv6 addresses are represented.\n\nThe spec mentions:\n\n> Especially IPv6 addresses, e.g., in AAAA resource records can benefit from straight referencing to compress common address prefixes.\n\nHowever, this doesn't (unless I'm misreading) cover compression of individual IPv6 addresses. The example address used in the draft, `2001:db8::1`, uses 16 bytes, but it quite clearly has less entropy than this, as evidenced by the fact that its ASCII notation (certainly not optimal) is only 11 bytes long.\n\nWould there be interest in compression of IPv6 addresses? I did some experiments with real-world zone files, and found that the following algorithm worked pretty well:\n\n1. Convert IPv6 address to ASCII notation.\n2. Remove any redundant colons.\n3. Parse as base17.\n\nMaybe there's a better approach, I'm not sure. Curious what your thoughts are on whether IPv6 address compression is a reasonable thing to include within the scope of CBOR-DNS.\n\nBest regards.",
       "createdAt": "2025-04-17T16:34:16Z",
-      "updatedAt": "2025-05-25T08:27:26Z",
+      "updatedAt": "2025-07-07T20:29:51Z",
       "closedAt": null,
       "comments": [
         {
@@ -225,6 +225,13 @@
           "body": "Thanks for the analysis @miri64! Yeah this seems reasonable. Given that MAC48 is a privacy leak, and we're working with privacy-focused projects, my preference would be to not do anything in the compression that incentivizes usage of MAC48; it sounds like this matches your preference.",
           "createdAt": "2025-05-25T08:27:24Z",
           "updatedAt": "2025-05-25T08:27:24Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "#10 is now merged and will be part of -14, which allows for extensions of the IP address representation.",
+          "createdAt": "2025-07-07T20:29:29Z",
+          "updatedAt": "2025-07-07T20:29:51Z"
         }
       ]
     }
@@ -369,25 +376,35 @@
       "id": "PR_kwDOIM0M7M6BK_Fj",
       "title": "Add capability to summarize rrsets",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/6",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "miri64",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The capability to summarize resource records set was discussed in the past, but I stayed away from it so far, as it adds additional overhead. Well, we add overhead already, so lets add more overhead (but less that the overhead than duplicating TTL and type ;-)) to maybe still have it. This is my proposal to how to optionally provide summarized resource record sets.\r\n\r\nMaybe the CDDL can be streamlined, but at the moment, I don't see how.",
       "createdAt": "2024-11-07T11:05:10Z",
-      "updatedAt": "2025-04-16T07:26:36Z",
+      "updatedAt": "2025-07-07T20:08:58Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "8e7957afb85235f33056f94db03e9eae655760a1",
       "headRepository": "cbor-wg/cbor-dns",
       "headRefName": "rrsets",
-      "headRefOid": "d0705dbe935cd7d7f628218ef6a149e30aa22e39",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "5e8db6e1f7d4ec269f1dc26f758ae39a79701afc",
+      "closedAt": "2025-07-07T20:08:51Z",
+      "mergedAt": "2025-07-07T20:08:51Z",
+      "mergedBy": "miri64",
+      "mergeCommit": {
+        "oid": "a2e5700fdab8017d9be8088f57c615de8270146f"
+      },
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Maybe the CDDL can be streamlined, but at the moment, I don't see how.\r\n\r\n@cabo any idea? Currently, even the CDDL checking tool is not even able to parse this properly, the offending line is https://github.com/cbor-wg/cbor-dns/blob/d0705dbe935cd7d7f628218ef6a149e30aa22e39/draft-lenders-dns-cbor.md?plain=1#L335",
+          "createdAt": "2025-07-07T11:32:41Z",
+          "updatedAt": "2025-07-07T11:32:41Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -871,25 +888,63 @@
       "id": "PR_kwDOIM0M7M6WuEp8",
       "title": "Provide extension point for IP addresses",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/10",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "miri64",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "See #9.",
       "createdAt": "2025-05-19T12:56:38Z",
-      "updatedAt": "2025-05-20T11:52:53Z",
+      "updatedAt": "2025-07-07T20:24:07Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
-      "baseRefOid": "92e57e9e7de3dae8896a664de216ef083560779c",
+      "baseRefOid": "a2e5700fdab8017d9be8088f57c615de8270146f",
       "headRepository": "cbor-wg/cbor-dns",
       "headRefName": "ip-addr-ext-point",
-      "headRefOid": "2233bc1ded2739955c6a6fa08ae37fd28089a013",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "1628b99be3e48603d6887477e8303473f0e63e3d",
+      "closedAt": "2025-07-07T20:24:03Z",
+      "mergedAt": "2025-07-07T20:24:03Z",
+      "mergedBy": "miri64",
+      "mergeCommit": {
+        "oid": "9a14dc87693b2615888773c7b6ff57cabc48e831"
+      },
       "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOIM0M7M6dzlOt",
+      "title": "Fix CDDL for PR#6 (groups vs. types)",
+      "url": "https://github.com/cbor-wg/cbor-dns/pull/11",
+      "state": "MERGED",
+      "author": "cabo",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-07-07T18:13:25Z",
+      "updatedAt": "2025-07-07T18:24:25Z",
+      "baseRepository": "cbor-wg/cbor-dns",
+      "baseRefName": "rrsets",
+      "baseRefOid": "d0705dbe935cd7d7f628218ef6a149e30aa22e39",
+      "headRepository": "cbor-wg/cbor-dns",
+      "headRefName": "fix-cddl-6",
+      "headRefOid": "d4234648d6d3dc7466e98e832666828b4fe73b06",
+      "closedAt": "2025-07-07T18:24:25Z",
+      "mergedAt": "2025-07-07T18:24:25Z",
+      "mergedBy": "miri64",
+      "mergeCommit": {
+        "oid": "5e8db6e1f7d4ec269f1dc26f758ae39a79701afc"
+      },
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Ahh, thanks!",
+          "createdAt": "2025-07-07T18:24:15Z",
+          "updatedAt": "2025-07-07T18:24:15Z"
+        }
+      ],
       "reviews": []
     }
   ]
