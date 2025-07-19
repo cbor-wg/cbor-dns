@@ -607,6 +607,8 @@ If it is not provided, the value of it is assumed to be 0.
 With packed=0, any CBOR object `obj` marked by the "application/dns+cbor" media type MUST explicitly be understood as `TBD28259(obj)`, unless it is already `obj` itself is already tagged explicitly with TBD28259 as a whole.
 This also means, that an "application/dns+cbor" encoder and decoder MUST support packed value 0.
 
+The splice integration tag 1115 is the only integration tag in use "application/dns+cbor" for "packed=0" and "packed=1" and only within the implicit table _V_.
+
 ### Example
 
 Take the following CBOR object _o_ (note that this is **intentionally not legal "application/dns+cbor"** to illustrate generality). A more DNS-specific example can be found in {{sec:response-examples}}.
