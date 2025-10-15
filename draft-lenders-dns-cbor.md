@@ -623,6 +623,15 @@ Take the following CBOR object _o_ (note that this is **intentionally not legal 
 ~~~
 {: #fig:name-compression-example-unpacked title="Unpacked example for implicit text string suffix sequence compression."}
 
+Mind, that the binary of _o_ would actually look as follows in hexadecimal encoding
+
+~~~
+8d 63 777777 67 6578616d706c65 63 6f7267
+   84 63 737663 63 777777 67 6578616d706c65 63 6f7267
+   63 6f7267 67 6578616d706c65 63 6f7267 18 2a
+   63 737663 63 777777 67 6578616d706c65 63 6f7267 18 2a
+~~~
+
 This would generate the following virtual table _V_.
 
 ~~~ edn
@@ -652,6 +661,15 @@ TBD28259(
 ~~~
 {: #fig:name-compression-example-packed title="The packed representation of the example."}
 
+In binary the packed representation of _o_ would be:
+
+~~~
+d9 6e63 89 63 777777 67 6578616d706c65 63 6f7267
+           82 63 737663 e0
+           63 6f7267 e1 18 2a
+           e3 18 2a
+~~~
+
 Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as application/dns+cbor).
 
 With, e.g., table setup tag 113, further packing can be achieved via nesting table packing.
@@ -677,6 +695,15 @@ TBD113(
 {: #fig:name-compression-example-packed-113 title="The packed representation of the example with additional table setup."}
 
 Note, how the previous references in {{fig:name-compression-example-packed}} do not changed, as the table `["org", 42]` is appended.
+
+In binary, that example would look like the following
+
+~~~
+d8 71 d9 6e63 82 82 63 6f7267 18 2a
+                 89 63 777777 67 6578616d706c65 e5
+                    82 63 737663 e0
+                    e5 e1 e6 e3 e6
+~~~
 
 ## Further DNS Representation with tag 113
 
@@ -857,16 +884,34 @@ represented in CBOR extended diagnostic notation (EDN) (see {{Section 8 of
 [["example", "org"]]
 ~~~
 
+The binary (in hexadecimal encoding) of the query looks as follows:
+
+~~~
+81 82 67 6578616d706c65 63 6f7267
+~~~
+
 A query of an `A` record for the same name is represented as
 
 ~~~ edn
 [["example", "org", 1]]
 ~~~
 
+or in binary
+
+~~~
+81 83 67 6578616d706c65 63 6f7267 01
+~~~
+
 A query of `ANY` record for that name is represented as
 
 ~~~ edn
 [["example", "org", 255, 255]]
+~~~
+
+or in binary
+
+~~~
+81 84 67 6578616d706c65 63 6f7267 18 ff 18 ff
 ~~~
 
 ## DNS Responses {#sec:response-examples}
@@ -882,6 +927,12 @@ response to `[["example", "org"]]` could be
 [[[300, ip'2001:db8::1']]]
 ~~~
 
+or in binary
+
+~~~
+81 81 82 19 012c 50 20010db8000000000000000000000001
+~~~
+
 In this case, the name is derived from the query.
 
 If the name or the context is required, the following response would also
@@ -891,6 +942,13 @@ be valid:
 [[["example", "org", 300, ip'2001:db8::1']]]
 ~~~
 
+In binary that response looks like the following:
+
+~~~
+81 81 84 67 6578616d706c65 63 6f7267 19 012c
+         50 20010db8000000000000000000000001
+~~~
+
 If the query can not be mapped to the response for some reason, a response
 would look like:
 
@@ -898,11 +956,24 @@ would look like:
 [["example", "org"], [[300, ip'2001:db8::1']]]
 ~~~
 
+In binary that response looks like the following:
+
+~~~
+82 82 67 6578616d706c65 63 6f7267
+   81 82 19 012c 50 20010db8000000000000000000000001
+~~~
+
 To represent a minimal response of an `A` record with TTL 3600 seconds for the IPv4 address
 192.0.2.1, a minimal response to `[["example", "org", 1]]` could be
 
 ~~~ edn
 [[[300, ip'192.0.2.1']]]
+~~~
+
+or in binary
+
+~~~
+81 81 82 19 012c 44 c0000201
 ~~~
 
 Note that here also the 1 of record type `A` can be elided, as this record
@@ -980,6 +1051,23 @@ Lastly, a response to `[["example", "org", 255, 255]]` could be
     ]
   ]
 ]
+~~~
+
+or in binary
+
+~~~
+84 83 67 6578616d706c65 63 6f7267 0c
+   81 84 19 0e10 65 5f636f6170 64 5f756470 65 6c6f63616c
+   82 84 19 0e10 02 63 6e7331 e0
+      84 19 0e10 02 63 6e7332 e0
+   84 84 e2 19 0e10 18 1c
+         50 20010db8000000000000000000000001
+      84 e2 19 0e10 18 1c
+         50 20010db8000000000000000000000002
+      84 e5 19 0e10 18 1c
+         50 20010db8000000000000000000000035
+      84 e6 19 0e10 18 1c
+         50 20010db8000000000000000000003535
 ~~~
 
 This response advertises two local CoAP servers (identified by service name `_coap._udp.local`) at
