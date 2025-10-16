@@ -557,8 +557,9 @@ If the response includes only one array, then the DNS answer section represents 
 array of one or more DNS Resource Records (see {{sec:rr}}).
 
 If the response includes more than 2 arrays, the first entry may be the question section, identified
-by not being an array of arrays. If it is present, it is followed by the answer section. The
-question section is encoded as specified in {{sec:queries}}.
+by not being an array of arrays. It MUST be included, if the client requested it using the boolean
+field in the query. If it is present, it is followed by the answer section. The question section is
+encoded as specified in {{sec:queries}}.
 
 If the answer section is followed by one extra array, this array is the additional section.
 Like the answer section, the additional section is represented as an array of one or more DNS Resource Records (see {{sec:rr}}).
