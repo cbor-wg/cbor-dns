@@ -623,7 +623,7 @@ Take the following CBOR object _o_ (note that this is **intentionally not legal 
 ~~~
 {: #fig:name-compression-example-unpacked title="Unpacked example for implicit text string suffix sequence compression."}
 
-Mind, that the binary of _o_ would actually look as follows in hexadecimal encoding
+Note that the binary of _o_ would actually look as follows in hexadecimal encoding
 
 ~~~
 8d 63 777777 67 6578616d706c65 63 6f7267
