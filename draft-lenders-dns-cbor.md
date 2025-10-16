@@ -371,9 +371,6 @@ srv = [
 ]
 ~~~
 {:cddl #fig:dns-rdata-srv title="SRV Resource Record Data Definition"}
--The next element is an array of the options, which are represented two elements each, an unsigned
--integer, the option code, followed by a byte string, the option data.
--Multiple options alternate between unsigned integer and byte string within the array.
 
 #### SVCB and HTTPS Record Data
 
