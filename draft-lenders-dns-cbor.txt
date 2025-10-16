@@ -5,12 +5,12 @@
 CBOR                                                       M. S. Lenders
 Internet-Draft                                                TU Dresden
 Intended status: Standards Track                              C. Bormann
-Expires: 18 April 2026                            Universität Bremen TZI
+Expires: 19 April 2026                            Universität Bremen TZI
                                                            T. C. Schmidt
                                                              HAW Hamburg
                                                              M. Wählisch
                                         TU Dresden & Barkhausen Institut
-                                                         15 October 2025
+                                                         16 October 2025
 
 
      A Concise Binary Object Representation (CBOR) of DNS Messages
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 1]
+Lenders, et al.           Expires 19 April 2026                 [Page 1]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -63,7 +63,7 @@ Internet-Draft                  dns+cbor                    October 2025
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 April 2026.
+   This Internet-Draft will expire on 19 April 2026.
 
 Copyright Notice
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 2]
+Lenders, et al.           Expires 19 April 2026                 [Page 2]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -165,7 +165,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 3]
+Lenders, et al.           Expires 19 April 2026                 [Page 3]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -221,7 +221,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 4]
+Lenders, et al.           Expires 19 April 2026                 [Page 4]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -277,7 +277,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 5]
+Lenders, et al.           Expires 19 April 2026                 [Page 5]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -333,7 +333,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 6]
+Lenders, et al.           Expires 19 April 2026                 [Page 6]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -389,7 +389,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 7]
+Lenders, et al.           Expires 19 April 2026                 [Page 7]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -445,7 +445,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 8]
+Lenders, et al.           Expires 19 April 2026                 [Page 8]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -501,7 +501,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                 [Page 9]
+Lenders, et al.           Expires 19 April 2026                 [Page 9]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -557,7 +557,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 10]
+Lenders, et al.           Expires 19 April 2026                [Page 10]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -613,7 +613,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 11]
+Lenders, et al.           Expires 19 April 2026                [Page 11]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -669,7 +669,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 12]
+Lenders, et al.           Expires 19 April 2026                [Page 12]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -725,7 +725,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 13]
+Lenders, et al.           Expires 19 April 2026                [Page 13]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -781,7 +781,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 14]
+Lenders, et al.           Expires 19 April 2026                [Page 14]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -837,7 +837,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 15]
+Lenders, et al.           Expires 19 April 2026                [Page 15]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -893,7 +893,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 16]
+Lenders, et al.           Expires 19 April 2026                [Page 16]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -949,7 +949,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 17]
+Lenders, et al.           Expires 19 April 2026                [Page 17]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -970,7 +970,7 @@ Internet-Draft                  dns+cbor                    October 2025
     Figure 12: Unpacked example for implicit text string suffix sequence
                                 compression.
 
-   Mind, that the binary of _o_ would actually look as follows in
+   Note that the binary of _o_ would actually look as follows in
    hexadecimal encoding
 
    8d 63 777777 67 6578616d706c65 63 6f7267
@@ -1005,7 +1005,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 18]
+Lenders, et al.           Expires 19 April 2026                [Page 18]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1061,7 +1061,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 19]
+Lenders, et al.           Expires 19 April 2026                [Page 19]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1117,7 +1117,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 20]
+Lenders, et al.           Expires 19 April 2026                [Page 20]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1173,7 +1173,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 21]
+Lenders, et al.           Expires 19 April 2026                [Page 21]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1229,7 +1229,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 22]
+Lenders, et al.           Expires 19 April 2026                [Page 22]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1285,7 +1285,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 23]
+Lenders, et al.           Expires 19 April 2026                [Page 23]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1341,7 +1341,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 24]
+Lenders, et al.           Expires 19 April 2026                [Page 24]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1397,7 +1397,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 25]
+Lenders, et al.           Expires 19 April 2026                [Page 25]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1453,7 +1453,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 26]
+Lenders, et al.           Expires 19 April 2026                [Page 26]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1509,7 +1509,7 @@ A.1.  DNS Queries
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 27]
+Lenders, et al.           Expires 19 April 2026                [Page 27]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1565,7 +1565,7 @@ A.2.  DNS Responses
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 28]
+Lenders, et al.           Expires 19 April 2026                [Page 28]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1621,7 +1621,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 29]
+Lenders, et al.           Expires 19 April 2026                [Page 29]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1677,7 +1677,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 30]
+Lenders, et al.           Expires 19 April 2026                [Page 30]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1733,7 +1733,7 @@ Appendix B.  Comparison to Classic DNS Wire Format
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 31]
+Lenders, et al.           Expires 19 April 2026                [Page 31]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1789,7 +1789,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 32]
+Lenders, et al.           Expires 19 April 2026                [Page 32]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1845,7 +1845,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 33]
+Lenders, et al.           Expires 19 April 2026                [Page 33]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1901,7 +1901,7 @@ C.5.  Since draft-lenders-dns-cbor-09
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 34]
+Lenders, et al.           Expires 19 April 2026                [Page 34]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1957,7 +1957,7 @@ C.8.  Since draft-lenders-dns-cbor-06
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 35]
+Lenders, et al.           Expires 19 April 2026                [Page 35]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -2013,7 +2013,7 @@ C.13.  Since draft-lenders-dns-cbor-01
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 36]
+Lenders, et al.           Expires 19 April 2026                [Page 36]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -2069,4 +2069,4 @@ Authors' Addresses
 
 
 
-Lenders, et al.           Expires 18 April 2026                [Page 37]
+Lenders, et al.           Expires 19 April 2026                [Page 37]
