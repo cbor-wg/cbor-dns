@@ -234,17 +234,17 @@ Internet-Draft                  dns+cbor                    October 2025
 
 3.  CBOR Representations (application/dns+cbor)
 
-   DNS messages are represented as CBOR arrays to minimize overhead.
-   All CBOR items used in this specification are of definite length.
-   CBOR arrays that do not follow the length definitions of this or of
-   follow-up specifications, MUST be silently ignored.  CBOR arrays that
-   exceed the message size provided by the transport, MUST be silently
-   ignored.  It is assumed that DNS query and DNS response are
-   distinguished message types and that the query can be mapped to the
-   response by the transfer protocol of choice.  To define the
-   representation of binary objects we use the Concise Data Definition
-   Language (CDDL) [RFC8610].  For examples, we use the CBOR Extended
-   Diagnostic Notation [I-D.ietf-cbor-edn-literals].
+   DNS messages in "application/dns+cbor" are represented as CBOR arrays
+   to minimize overhead.  All CBOR items used in this specification are
+   of definite length.  CBOR arrays that do not follow the length
+   definitions of this or of follow-up specifications, MUST be silently
+   ignored.  CBOR arrays that exceed the message size provided by the
+   transport, MUST be silently ignored.  It is assumed that DNS query
+   and DNS response are distinguished message types and that the query
+   can be mapped to the response by the transfer protocol of choice.  To
+   define the representation of binary objects we use the Concise Data
+   Definition Language (CDDL) [RFC8610].  For examples, we use the CBOR
+   Extended Diagnostic Notation [I-D.ietf-cbor-edn-literals].
 
    dns-message = dns-query / dns-response
 
@@ -577,11 +577,6 @@ Internet-Draft                  dns+cbor                    October 2025
 
                Figure 7: SRV Resource Record Data Definition
 
-   -The next element is an array of the options, which are represented
-   two elements each, an unsigned -integer, the option code, followed by
-   a byte string, the option data. -Multiple options alternate between
-   unsigned integer and byte string within the array.
-
 3.2.1.4.  SVCB and HTTPS Record Data
 
    The record data of RRs with record-type = 64 (SVCB) and record-type =
@@ -610,6 +605,11 @@ Internet-Draft                  dns+cbor                    October 2025
    If there is no domain name after the SvcPriority, the TargetName is
    elided and defaults to the sequence of text strings "" (i.e. the root
    domain "." in the common name representation defined in Section 2.3.1
+   of [RFC1035], see Section 3.1) and Section 2.5 of [RFC9460].  If
+   there is a domain name after the SvcPriority, the TargetName is not
+   elided and in the domain name form specified in Section 3.1.
+
+
 
 
 
@@ -617,10 +617,6 @@ Lenders, et al.           Expires 19 April 2026                [Page 11]
 
 Internet-Draft                  dns+cbor                    October 2025
 
-
-   of [RFC1035], see Section 3.1) and Section 2.5 of [RFC9460].  If
-   there is a domain name after the SvcPriority, the TargetName is not
-   elided and in the domain name form specified in Section 3.1.
 
    The definition for SVCB and HTTPS record data can be seen in
    Figure 8.
@@ -666,6 +662,10 @@ Internet-Draft                  dns+cbor                    October 2025
    (unsigned integer) as key and the option data (byte string) as value.
    The type of option data may be extended in future specifications.
 
+   After that, up to three unsigned integers are following.  The first
+   being the extended flags as unsigned integer (implied to be 0 if
+   elided), the second the extended RCODE as an unsigned integer
+   (implied to be 0 if elided), and the third the EDNS version (implied
 
 
 
@@ -674,10 +674,6 @@ Lenders, et al.           Expires 19 April 2026                [Page 12]
 Internet-Draft                  dns+cbor                    October 2025
 
 
-   After that, up to three unsigned integers are following.  The first
-   being the extended flags as unsigned integer (implied to be 0 if
-   elided), the second the extended RCODE as an unsigned integer
-   (implied to be 0 if elided), and the third the EDNS version (implied
    to be 0 if elided).  They are dependent on each of their previous
    elements.  If the EDNS version is not elided, both extended flags and
    extended RCODE MUST not be elided.  If the RCODE is not elided the
@@ -722,6 +718,10 @@ Internet-Draft                  dns+cbor                    October 2025
 
    6.  An optional additional section (as array)
 
+   If the first item is a boolean and when true, it tells the responding
+   resolver that it MUST include the question section in its response.
+   If that boolean is not present, it is assumed to be false.
+
 
 
 
@@ -729,10 +729,6 @@ Lenders, et al.           Expires 19 April 2026                [Page 13]
 
 Internet-Draft                  dns+cbor                    October 2025
 
-
-   If the first item is a boolean and when true, it tells the responding
-   resolver that it MUST include the question section in its response.
-   If that boolean is not present, it is assumed to be false.
 
    If the first item of the query is an array, it is the question
    section, if it is an unsigned integer, it is as flag field and maps
@@ -778,6 +774,10 @@ Internet-Draft                  dns+cbor                    October 2025
    of the query as an array of DNS resource records (see Section 3.2).
    If two extra arrays are in the query, they encode, in that order, the
    authority and additional sections of the query each as an array of
+   DNS resource records (see Section 3.2).  If three extra arrays are in
+   the query, they encode, in that order, the answer section, the
+   authority, and additional sections of the query each as an array of
+   DNS resource records (see Section 3.2).
 
 
 
@@ -785,11 +785,6 @@ Lenders, et al.           Expires 19 April 2026                [Page 14]
 
 Internet-Draft                  dns+cbor                    October 2025
 
-
-   DNS resource records (see Section 3.2).  If three extra arrays are in
-   the query, they encode, in that order, the answer section, the
-   authority, and additional sections of the query each as an array of
-   DNS resource records (see Section 3.2).
 
    As such, the highest precedence in elision is given to the answer
    section, as it only occurs with mDNS to signify Known Answers
@@ -835,17 +830,17 @@ Internet-Draft                  dns+cbor                    October 2025
 
    1.  An optional flag field (as unsigned integer),
 
+   2.  An optional question section (as array, encoded as described in
+       Section 3.3)
+
+   3.  The answer section (as array),
+
 
 
 Lenders, et al.           Expires 19 April 2026                [Page 15]
 
 Internet-Draft                  dns+cbor                    October 2025
 
-
-   2.  An optional question section (as array, encoded as described in
-       Section 3.3)
-
-   3.  The answer section (as array),
 
    4.  An optional authority section (as array), and
 
@@ -864,9 +859,11 @@ Internet-Draft                  dns+cbor                    October 2025
    Section 3.2).
 
    If the response includes more than 2 arrays, the first entry may be
-   the question section, identified by not being an array of arrays.  If
-   it is present, it is followed by the answer section.  The question
-   section is encoded as specified in Section 3.3.
+   the question section, identified by not being an array of arrays.  It
+   MUST be included, if the client requested it using the boolean field
+   in the query.  If it is present, it is followed by the answer
+   section.  The question section is encoded as specified in
+   Section 3.3.
 
    If the answer section is followed by one extra array, this array is
    the additional section.  Like the answer section, the additional
@@ -890,6 +887,9 @@ Internet-Draft                  dns+cbor                    October 2025
      ? extra-sections,
    ]
 
+                     Figure 11: DNS Response Definition
+
+
 
 
 
@@ -898,12 +898,10 @@ Lenders, et al.           Expires 19 April 2026                [Page 16]
 Internet-Draft                  dns+cbor                    October 2025
 
 
-                     Figure 11: DNS Response Definition
-
 4.  Compression with Packed CBOR
 
    Packed CBOR [I-D.ietf-cbor-packed] is used for name compression in
-   application/dns+cbor.
+   "application/dns+cbor".
 
    If both DNS server and client support table setup tag 113 as
    described in Section 3.1 of [I-D.ietf-cbor-packed], it MAY be used
@@ -945,6 +943,8 @@ Internet-Draft                  dns+cbor                    October 2025
    The splice integration tag 1115 is the only integration tag in use
    "application/dns+cbor" for "packed=0" and "packed=1" and only within
    the implicit table _V_.
+
+
 
 
 
@@ -1030,7 +1030,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
    Also note, with "application/dns+cbor;packed=0" the surrounding
    TBD28259 can be elided (even though the content would not be parsable
-   as application/dns+cbor).
+   as "application/dns+cbor").
 
    With, e.g., table setup tag 113, further packing can be achieved via
    nesting table packing.
