@@ -112,10 +112,15 @@ However, this may add overhead for individual DNS messages.
 The format described in this document is a transfer format that aims to provide conciseness and compression for individual DNS messages to be sent over the network.
 This is achieved applying the following objectives:
 
-1. Encoding DNS messages in CBOR (conciseness),
-2. Omitting (redundant) fields in DNS queries and responses (conciseness),
-3. Providing easy to implement name compression that allows for on-the-fly construction of DNS queries and responses (compression), and
-4. Providing optional address and value compression in DNS responses using Packed CBOR {{-cbor-packed}} (compression).
+Conciseness:
+
+- Encoding DNS messages in CBOR and
+- Omitting (redundant) fields in DNS queries and responses.
+
+Compression:
+
+- Providing easy to implement name compression that allows for on-the-fly construction of DNS queries and responses and
+- Providing optional address and value compression in DNS responses using Packed CBOR {{-cbor-packed}}.
 
 # Terminology
 
@@ -160,8 +165,9 @@ For the purpose of this document, domain names remain case-insensitive as specif
 
 The representation of a domain name is defined in {{fig:domain-name}}.
 A label may either be encoded in ASCII-compatible encoding (ACE) {{-idna}} embedded within UTF-8 encoding of the text strings or plain UTF-8.
-It is RECOMMENDED to use the encoding with the shorter length in bytes.
-A decoder MAY identify the ACE encoding by identifying the label as a valid A-label (see {{-idna}}) and MUST assume the label to be encoded in UTF-8 otherwise.
+It is RECOMMENDED to use the encoding with the shorter length in bytes, otherwise message sizes may
+increase.
+A decoder identifies the ACE encoding by identifying the label as a valid A-label (see {{-idna}}) and MUST assume the label to be encoded in UTF-8 otherwise.
 
 This sequence of text strings is supposed to be embedded into a surrounding array, usually the query
 or resource record.
@@ -172,7 +178,7 @@ compression similar to that described in {{Section 4.1.4 of -dns}}.
 However, instead of using the byte index as reference within the message, text strings are counted,
 starting at 0, depth-first within the message.
 That number is used as index for the reference.
-Since names are the only text strings, the end of a name can be identified when the decoder cursor
+Since names are the only text strings in a CBOR-based DNS message, the end of a name can be identified when the decoder cursor
 does not point to a text string or reference to another text string anymore.
 For the reference itself, either simple values or tag 6 are used (see {{Section 2.2 of -cbor-packed}}).
 
@@ -193,11 +199,10 @@ and EDNS option pseudo-RRs (see {{-edns}}.
 If for any reason, a resource record cannot be represented in the given formats, they can be
 represented in their binary wire-format form as a byte string.
 
-Further special records, e.g., TSIG can be defined in follow-up specifications and are out of scope
-of this document.
+Further special records, e.g., TSIG {{?RFC8945}}, can be defined in follow-up specifications using the `$$structured-ts-rd`
+extension point (see {{fig:dns-standard-rr}}) and are out of scope of this document.
 
 The representation of a DNS resource records is defined in {{fig:dns-rr}}.
-
 
 ~~~ cddl
 $$dns-rr = rr / #6.141(opt-rr) / bstr
@@ -230,21 +235,19 @@ The byte string format of the record data as a byte string follows the classic D
 Note that the CBOR format does not include the RDLENGTH field from the classic format as this value is encoded in the length field of the CBOR header of the byte string.
 
 If the record data represents a domain name (e.g., for CNAME or PTR records), the record data MAY be represented as domain name as specified in {{sec:domain-names}}.
-This can save 1 byte of data, as the zero byte at the end of the name is not necessary with the CBOR format.
-Only 1 byte is required to define type and length of each text string representing a label up until a string length of 23 characters, amortizing to the same remaining length as in the name representation in the classic format.
-This way of representing the record data also means that name compression (see {{sec:name-compression}}) can also be used on it.
+This way of representing the record data means that name compression (see {{sec:name-compression}}) can also be used on it.
 
 Depending on the record type, the record data may also be expressed as an array.
 Some initial array types are specified below.
-Future specifications can extend the definition for `$rdata-array` in {{fig:dns-standard-rr}}.
-These extensions mainly serve to expose names to name compression (see {{sec:name-compression}}).
+Future specifications can extend the definition for `$$structured-ts-rd` in {{fig:dns-standard-rr}}.
+Extensions to that in this document mainly serve to expose names to name compression (see {{sec:name-compression}}).
 There is an argument to be made for CBOR-structured formats of other record data representations (e.g. DNSKEY or RRSIG), but structuring such records as an array usually adds more overhead than just transferring the byte representation.
-As such, structured record data that do not contain names are always to be represented as a byte string.
+As such, structured record data that do not contain names are to be represented as a byte string in this specification.
 
 Multiple resource records of the same type, class, and TTL can be summarized to a resource record set.
 A decoder can be notified about this, by including the boolean true value before an array of multiple record data entries of the same type.
 Note, that this adds more overhead to the message and should only really be considered, when there are
-more than two resource records of the same type, class, and TTL in the message.
+more than one resource records of the same type, class, and TTL in the message.
 
 ~~~ cddl
 max-uint8 = 0..255
@@ -293,7 +296,7 @@ The record data of RRs with `record-type` = 6 (SOA) MAY be expressed as an array
 
 MNAME and RNAME are put to the beginning and end of the array, respectively, to keep their labels apart.
 
-The definition for MX record data can be seen in {{fig:dns-rdata-soa}}.
+The definition for SOA record data can be seen in {{fig:dns-rdata-soa}}.
 
 ~~~ cddl
 $$structured-ts-rd //= (
