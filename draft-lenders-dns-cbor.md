@@ -140,7 +140,7 @@ The term "constrained networks" is used as defined in {{-constr-terms}}.
 
 # CBOR Representations (application/dns+cbor)
 
-DNS messages are represented as CBOR arrays to minimize overhead.
+DNS messages in "application/dns+cbor" are represented as CBOR arrays to minimize overhead.
 All CBOR items used in this specification are of definite length.
 CBOR arrays that do not follow the length definitions of this or of follow-up specifications, MUST be silently ignored.
 CBOR arrays that exceed the message size provided by the transport, MUST be silently ignored.
@@ -581,7 +581,7 @@ dns-response = [
 
 # Compression with Packed CBOR {#sec:cbor-packed}
 
-Packed CBOR {{-cbor-packed}} is used for name compression in application/dns+cbor.
+Packed CBOR {{-cbor-packed}} is used for name compression in "application/dns+cbor".
 
 If both DNS server and client support table setup tag 113 as described in {{Section 3.1 of -cbor-packed}}, it MAY be used for further
 compression in DNS responses.
@@ -670,7 +670,7 @@ d9 6e63 89 63 777777 67 6578616d706c65 63 6f7267
            e3 18 2a
 ~~~
 
-Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as application/dns+cbor).
+Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as "application/dns+cbor").
 
 With, e.g., table setup tag 113, further packing can be achieved via nesting table packing.
 
