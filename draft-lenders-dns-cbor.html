@@ -1364,20 +1364,24 @@ Common values such as names or addresses are collected in separate tables which 
 However, this may add overhead for individual DNS messages.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <p id="section-1-5">The format described in this document is a transfer format that aims to provide conciseness and compression for individual DNS messages to be sent over the network.
 This is achieved applying the following objectives:<a href="#section-1-5" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-6">
-<li id="section-1-6.1">
-          <p id="section-1-6.1.1">Encoding DNS messages in CBOR (conciseness),<a href="#section-1-6.1.1" class="pilcrow">¶</a></p>
+<p id="section-1-6">Conciseness:<a href="#section-1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-7.1">
+          <p id="section-1-7.1.1">Encoding DNS messages in CBOR and<a href="#section-1-7.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-1-6.2">
-          <p id="section-1-6.2.1">Omitting (redundant) fields in DNS queries and responses (conciseness),<a href="#section-1-6.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-1-7.2">
+          <p id="section-1-7.2.1">Omitting (redundant) fields in DNS queries and responses.<a href="#section-1-7.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-1-6.3">
-          <p id="section-1-6.3.1">Providing easy to implement name compression that allows for on-the-fly construction of DNS queries and responses (compression), and<a href="#section-1-6.3.1" class="pilcrow">¶</a></p>
+      </ul>
+<p id="section-1-8">Compression:<a href="#section-1-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-9.1">
+          <p id="section-1-9.1.1">Providing easy to implement name compression that allows for on-the-fly construction of DNS queries and responses and<a href="#section-1-9.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-1-6.4">
-          <p id="section-1-6.4.1">Providing optional address and value compression in DNS responses using Packed CBOR <span>[<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>]</span> (compression).<a href="#section-1-6.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-1-9.2">
+          <p id="section-1-9.2.1">Providing optional address and value compression in DNS responses using Packed CBOR <span>[<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>]</span>.<a href="#section-1-9.2.1" class="pilcrow">¶</a></p>
 </li>
-      </ol>
+      </ul>
 </section>
 </div>
 <div id="terminology">
@@ -1434,8 +1438,9 @@ The absence of any label means the name is elided.
 For the purpose of this document, domain names remain case-insensitive as specified in <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">The representation of a domain name is defined in <a href="#fig_domain-name" class="auto internal xref">Figure 2</a>.
 A label may either be encoded in ASCII-compatible encoding (ACE) <span>[<a href="#RFC5891" class="cite xref">RFC5891</a>]</span> embedded within UTF-8 encoding of the text strings or plain UTF-8.
-It is <span class="bcp14">RECOMMENDED</span> to use the encoding with the shorter length in bytes.
-A decoder <span class="bcp14">MAY</span> identify the ACE encoding by identifying the label as a valid A-label (see <span>[<a href="#RFC5891" class="cite xref">RFC5891</a>]</span>) and <span class="bcp14">MUST</span> assume the label to be encoded in UTF-8 otherwise.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+It is <span class="bcp14">RECOMMENDED</span> to use the encoding with the shorter length in bytes, otherwise message sizes may
+increase.
+A decoder identifies the ACE encoding by identifying the label as a valid A-label (see <span>[<a href="#RFC5891" class="cite xref">RFC5891</a>]</span>) and <span class="bcp14">MUST</span> assume the label to be encoded in UTF-8 otherwise.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <p id="section-3.1-3">This sequence of text strings is supposed to be embedded into a surrounding array, usually the query
 or resource record.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
 <p id="section-3.1-4">Name compression is implemented using an extension to Packed CBOR, see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>.
@@ -1444,7 +1449,7 @@ compression similar to that described in <span><a href="https://rfc-editor.org/r
 However, instead of using the byte index as reference within the message, text strings are counted,
 starting at 0, depth-first within the message.
 That number is used as index for the reference.
-Since names are the only text strings, the end of a name can be identified when the decoder cursor
+Since names are the only text strings in a CBOR-based DNS message, the end of a name can be identified when the decoder cursor
 does not point to a text string or reference to another text string anymore.
 For the reference itself, either simple values or tag 6 are used (see <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-packed-17#section-2.2" class="relref">Section 2.2</a> of [<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>]</span>).<a href="#section-3.1-4" class="pilcrow">¶</a></p>
 <span id="name-domain-name-definition"></span><div id="fig_domain-name">
@@ -1470,8 +1475,8 @@ label = tstr
 and EDNS option pseudo-RRs (see <span>[<a href="#RFC6891" class="cite xref">RFC6891</a>]</span>.
 If for any reason, a resource record cannot be represented in the given formats, they can be
 represented in their binary wire-format form as a byte string.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">Further special records, e.g., TSIG can be defined in follow-up specifications and are out of scope
-of this document.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">Further special records, e.g., TSIG <span>[<a href="#RFC8945" class="cite xref">RFC8945</a>]</span>, can be defined in follow-up specifications using the <code>$$structured-ts-rd</code>
+extension point (see <a href="#fig_dns-standard-rr" class="auto internal xref">Figure 4</a>) and are out of scope of this document.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
 <p id="section-3.2-3">The representation of a DNS resource records is defined in <a href="#fig_dns-rr" class="auto internal xref">Figure 3</a>.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
 <span id="name-dns-resource-record-definit"></span><div id="fig_dns-rr">
 <figure id="figure-3">
@@ -1520,19 +1525,17 @@ When a record class is required to be expressed, the record type <span class="bc
 <p id="section-3.2.1-5">The byte string format of the record data as a byte string follows the classic DNS format as specified in <span><a href="https://rfc-editor.org/rfc/rfc1035#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> (or other specifications of the respective record type).
 Note that the CBOR format does not include the RDLENGTH field from the classic format as this value is encoded in the length field of the CBOR header of the byte string.<a href="#section-3.2.1-5" class="pilcrow">¶</a></p>
 <p id="section-3.2.1-6">If the record data represents a domain name (e.g., for CNAME or PTR records), the record data <span class="bcp14">MAY</span> be represented as domain name as specified in <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>.
-This can save 1 byte of data, as the zero byte at the end of the name is not necessary with the CBOR format.
-Only 1 byte is required to define type and length of each text string representing a label up until a string length of 23 characters, amortizing to the same remaining length as in the name representation in the classic format.
-This way of representing the record data also means that name compression (see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>) can also be used on it.<a href="#section-3.2.1-6" class="pilcrow">¶</a></p>
+This way of representing the record data means that name compression (see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>) can also be used on it.<a href="#section-3.2.1-6" class="pilcrow">¶</a></p>
 <p id="section-3.2.1-7">Depending on the record type, the record data may also be expressed as an array.
 Some initial array types are specified below.
-Future specifications can extend the definition for <code>$rdata-array</code> in <a href="#fig_dns-standard-rr" class="auto internal xref">Figure 4</a>.
-These extensions mainly serve to expose names to name compression (see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>).
+Future specifications can extend the definition for <code>$$structured-ts-rd</code> in <a href="#fig_dns-standard-rr" class="auto internal xref">Figure 4</a>.
+Extensions to that in this document mainly serve to expose names to name compression (see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>).
 There is an argument to be made for CBOR-structured formats of other record data representations (e.g. DNSKEY or RRSIG), but structuring such records as an array usually adds more overhead than just transferring the byte representation.
-As such, structured record data that do not contain names are always to be represented as a byte string.<a href="#section-3.2.1-7" class="pilcrow">¶</a></p>
+As such, structured record data that do not contain names are to be represented as a byte string in this specification.<a href="#section-3.2.1-7" class="pilcrow">¶</a></p>
 <p id="section-3.2.1-8">Multiple resource records of the same type, class, and TTL can be summarized to a resource record set.
 A decoder can be notified about this, by including the boolean true value before an array of multiple record data entries of the same type.
 Note, that this adds more overhead to the message and should only really be considered, when there are
-more than two resource records of the same type, class, and TTL in the message.<a href="#section-3.2.1-8" class="pilcrow">¶</a></p>
+more than one resource records of the same type, class, and TTL in the message.<a href="#section-3.2.1-8" class="pilcrow">¶</a></p>
 <span id="name-dns-standard-resource-recor"></span><div id="fig_dns-standard-rr">
 <figure id="figure-4">
             <div class="lang-cddl sourcecode" id="section-3.2.1-9.1">
@@ -1602,7 +1605,7 @@ type-spec = (
 </li>
             </ul>
 <p id="section-3.2.1.1-3">MNAME and RNAME are put to the beginning and end of the array, respectively, to keep their labels apart.<a href="#section-3.2.1.1-3" class="pilcrow">¶</a></p>
-<p id="section-3.2.1.1-4">The definition for MX record data can be seen in <a href="#fig_dns-rdata-soa" class="auto internal xref">Figure 5</a>.<a href="#section-3.2.1.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.2.1.1-4">The definition for SOA record data can be seen in <a href="#fig_dns-rdata-soa" class="auto internal xref">Figure 5</a>.<a href="#section-3.2.1.1-4" class="pilcrow">¶</a></p>
 <span id="name-soa-resource-record-data-de"></span><div id="fig_dns-rdata-soa">
 <figure id="figure-5">
               <div class="lang-cddl sourcecode" id="section-3.2.1.1-5.1">
@@ -2408,7 +2411,7 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
 <dl class="references">
 <dt id="I-D.ietf-cbor-edn-literals">[I-D.ietf-cbor-edn-literals]</dt>
         <dd>
-<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Extended Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-literals-18</span>, <time datetime="2025-07-07" class="refDate">7 July 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-18">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-18</a>&gt;</span>. </dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Extended Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-literals-19</span>, <time datetime="2025-10-16" class="refDate">16 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-19">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-19</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-cbor-packed">[I-D.ietf-cbor-packed]</dt>
         <dd>
@@ -2518,6 +2521,10 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
 <dt id="RFC8824">[RFC8824]</dt>
         <dd>
 <span class="refAuthor">Minaburo, A.</span>, <span class="refAuthor">Toutain, L.</span>, and <span class="refAuthor">R. Andreasen</span>, <span class="refTitle">"Static Context Header Compression (SCHC) for the Constrained Application Protocol (CoAP)"</span>, <span class="seriesInfo">RFC 8824</span>, <span class="seriesInfo">DOI 10.17487/RFC8824</span>, <time datetime="2021-06" class="refDate">June 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8824">https://www.rfc-editor.org/rfc/rfc8824</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8945">[RFC8945]</dt>
+        <dd>
+<span class="refAuthor">Dupont, F.</span>, <span class="refAuthor">Morris, S.</span>, <span class="refAuthor">Vixie, P.</span>, <span class="refAuthor">Eastlake 3rd, D.</span>, <span class="refAuthor">Gudmundsson, O.</span>, and <span class="refAuthor">B. Wellington</span>, <span class="refTitle">"Secret Key Transaction Authentication for DNS (TSIG)"</span>, <span class="seriesInfo">STD 93</span>, <span class="seriesInfo">RFC 8945</span>, <span class="seriesInfo">DOI 10.17487/RFC8945</span>, <time datetime="2020-11" class="refDate">November 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8945">https://www.rfc-editor.org/rfc/rfc8945</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9110">[RFC9110]</dt>
         <dd>
