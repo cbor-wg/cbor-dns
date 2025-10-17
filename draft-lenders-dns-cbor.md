@@ -729,7 +729,7 @@ Otherwise, both fall back to the implicit "packed=0".
 
 ## Compression {#sec:pack-compression}
 
-The method of the compressor to construct the packing table, i.e., how the compression is applied, is out of scope of this document. Several potential compression algorithms were evaluated in \[TBD\].
+The method of the compressor to construct the packing table, i.e., how the compression is applied, is out of scope of this document.
 
 # Implementation Status
 
