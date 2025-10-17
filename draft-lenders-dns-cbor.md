@@ -710,7 +710,7 @@ d8 71 d9 6e63 82 82 63 6f7267 18 2a
 
 The representation of DNS responses with packed value 1, i.e. "application/dns+cbor;packed=1", has the same semantics as for tag TBD113
 (see {{Section 3.1 of -cbor-packed}}) with the rump being the compressed response.
-The difference to {{-cbor-packed}} is that tag TBD113 is OPTIONAL with parameter "packed=1".
+The difference to {{-cbor-packed}} is that tag TBD113 is OPTIONAL with media type parameter "packed=1".
 As such, any CBOR object `obj` marked by the "application/dns+cbor;packed=1" media type and parameter MUST explicitly be understood as `TBD113(TBD28259(obj))`, unless it is already `obj` itself is already tagged explicitly with TBD113 as a whole[^6]{: mlenders}.
 
 Packed compression of queries is not specified, as apart from EDNS(0) (see {{sec:edns}}), they only
@@ -720,7 +720,7 @@ consist of one question most of the time, i.e., there is close to no redundancy.
 
 ## Media Type Negotiation
 
-A DNS client uses the media type "application/dns+cbor;packed=1" to negotiate (see, e.g.,
+A DNS client tells a server that it would accept the media type "application/dns+cbor;packed=1" to negotiate (see, e.g.,
 {{-http-semantics}} or {{-coap, Section 5.5.4}}) with the DNS server whether the server supports setup table tag TBD113.
 If it does, it MAY request the response to be in packed value 1 (media type "application/dns+cbor;packed=1").
 The server then SHOULD reply with the response in Packed CBOR, which it also signals with media type
