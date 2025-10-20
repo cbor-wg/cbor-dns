@@ -1366,6 +1366,16 @@ a name overhead of 1 byte to its CBOR type header.[^10]{: mlenders}
 
 # Change Log
 
+Since [draft-lenders-dns-cbor-14]
+---------------------------------
+- Correction and nits
+- Explicitly state which integration tags are in use
+- Add binary examples in CBOR-pretty
+- Unify formatting for and mention explicitly application/dns+cbor from the top
+- Explicitly define behavior for query[0] = True in response text
+- Clarifications around media type parameter `packed=1`
+- Remove TBD reference (it never came to be)
+
 Since [draft-lenders-dns-cbor-13]
 ---------------------------------
 - Make use of splicing integration tag 1115
@@ -1459,6 +1469,7 @@ Since [draft-lenders-dns-cbor-00]
 - Name and Address compression utilizing CBOR-packed
 - Minor fixes to CBOR EDN and CDDL
 
+[draft-lenders-dns-cbor-14]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-14
 [draft-lenders-dns-cbor-13]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-13
 [draft-lenders-dns-cbor-12]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-12
 [draft-lenders-dns-cbor-11]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-11
