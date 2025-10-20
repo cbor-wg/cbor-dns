@@ -14,24 +14,23 @@
 the Concise Binary Object Representation  .
 The primary purpose is to keep DNS messages small in constrained networks. 
     " name="description">
-<meta content="xml2rfc 3.30.2" name="generator">
+<meta content="xml2rfc 3.31.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="CBOR" name="keyword">
 <meta content="DNS" name="keyword">
 <meta content="draft-lenders-dns-cbor-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.30.2
-    Python 3.12.11
+  xml2rfc 3.31.0
+    Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
     lxml 5.3.1
-    platformdirs 4.4.0
+    platformdirs 4.5.0
     pycountry 24.6.1
     PyYAML 6.0.2
     requests 2.32.5
-    setuptools 80.9.0
     wcwidth 0.2.14
 -->
 <link href="draft-lenders-dns-cbor.xml" rel="alternate" type="application/rfc+xml">
@@ -1055,7 +1054,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Lenders, et al.</td>
-<td class="center">Expires 20 April 2026</td>
+<td class="center">Expires 23 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1067,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-lenders-dns-cbor-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-10-17" class="published">17 October 2025</time>
+<time datetime="2025-10-20" class="published">20 October 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-20">20 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-23">23 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1137,7 +1136,7 @@ The primary purpose is to keep DNS messages small in constrained networks.<a hre
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 23 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2038,18 +2037,53 @@ This also means, that an "application/dns+cbor" encoder and decoder <span class=
 <a href="#name-unpacked-example-for-implic" class="selfRef">Unpacked example for implicit text string suffix sequence compression.</a>
             </figcaption></figure>
 </div>
-<p id="section-4.1.1-3">Note that the binary of <em>o</em> would actually look as follows in hexadecimal encoding<a href="#section-4.1.1-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.1.1-4">
+<p id="section-4.1.1-3">Note that the binary of <em>o</em> would actually look as follows in hexadecimal encoding (type and data
+noted in comment)<a href="#section-4.1.1-3" class="pilcrow">¶</a></p>
+<span id="name-binary-of-the-unpacked-exam"></span><div id="fig_name-compression-example-unpacked-binary">
+<figure id="figure-13">
+            <div class="alignLeft art-text artwork" id="section-4.1.1-4.1">
 <pre>
-8d 63 777777 67 6578616d706c65 63 6f7267
-   84 63 737663 63 777777 67 6578616d706c65 63 6f7267
-   63 6f7267 67 6578616d706c65 63 6f7267 18 2a
-   63 737663 63 777777 67 6578616d706c65 63 6f7267 18 2a
-</pre><a href="#section-4.1.1-4" class="pilcrow">¶</a>
+8d                      # array(13)
+   63                   # text(3)
+      777777            # "www"
+   67                   # text(7)
+      6578616d706c65    # "example"
+   63                   # text(3)
+      6f7267            # "org"
+   84                   # array(4)
+      63                # text(3)
+         737663         # "svc"
+      63                # text(3)
+         777777         # "www"
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+   63                   # text(3)
+      6f7267            # "org"
+   67                   # text(7)
+      6578616d706c65    # "example"
+   63                   # text(3)
+      6f7267            # "org"
+   18 2a                # unsigned(42)
+   63                   # text(3)
+      737663            # "svc"
+   63                   # text(3)
+      777777            # "www"
+   67                   # text(7)
+      6578616d706c65    # "example"
+   63                   # text(3)
+      6f7267            # "org"
+   18 2a                # unsigned(42)
+</pre>
+</div>
+<figcaption><a href="#figure-13" class="selfRef">Figure 13</a>:
+<a href="#name-binary-of-the-unpacked-exam" class="selfRef">Binary of the unpacked example for implicit text string suffix sequence compression (78 bytes).</a>
+            </figcaption></figure>
 </div>
 <p id="section-4.1.1-5">This would generate the following virtual table <em>V</em>.<a href="#section-4.1.1-5" class="pilcrow">¶</a></p>
 <span id="name-implicit-table-of-shared-it"></span><div id="fig_name-compression-example-table">
-<figure id="figure-13">
+<figure id="figure-14">
             <div class="lang-edn sourcecode" id="section-4.1.1-6.1">
 <pre>
 [
@@ -2061,14 +2095,14 @@ This also means, that an "application/dns+cbor" encoder and decoder <span class=
 ]
 </pre>
 </div>
-<figcaption><a href="#figure-13" class="selfRef">Figure 13</a>:
+<figcaption><a href="#figure-14" class="selfRef">Figure 14</a>:
 <a href="#name-implicit-table-of-shared-it" class="selfRef">Implicit table of shared items for the example.</a>
             </figcaption></figure>
 </div>
 <p id="section-4.1.1-7">Note that the sequence "org", "example", "org" is added at index 4 with leading "org", instead of referencing index 2 + index 1 (<code>simple(2), simple(1)</code>), as it is its own distinct suffix sequence.<a href="#section-4.1.1-7" class="pilcrow">¶</a></p>
 <p id="section-4.1.1-8">The packed representation of <em>o</em> would thus be:<a href="#section-4.1.1-8" class="pilcrow">¶</a></p>
 <span id="name-the-packed-representation-o"></span><div id="fig_name-compression-example-packed">
-<figure id="figure-14">
+<figure id="figure-15">
             <div class="lang-edn sourcecode" id="section-4.1.1-9.1">
 <pre>
 TBD28259(
@@ -2081,23 +2115,43 @@ TBD28259(
 )
 </pre>
 </div>
-<figcaption><a href="#figure-14" class="selfRef">Figure 14</a>:
+<figcaption><a href="#figure-15" class="selfRef">Figure 15</a>:
 <a href="#name-the-packed-representation-o" class="selfRef">The packed representation of the example.</a>
             </figcaption></figure>
 </div>
 <p id="section-4.1.1-10">In binary the packed representation of <em>o</em> would be:<a href="#section-4.1.1-10" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.1.1-11">
+<span id="name-binary-of-the-packed-repres"></span><div id="fig_name-compression-example-packed-binary">
+<figure id="figure-16">
+            <div class="alignLeft art-text artwork" id="section-4.1.1-11.1">
 <pre>
-d9 6e63 89 63 777777 67 6578616d706c65 63 6f7267
-           82 63 737663 e0
-           63 6f7267 e1 18 2a
-           e3 18 2a
-</pre><a href="#section-4.1.1-11" class="pilcrow">¶</a>
+d9 6e63                 # tag(28259)
+   89                   # array(9)
+      63                # text(3)
+         777777         # "www"
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+      82                # array(2)
+         63             # text(3)
+            737663      # "svc"
+         e0             # simple(0)
+      63                # text(3)
+         6f7267         # "org"
+      e1                # simple(1)
+      18 2a             # unsigned(42)
+      e3                # simple(3)
+      18 2a             # unsigned(42)
+</pre>
+</div>
+<figcaption><a href="#figure-16" class="selfRef">Figure 16</a>:
+<a href="#name-binary-of-the-packed-repres" class="selfRef">Binary of the packed representation of the example (36 bytes).</a>
+            </figcaption></figure>
 </div>
 <p id="section-4.1.1-12">Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as "application/dns+cbor").<a href="#section-4.1.1-12" class="pilcrow">¶</a></p>
 <p id="section-4.1.1-13">With, e.g., table setup tag 113, further packing can be achieved via nesting table packing.<a href="#section-4.1.1-13" class="pilcrow">¶</a></p>
 <span id="name-the-packed-representation-of"></span><div id="fig_name-compression-example-packed-113">
-<figure id="figure-15">
+<figure id="figure-17">
             <div class="lang-edn sourcecode" id="section-4.1.1-14.1">
 <pre>
 TBD113(
@@ -2118,19 +2172,43 @@ TBD113(
 )
 </pre>
 </div>
-<figcaption><a href="#figure-15" class="selfRef">Figure 15</a>:
+<figcaption><a href="#figure-17" class="selfRef">Figure 17</a>:
 <a href="#name-the-packed-representation-of" class="selfRef">The packed representation of the example with additional table setup.</a>
             </figcaption></figure>
 </div>
-<p id="section-4.1.1-15">Note, how the previous references in <a href="#fig_name-compression-example-packed" class="auto internal xref">Figure 14</a> do not changed, as the table <code>["org", 42]</code> is appended.<a href="#section-4.1.1-15" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-15">Note, how the previous references in <a href="#fig_name-compression-example-packed" class="auto internal xref">Figure 15</a> do not changed, as the table <code>["org", 42]</code> is appended.<a href="#section-4.1.1-15" class="pilcrow">¶</a></p>
 <p id="section-4.1.1-16">In binary, that example would look like the following<a href="#section-4.1.1-16" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.1.1-17">
+<span id="name-the-binary-of-the-packed-re"></span><div id="fig_name-compression-example-packed-113-binary">
+<figure id="figure-18">
+            <div class="alignLeft art-text artwork" id="section-4.1.1-17.1">
 <pre>
-d8 71 d9 6e63 82 82 63 6f7267 18 2a
-                 89 63 777777 67 6578616d706c65 e5
-                    82 63 737663 e0
-                    e5 e1 e6 e3 e6
-</pre><a href="#section-4.1.1-17" class="pilcrow">¶</a>
+d8 71                         # tag(113)
+   d9 6e63                    # tag(28259)
+      82                      # array(2)
+         82                   # array(2)
+            63                # text(3)
+               6f7267         # "org"
+            18 2a             # unsigned(42)
+         89                   # array(9)
+            63                # text(3)
+               777777         # "www"
+            67                # text(7)
+               6578616d706c65 # "example"
+            e5                # simple(5)
+            82                # array(2)
+               63             # text(3)
+                  737663      # "svc"
+               e0             # simple(0)
+            e5                # simple(5)
+            e1                # simple(1)
+            e6                # simple(6)
+            e3                # simple(3)
+            e6                # simple(6)
+</pre>
+</div>
+<figcaption><a href="#figure-18" class="selfRef">Figure 18</a>:
+<a href="#name-the-binary-of-the-packed-re" class="selfRef">The binary of the packed representation of the example with additional table setup (38 bytes).</a>
+            </figcaption></figure>
 </div>
 </section>
 </div>
@@ -2554,10 +2632,15 @@ represented in CBOR extended diagnostic notation (EDN) (see <span><a href="https
 [["example", "org"]]
 </pre><a href="#appendix-A.1-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.1-3">The binary (in hexadecimal encoding) of the query looks as follows:<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-3">The binary (in hexadecimal encoding) of the query looks as follows (14 bytes):<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1-4">
 <pre>
-81 82 67 6578616d706c65 63 6f7267
+81                      # array(1)
+   82                   # array(2)
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
 </pre><a href="#appendix-A.1-4" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.1-5">A query of an <code>A</code> record for the same name is represented as<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
@@ -2566,10 +2649,16 @@ represented in CBOR extended diagnostic notation (EDN) (see <span><a href="https
 [["example", "org", 1]]
 </pre><a href="#appendix-A.1-6" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.1-7">or in binary<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-7">or in binary (15 bytes)<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1-8">
 <pre>
-81 83 67 6578616d706c65 63 6f7267 01
+81                      # array(1)
+   83                   # array(3)
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+      01                # unsigned(1)
 </pre><a href="#appendix-A.1-8" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.1-9">A query of <code>ANY</code> record for that name is represented as<a href="#appendix-A.1-9" class="pilcrow">¶</a></p>
@@ -2578,10 +2667,17 @@ represented in CBOR extended diagnostic notation (EDN) (see <span><a href="https
 [["example", "org", 255, 255]]
 </pre><a href="#appendix-A.1-10" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.1-11">or in binary<a href="#appendix-A.1-11" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-11">or in binary (18 bytes)<a href="#appendix-A.1-11" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1-12">
 <pre>
-81 84 67 6578616d706c65 63 6f7267 18 ff 18 ff
+81                      # array(1)
+   84                   # array(4)
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+      18 ff             # unsigned(255)
+      18 ff             # unsigned(255)
 </pre><a href="#appendix-A.1-12" class="pilcrow">¶</a>
 </div>
 </section>
@@ -2601,10 +2697,15 @@ response to <code>[["example", "org"]]</code> could be<a href="#appendix-A.2-2" 
 [[[300, ip'2001:db8::1']]]
 </pre><a href="#appendix-A.2-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-4">or in binary<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-4">or in binary (23 bytes)<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.2-5">
 <pre>
-81 81 82 19 012c 50 20010db8000000000000000000000001
+81                                            # array(1)
+   81                                         # array(1)
+      82                                      # array(2)
+         19 012c                              # unsigned(300)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
 </pre><a href="#appendix-A.2-5" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-6">In this case, the name is derived from the query.<a href="#appendix-A.2-6" class="pilcrow">¶</a></p>
@@ -2615,11 +2716,19 @@ be valid:<a href="#appendix-A.2-7" class="pilcrow">¶</a></p>
 [[["example", "org", 300, ip'2001:db8::1']]]
 </pre><a href="#appendix-A.2-8" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-9">In binary that response looks like the following:<a href="#appendix-A.2-9" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-9">In binary that response looks like the following (35 bytes):<a href="#appendix-A.2-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.2-10">
 <pre>
-81 81 84 67 6578616d706c65 63 6f7267 19 012c
-         50 20010db8000000000000000000000001
+81                                            # array(1)
+   81                                         # array(1)
+      84                                      # array(4)
+         67                                   # text(7)
+            6578616d706c65                    # "example"
+         63                                   # text(3)
+            6f7267                            # "org"
+         19 012c                              # unsigned(300)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
 </pre><a href="#appendix-A.2-10" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-11">If the query can not be mapped to the response for some reason, a response
@@ -2629,11 +2738,20 @@ would look like:<a href="#appendix-A.2-11" class="pilcrow">¶</a></p>
 [["example", "org"], [[300, ip'2001:db8::1']]]
 </pre><a href="#appendix-A.2-12" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-13">In binary that response looks like the following:<a href="#appendix-A.2-13" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-13">In binary that response looks like the following (36 bytes):<a href="#appendix-A.2-13" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.2-14">
 <pre>
-82 82 67 6578616d706c65 63 6f7267
-   81 82 19 012c 50 20010db8000000000000000000000001
+82                                            # array(2)
+   82                                         # array(2)
+      67                                      # text(7)
+         6578616d706c65                       # "example"
+      63                                      # text(3)
+         6f7267                               # "org"
+   81                                         # array(1)
+      82                                      # array(2)
+         19 012c                              # unsigned(300)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
 </pre><a href="#appendix-A.2-14" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-15">To represent a minimal response of an <code>A</code> record with TTL 3600 seconds for the IPv4 address
@@ -2643,10 +2761,15 @@ would look like:<a href="#appendix-A.2-11" class="pilcrow">¶</a></p>
 [[[300, ip'192.0.2.1']]]
 </pre><a href="#appendix-A.2-16" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-17">or in binary<a href="#appendix-A.2-17" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-17">or in binary (11 bytes)<a href="#appendix-A.2-17" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.2-18">
 <pre>
-81 81 82 19 012c 44 c0000201
+81                   # array(1)
+   81                # array(1)
+      82             # array(2)
+         19 012c     # unsigned(300)
+         44          # bytes(4)
+            c0000201 # ip'192.0.2.1'
 </pre><a href="#appendix-A.2-18" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-19">Note that here also the 1 of record type <code>A</code> can be elided, as this record
@@ -2725,26 +2848,68 @@ type is specified in the question section.<a href="#appendix-A.2-19" class="pilc
 ]
 </pre><a href="#appendix-A.2-21" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-22">or in binary<a href="#appendix-A.2-22" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-22">or in binary (155 bytes)<a href="#appendix-A.2-22" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.2-23">
 <pre>
-84 83 67 6578616d706c65 63 6f7267 0c
-   81 84 19 0e10 65 5f636f6170 64 5f756470 65 6c6f63616c
-   82 84 19 0e10 02 63 6e7331 e0
-      84 19 0e10 02 63 6e7332 e0
-   84 84 e2 19 0e10 18 1c
-         50 20010db8000000000000000000000001
-      84 e2 19 0e10 18 1c
-         50 20010db8000000000000000000000002
-      84 e5 19 0e10 18 1c
-         50 20010db8000000000000000000000035
-      84 e6 19 0e10 18 1c
-         50 20010db8000000000000000000003535
+84                                            # array(4)
+   83                                         # array(3)
+      67                                      # text(7)
+         6578616d706c65                       # "example"
+      63                                      # text(3)
+         6f7267                               # "org"
+      0c                                      # unsigned(12)
+   81                                         # array(1)
+      84                                      # array(4)
+         19 0e10                              # unsigned(3600)
+         65                                   # text(5)
+            5f636f6170                        # "_coap"
+         64                                   # text(4)
+            5f756470                          # "_udp"
+         65                                   # text(5)
+            6c6f63616c                        # "local"
+   82                                         # array(2)
+      84                                      # array(4)
+         19 0e10                              # unsigned(3600)
+         02                                   # unsigned(2)
+         63                                   # text(3)
+            6e7331                            # "ns1"
+         e0                                   # simple(0)
+      84                                      # array(4)
+         19 0e10                              # unsigned(3600)
+         02                                   # unsigned(2)
+         63                                   # text(3)
+            6e7332                            # "ns2"
+         e0                                   # simple(0)
+   84                                         # array(4)
+      84                                      # array(4)
+         e2                                   # simple(2)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
+      84                                      # array(4)
+         e2                                   # simple(2)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000000002  # ip'2001:db8::2'
+      84                                      # array(4)
+         e5                                   # simple(5)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000000035  # ip'2001:db8::35'
+      84                                      # array(4)
+         e6                                   # simple(6)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000003535  # ip'2001:db8::3535'
 </pre><a href="#appendix-A.2-23" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-24">This response advertises two local CoAP servers (identified by service name <code>_coap._udp.local</code>) at
+<p id="appendix-A.2-24">This response advertises two local CoAP servers (identified by service name _coap._udp.local) at
 2001:db8::1 and 2001:db8::2 and two nameservers for the example.org domain, ns1.example.org at
-2001:db8::35 and ns2.example.org at 2001.db8::3535. Each of the transmitted records has a TTL of
+2001:db8::35 and ns2.example.org at 2001:db8::3535. Each of the transmitted records has a TTL of
 3600 seconds.
 Note the use of name compression (see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>) in this example.<a href="#appendix-A.2-24" class="pilcrow">¶</a></p>
 </section>

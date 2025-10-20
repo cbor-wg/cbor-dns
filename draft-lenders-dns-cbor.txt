@@ -5,12 +5,12 @@
 CBOR                                                       M. S. Lenders
 Internet-Draft                                                TU Dresden
 Intended status: Standards Track                              C. Bormann
-Expires: 20 April 2026                            Universität Bremen TZI
+Expires: 23 April 2026                            Universität Bremen TZI
                                                            T. C. Schmidt
                                                              HAW Hamburg
                                                              M. Wählisch
                                         TU Dresden & Barkhausen Institut
-                                                         17 October 2025
+                                                         20 October 2025
 
 
      A Concise Binary Object Representation (CBOR) of DNS Messages
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 1]
+Lenders, et al.           Expires 23 April 2026                 [Page 1]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -63,7 +63,7 @@ Internet-Draft                  dns+cbor                    October 2025
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 April 2026.
+   This Internet-Draft will expire on 23 April 2026.
 
 Copyright Notice
 
@@ -93,52 +93,52 @@ Table of Contents
    4.  Compression with Packed CBOR  . . . . . . . . . . . . . . . .  17
      4.1.  Name Compression  . . . . . . . . . . . . . . . . . . . .  17
        4.1.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  18
-     4.2.  Further DNS Representation with tag 113 . . . . . . . . .  20
-     4.3.  Media Type Negotiation  . . . . . . . . . . . . . . . . .  20
-     4.4.  Compression . . . . . . . . . . . . . . . . . . . . . . .  20
-   5.  Implementation Status . . . . . . . . . . . . . . . . . . . .  21
-     5.1.  Python decoder/encoder  . . . . . . . . . . . . . . . . .  21
-     5.2.  Embedded decoder/encoder  . . . . . . . . . . . . . . . .  21
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  22
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  22
-     7.1.  Media Type Registration . . . . . . . . . . . . . . . . .  22
-       7.1.1.  "application/dns+cbor"  . . . . . . . . . . . . . . .  22
-     7.2.  CoAP Content-Format Registration  . . . . . . . . . . . .  23
-       7.2.1.  "application/dns+cbor"  . . . . . . . . . . . . . . .  23
-       7.2.2.  "application/dns+cbor;packed=1" . . . . . . . . . . .  23
+     4.2.  Further DNS Representation with tag 113 . . . . . . . . .  22
+     4.3.  Media Type Negotiation  . . . . . . . . . . . . . . . . .  22
+     4.4.  Compression . . . . . . . . . . . . . . . . . . . . . . .  22
+   5.  Implementation Status . . . . . . . . . . . . . . . . . . . .  22
+     5.1.  Python decoder/encoder  . . . . . . . . . . . . . . . . .  23
+     5.2.  Embedded decoder/encoder  . . . . . . . . . . . . . . . .  23
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  24
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  24
+     7.1.  Media Type Registration . . . . . . . . . . . . . . . . .  24
+       7.1.1.  "application/dns+cbor"  . . . . . . . . . . . . . . .  24
+     7.2.  CoAP Content-Format Registration  . . . . . . . . . . . .  25
+       7.2.1.  "application/dns+cbor"  . . . . . . . . . . . . . . .  25
+       7.2.2.  "application/dns+cbor;packed=1" . . . . . . . . . . .  25
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 2]
+Lenders, et al.           Expires 23 April 2026                 [Page 2]
 
 Internet-Draft                  dns+cbor                    October 2025
 
 
-     7.3.  CBOR Tags Registry  . . . . . . . . . . . . . . . . . . .  23
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  24
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  24
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  26
-   Appendix A.  Examples . . . . . . . . . . . . . . . . . . . . . .  27
-     A.1.  DNS Queries . . . . . . . . . . . . . . . . . . . . . . .  27
-     A.2.  DNS Responses . . . . . . . . . . . . . . . . . . . . . .  28
-   Appendix B.  Comparison to Classic DNS Wire Format  . . . . . . .  31
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  34
-     C.1.  Since draft-lenders-dns-cbor-13 . . . . . . . . . . . . .  34
-     C.2.  Since draft-lenders-dns-cbor-12 . . . . . . . . . . . . .  34
-     C.3.  Since draft-lenders-dns-cbor-11 . . . . . . . . . . . . .  34
-     C.4.  Since draft-lenders-dns-cbor-10 . . . . . . . . . . . . .  34
-     C.5.  Since draft-lenders-dns-cbor-09 . . . . . . . . . . . . .  34
-     C.6.  Since draft-lenders-dns-cbor-08 . . . . . . . . . . . . .  35
-     C.7.  Since draft-lenders-dns-cbor-07 . . . . . . . . . . . . .  35
-     C.8.  Since draft-lenders-dns-cbor-06 . . . . . . . . . . . . .  35
-     C.9.  Since draft-lenders-dns-cbor-05 . . . . . . . . . . . . .  36
-     C.10. Since draft-lenders-dns-cbor-04 . . . . . . . . . . . . .  36
-     C.11. Since draft-lenders-dns-cbor-03 . . . . . . . . . . . . .  36
-     C.12. Since draft-lenders-dns-cbor-02 . . . . . . . . . . . . .  36
-     C.13. Since draft-lenders-dns-cbor-01 . . . . . . . . . . . . .  36
-     C.14. Since draft-lenders-dns-cbor-00 . . . . . . . . . . . . .  37
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  37
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  37
+     7.3.  CBOR Tags Registry  . . . . . . . . . . . . . . . . . . .  25
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  26
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  26
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  28
+   Appendix A.  Examples . . . . . . . . . . . . . . . . . . . . . .  29
+     A.1.  DNS Queries . . . . . . . . . . . . . . . . . . . . . . .  29
+     A.2.  DNS Responses . . . . . . . . . . . . . . . . . . . . . .  30
+   Appendix B.  Comparison to Classic DNS Wire Format  . . . . . . .  35
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  38
+     C.1.  Since draft-lenders-dns-cbor-13 . . . . . . . . . . . . .  38
+     C.2.  Since draft-lenders-dns-cbor-12 . . . . . . . . . . . . .  38
+     C.3.  Since draft-lenders-dns-cbor-11 . . . . . . . . . . . . .  38
+     C.4.  Since draft-lenders-dns-cbor-10 . . . . . . . . . . . . .  38
+     C.5.  Since draft-lenders-dns-cbor-09 . . . . . . . . . . . . .  38
+     C.6.  Since draft-lenders-dns-cbor-08 . . . . . . . . . . . . .  39
+     C.7.  Since draft-lenders-dns-cbor-07 . . . . . . . . . . . . .  39
+     C.8.  Since draft-lenders-dns-cbor-06 . . . . . . . . . . . . .  39
+     C.9.  Since draft-lenders-dns-cbor-05 . . . . . . . . . . . . .  40
+     C.10. Since draft-lenders-dns-cbor-04 . . . . . . . . . . . . .  40
+     C.11. Since draft-lenders-dns-cbor-03 . . . . . . . . . . . . .  40
+     C.12. Since draft-lenders-dns-cbor-02 . . . . . . . . . . . . .  40
+     C.13. Since draft-lenders-dns-cbor-01 . . . . . . . . . . . . .  40
+     C.14. Since draft-lenders-dns-cbor-00 . . . . . . . . . . . . .  41
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  41
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  41
 
 1.  Introduction
 
@@ -165,7 +165,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 3]
+Lenders, et al.           Expires 23 April 2026                 [Page 3]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -221,7 +221,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 4]
+Lenders, et al.           Expires 23 April 2026                 [Page 4]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -277,7 +277,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 5]
+Lenders, et al.           Expires 23 April 2026                 [Page 5]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -333,7 +333,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 6]
+Lenders, et al.           Expires 23 April 2026                 [Page 6]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -389,7 +389,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 7]
+Lenders, et al.           Expires 23 April 2026                 [Page 7]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -445,7 +445,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 8]
+Lenders, et al.           Expires 23 April 2026                 [Page 8]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -501,7 +501,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                 [Page 9]
+Lenders, et al.           Expires 23 April 2026                 [Page 9]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -557,7 +557,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 10]
+Lenders, et al.           Expires 23 April 2026                [Page 10]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -613,7 +613,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 11]
+Lenders, et al.           Expires 23 April 2026                [Page 11]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -669,7 +669,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 12]
+Lenders, et al.           Expires 23 April 2026                [Page 12]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -725,7 +725,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 13]
+Lenders, et al.           Expires 23 April 2026                [Page 13]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -781,7 +781,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 14]
+Lenders, et al.           Expires 23 April 2026                [Page 14]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -837,7 +837,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 15]
+Lenders, et al.           Expires 23 April 2026                [Page 15]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -893,7 +893,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 16]
+Lenders, et al.           Expires 23 April 2026                [Page 16]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -949,7 +949,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 17]
+Lenders, et al.           Expires 23 April 2026                [Page 17]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -971,12 +971,80 @@ Internet-Draft                  dns+cbor                    October 2025
                                 compression.
 
    Note that the binary of _o_ would actually look as follows in
-   hexadecimal encoding
+   hexadecimal encoding (type and data noted in comment)
 
-   8d 63 777777 67 6578616d706c65 63 6f7267
-      84 63 737663 63 777777 67 6578616d706c65 63 6f7267
-      63 6f7267 67 6578616d706c65 63 6f7267 18 2a
-      63 737663 63 777777 67 6578616d706c65 63 6f7267 18 2a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 18]
+
+Internet-Draft                  dns+cbor                    October 2025
+
+
+   8d                      # array(13)
+      63                   # text(3)
+         777777            # "www"
+      67                   # text(7)
+         6578616d706c65    # "example"
+      63                   # text(3)
+         6f7267            # "org"
+      84                   # array(4)
+         63                # text(3)
+            737663         # "svc"
+         63                # text(3)
+            777777         # "www"
+         67                # text(7)
+            6578616d706c65 # "example"
+         63                # text(3)
+            6f7267         # "org"
+      63                   # text(3)
+         6f7267            # "org"
+      67                   # text(7)
+         6578616d706c65    # "example"
+      63                   # text(3)
+         6f7267            # "org"
+      18 2a                # unsigned(42)
+      63                   # text(3)
+         737663            # "svc"
+      63                   # text(3)
+         777777            # "www"
+      67                   # text(7)
+         6578616d706c65    # "example"
+      63                   # text(3)
+         6f7267            # "org"
+      18 2a                # unsigned(42)
+
+        Figure 13: Binary of the unpacked example for implicit text
+               string suffix sequence compression (78 bytes).
 
    This would generate the following virtual table _V_.
 
@@ -988,27 +1056,21 @@ Internet-Draft                  dns+cbor                    October 2025
        1115(["org", "example", "org"])
    ]
 
-         Figure 13: Implicit table of shared items for the example.
+         Figure 14: Implicit table of shared items for the example.
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 19]
+
+Internet-Draft                  dns+cbor                    October 2025
+
 
    Note that the sequence "org", "example", "org" is added at index 4
    with leading "org", instead of referencing index 2 + index 1
    (simple(2), simple(1)), as it is its own distinct suffix sequence.
 
    The packed representation of _o_ would thus be:
-
-
-
-
-
-
-
-
-
-
-Lenders, et al.           Expires 20 April 2026                [Page 18]
-
-Internet-Draft                  dns+cbor                    October 2025
-
 
    TBD28259(
      [
@@ -1019,14 +1081,31 @@ Internet-Draft                  dns+cbor                    October 2025
      ]
    )
 
-            Figure 14: The packed representation of the example.
+            Figure 15: The packed representation of the example.
 
    In binary the packed representation of _o_ would be:
 
-   d9 6e63 89 63 777777 67 6578616d706c65 63 6f7267
-              82 63 737663 e0
-              63 6f7267 e1 18 2a
-              e3 18 2a
+   d9 6e63                 # tag(28259)
+      89                   # array(9)
+         63                # text(3)
+            777777         # "www"
+         67                # text(7)
+            6578616d706c65 # "example"
+         63                # text(3)
+            6f7267         # "org"
+         82                # array(2)
+            63             # text(3)
+               737663      # "svc"
+            e0             # simple(0)
+         63                # text(3)
+            6f7267         # "org"
+         e1                # simple(1)
+         18 2a             # unsigned(42)
+         e3                # simple(3)
+         18 2a             # unsigned(42)
+
+     Figure 16: Binary of the packed representation of the example (36
+                                  bytes).
 
    Also note, with "application/dns+cbor;packed=0" the surrounding
    TBD28259 can be elided (even though the content would not be parsable
@@ -1034,6 +1113,14 @@ Internet-Draft                  dns+cbor                    October 2025
 
    With, e.g., table setup tag 113, further packing can be achieved via
    nesting table packing.
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 20]
+
+Internet-Draft                  dns+cbor                    October 2025
+
 
    TBD113(
      TBD28259(
@@ -1052,26 +1139,47 @@ Internet-Draft                  dns+cbor                    October 2025
      )
    )
 
-          Figure 15: The packed representation of the example with
+          Figure 17: The packed representation of the example with
                           additional table setup.
 
-   Note, how the previous references in Figure 14 do not changed, as the
+   Note, how the previous references in Figure 15 do not changed, as the
    table ["org", 42] is appended.
 
+   In binary, that example would look like the following
+
+   d8 71                         # tag(113)
+      d9 6e63                    # tag(28259)
+         82                      # array(2)
+            82                   # array(2)
+               63                # text(3)
+                  6f7267         # "org"
+               18 2a             # unsigned(42)
+            89                   # array(9)
+               63                # text(3)
+                  777777         # "www"
+               67                # text(7)
+                  6578616d706c65 # "example"
+               e5                # simple(5)
+               82                # array(2)
+                  63             # text(3)
+                     737663      # "svc"
+                  e0             # simple(0)
+               e5                # simple(5)
+               e1                # simple(1)
+               e6                # simple(6)
+               e3                # simple(3)
+               e6                # simple(6)
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 19]
+
+Lenders, et al.           Expires 23 April 2026                [Page 21]
 
 Internet-Draft                  dns+cbor                    October 2025
 
 
-   In binary, that example would look like the following
-
-   d8 71 d9 6e63 82 82 63 6f7267 18 2a
-                    89 63 777777 67 6578616d706c65 e5
-                       82 63 737663 e0
-                       e5 e1 e6 e3 e6
+     Figure 18: The binary of the packed representation of the example
+                  with additional table setup (38 bytes).
 
 4.2.  Further DNS Representation with tag 113
 
@@ -1110,18 +1218,6 @@ Internet-Draft                  dns+cbor                    October 2025
    The method of the compressor to construct the packing table, i.e.,
    how the compression is applied, is out of scope of this document.
 
-
-
-
-
-
-
-
-Lenders, et al.           Expires 20 April 2026                [Page 20]
-
-Internet-Draft                  dns+cbor                    October 2025
-
-
 5.  Implementation Status
 
    This section records the status of known implementations of the
@@ -1130,6 +1226,14 @@ Internet-Draft                  dns+cbor                    October 2025
    The description of implementations in this section is intended to
    assist the IETF in its decision processes in progressing drafts to
    RFCs.  Please note that the listing of any individual implementation
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 22]
+
+Internet-Draft                  dns+cbor                    October 2025
+
+
    here does not imply endorsement by the IETF.  Furthermore, no effort
    has been spent to verify the information presented here that was
    supplied by IETF contributors.  This is not intended as, and must not
@@ -1171,18 +1275,20 @@ Internet-Draft                  dns+cbor                    October 2025
 
    Version compatibility:  draft-lenders-dns-cbor-08
 
-
-
-Lenders, et al.           Expires 20 April 2026                [Page 21]
-
-Internet-Draft                  dns+cbor                    October 2025
-
-
    License:  MIT
 
    Contact information:  Martine Lenders <martine.lenders@tu-dresden.de>
 
    Last update of this information:  October 2023
+
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 23]
+
+Internet-Draft                  dns+cbor                    October 2025
+
 
 6.  Security Considerations
 
@@ -1227,18 +1333,18 @@ Internet-Draft                  dns+cbor                    October 2025
 
       File extension(s): dnsc
 
-
-
-Lenders, et al.           Expires 20 April 2026                [Page 22]
-
-Internet-Draft                  dns+cbor                    October 2025
-
-
       Macintosh file type code(s): none
 
    Person & email address to contact for further information: IETF CBOR
    Working Group (cbor@ietf.org) or IETF Applications and Real-Time Area
    (art@ietf.org)
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 24]
+
+Internet-Draft                  dns+cbor                    October 2025
+
 
    Intended usage: COMMON
 
@@ -1285,7 +1391,13 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 23]
+
+
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 25]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1341,7 +1453,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 24]
+Lenders, et al.           Expires 23 April 2026                [Page 26]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1397,7 +1509,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 25]
+Lenders, et al.           Expires 23 April 2026                [Page 27]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1453,7 +1565,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 26]
+Lenders, et al.           Expires 23 April 2026                [Page 28]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1500,33 +1612,55 @@ A.1.  DNS Queries
 
    [["example", "org"]]
 
-   The binary (in hexadecimal encoding) of the query looks as follows:
-
-   81 82 67 6578616d706c65 63 6f7267
-
-   A query of an A record for the same name is represented as
+   The binary (in hexadecimal encoding) of the query looks as follows
+   (14 bytes):
 
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 27]
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 29]
 
 Internet-Draft                  dns+cbor                    October 2025
 
 
+   81                      # array(1)
+      82                   # array(2)
+         67                # text(7)
+            6578616d706c65 # "example"
+         63                # text(3)
+            6f7267         # "org"
+
+   A query of an A record for the same name is represented as
+
    [["example", "org", 1]]
 
-   or in binary
+   or in binary (15 bytes)
 
-   81 83 67 6578616d706c65 63 6f7267 01
+   81                      # array(1)
+      83                   # array(3)
+         67                # text(7)
+            6578616d706c65 # "example"
+         63                # text(3)
+            6f7267         # "org"
+         01                # unsigned(1)
 
    A query of ANY record for that name is represented as
 
    [["example", "org", 255, 255]]
 
-   or in binary
+   or in binary (18 bytes)
 
-   81 84 67 6578616d706c65 63 6f7267 18 ff 18 ff
+   81                      # array(1)
+      84                   # array(4)
+         67                # text(7)
+            6578616d706c65 # "example"
+         63                # text(3)
+            6f7267         # "org"
+         18 ff             # unsigned(255)
+         18 ff             # unsigned(255)
 
 A.2.  DNS Responses
 
@@ -1541,9 +1675,21 @@ A.2.  DNS Responses
 
    [[[300, ip'2001:db8::1']]]
 
-   or in binary
 
-   81 81 82 19 012c 50 20010db8000000000000000000000001
+
+Lenders, et al.           Expires 23 April 2026                [Page 30]
+
+Internet-Draft                  dns+cbor                    October 2025
+
+
+   or in binary (23 bytes)
+
+   81                                            # array(1)
+      81                                         # array(1)
+         82                                      # array(2)
+            19 012c                              # unsigned(300)
+            50                                   # bytes(16)
+               20010db8000000000000000000000001  # ip'2001:db8::1'
 
    In this case, the name is derived from the query.
 
@@ -1552,28 +1698,45 @@ A.2.  DNS Responses
 
    [[["example", "org", 300, ip'2001:db8::1']]]
 
-   In binary that response looks like the following:
+   In binary that response looks like the following (35 bytes):
 
-   81 81 84 67 6578616d706c65 63 6f7267 19 012c
-            50 20010db8000000000000000000000001
+   81                                            # array(1)
+      81                                         # array(1)
+         84                                      # array(4)
+            67                                   # text(7)
+               6578616d706c65                    # "example"
+            63                                   # text(3)
+               6f7267                            # "org"
+            19 012c                              # unsigned(300)
+            50                                   # bytes(16)
+               20010db8000000000000000000000001  # ip'2001:db8::1'
 
    If the query can not be mapped to the response for some reason, a
    response would look like:
 
    [["example", "org"], [[300, ip'2001:db8::1']]]
 
+   In binary that response looks like the following (36 bytes):
+
+   82                                            # array(2)
+      82                                         # array(2)
+         67                                      # text(7)
+            6578616d706c65                       # "example"
+         63                                      # text(3)
+            6f7267                               # "org"
+      81                                         # array(1)
+         82                                      # array(2)
+            19 012c                              # unsigned(300)
+            50                                   # bytes(16)
+               20010db8000000000000000000000001  # ip'2001:db8::1'
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 28]
+
+Lenders, et al.           Expires 23 April 2026                [Page 31]
 
 Internet-Draft                  dns+cbor                    October 2025
 
-
-   In binary that response looks like the following:
-
-   82 82 67 6578616d706c65 63 6f7267
-      81 82 19 012c 50 20010db8000000000000000000000001
 
    To represent a minimal response of an A record with TTL 3600 seconds
    for the IPv4 address 192.0.2.1, a minimal response to [["example",
@@ -1581,9 +1744,14 @@ Internet-Draft                  dns+cbor                    October 2025
 
    [[[300, ip'192.0.2.1']]]
 
-   or in binary
+   or in binary (11 bytes)
 
-   81 81 82 19 012c 44 c0000201
+   81                   # array(1)
+      81                # array(1)
+         82             # array(2)
+            19 012c     # unsigned(300)
+            44          # bytes(4)
+               c0000201 # ip'192.0.2.1'
 
    Note that here also the 1 of record type A can be elided, as this
    record type is specified in the question section.
@@ -1621,7 +1789,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 29]
+Lenders, et al.           Expires 23 April 2026                [Page 32]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1668,7 +1836,7 @@ Internet-Draft                  dns+cbor                    October 2025
      ]
    ]
 
-   or in binary
+   or in binary (155 bytes)
 
 
 
@@ -1677,28 +1845,78 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 30]
+Lenders, et al.           Expires 23 April 2026                [Page 33]
 
 Internet-Draft                  dns+cbor                    October 2025
 
 
-   84 83 67 6578616d706c65 63 6f7267 0c
-      81 84 19 0e10 65 5f636f6170 64 5f756470 65 6c6f63616c
-      82 84 19 0e10 02 63 6e7331 e0
-         84 19 0e10 02 63 6e7332 e0
-      84 84 e2 19 0e10 18 1c
-            50 20010db8000000000000000000000001
-         84 e2 19 0e10 18 1c
-            50 20010db8000000000000000000000002
-         84 e5 19 0e10 18 1c
-            50 20010db8000000000000000000000035
-         84 e6 19 0e10 18 1c
-            50 20010db8000000000000000000003535
+   84                                            # array(4)
+      83                                         # array(3)
+         67                                      # text(7)
+            6578616d706c65                       # "example"
+         63                                      # text(3)
+            6f7267                               # "org"
+         0c                                      # unsigned(12)
+      81                                         # array(1)
+         84                                      # array(4)
+            19 0e10                              # unsigned(3600)
+            65                                   # text(5)
+               5f636f6170                        # "_coap"
+            64                                   # text(4)
+               5f756470                          # "_udp"
+            65                                   # text(5)
+               6c6f63616c                        # "local"
+      82                                         # array(2)
+         84                                      # array(4)
+            19 0e10                              # unsigned(3600)
+            02                                   # unsigned(2)
+            63                                   # text(3)
+               6e7331                            # "ns1"
+            e0                                   # simple(0)
+         84                                      # array(4)
+            19 0e10                              # unsigned(3600)
+            02                                   # unsigned(2)
+            63                                   # text(3)
+               6e7332                            # "ns2"
+            e0                                   # simple(0)
+      84                                         # array(4)
+         84                                      # array(4)
+            e2                                   # simple(2)
+            19 0e10                              # unsigned(3600)
+            18 1c                                # unsigned(28)
+            50                                   # bytes(16)
+               20010db8000000000000000000000001  # ip'2001:db8::1'
+         84                                      # array(4)
+            e2                                   # simple(2)
+            19 0e10                              # unsigned(3600)
+            18 1c                                # unsigned(28)
+            50                                   # bytes(16)
+               20010db8000000000000000000000002  # ip'2001:db8::2'
+         84                                      # array(4)
+            e5                                   # simple(5)
+            19 0e10                              # unsigned(3600)
+            18 1c                                # unsigned(28)
+            50                                   # bytes(16)
+               20010db8000000000000000000000035  # ip'2001:db8::35'
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 34]
+
+Internet-Draft                  dns+cbor                    October 2025
+
+
+         84                                      # array(4)
+            e6                                   # simple(6)
+            19 0e10                              # unsigned(3600)
+            18 1c                                # unsigned(28)
+            50                                   # bytes(16)
+               20010db8000000000000000000003535  # ip'2001:db8::3535'
 
    This response advertises two local CoAP servers (identified by
    service name _coap._udp.local) at 2001:db8::1 and 2001:db8::2 and two
    nameservers for the example.org domain, ns1.example.org at
-   2001:db8::35 and ns2.example.org at 2001.db8::3535.  Each of the
+   2001:db8::35 and ns2.example.org at 2001:db8::3535.  Each of the
    transmitted records has a TTL of 3600 seconds.  Note the use of name
    compression (see Section 4.1) in this example.
 
@@ -1733,7 +1951,13 @@ Appendix B.  Comparison to Classic DNS Wire Format
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 31]
+
+
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 35]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1789,7 +2013,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 32]
+Lenders, et al.           Expires 23 April 2026                [Page 36]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1845,7 +2069,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 33]
+Lenders, et al.           Expires 23 April 2026                [Page 37]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1901,7 +2125,7 @@ C.5.  Since draft-lenders-dns-cbor-09
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 34]
+Lenders, et al.           Expires 23 April 2026                [Page 38]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -1957,7 +2181,7 @@ C.8.  Since draft-lenders-dns-cbor-06
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 35]
+Lenders, et al.           Expires 23 April 2026                [Page 39]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -2013,7 +2237,7 @@ C.13.  Since draft-lenders-dns-cbor-01
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 36]
+Lenders, et al.           Expires 23 April 2026                [Page 40]
 
 Internet-Draft                  dns+cbor                    October 2025
 
@@ -2069,4 +2293,4 @@ Authors' Addresses
 
 
 
-Lenders, et al.           Expires 20 April 2026                [Page 37]
+Lenders, et al.           Expires 23 April 2026                [Page 41]
