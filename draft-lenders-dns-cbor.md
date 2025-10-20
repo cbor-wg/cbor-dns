@@ -624,14 +624,44 @@ Take the following CBOR object _o_ (note that this is **intentionally not legal 
 ~~~
 {: #fig:name-compression-example-unpacked title="Unpacked example for implicit text string suffix sequence compression."}
 
-Note that the binary of _o_ would actually look as follows in hexadecimal encoding
+Note that the binary of _o_ would actually look as follows in hexadecimal encoding (type and data
+noted in comment)
 
 ~~~
-8d 63 777777 67 6578616d706c65 63 6f7267
-   84 63 737663 63 777777 67 6578616d706c65 63 6f7267
-   63 6f7267 67 6578616d706c65 63 6f7267 18 2a
-   63 737663 63 777777 67 6578616d706c65 63 6f7267 18 2a
+8d                      # array(13)
+   63                   # text(3)
+      777777            # "www"
+   67                   # text(7)
+      6578616d706c65    # "example"
+   63                   # text(3)
+      6f7267            # "org"
+   84                   # array(4)
+      63                # text(3)
+         737663         # "svc"
+      63                # text(3)
+         777777         # "www"
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+   63                   # text(3)
+      6f7267            # "org"
+   67                   # text(7)
+      6578616d706c65    # "example"
+   63                   # text(3)
+      6f7267            # "org"
+   18 2a                # unsigned(42)
+   63                   # text(3)
+      737663            # "svc"
+   63                   # text(3)
+      777777            # "www"
+   67                   # text(7)
+      6578616d706c65    # "example"
+   63                   # text(3)
+      6f7267            # "org"
+   18 2a                # unsigned(42)
 ~~~
+{: #fig:name-compression-example-unpacked-binary title="Binary of the unpacked example for implicit text string suffix sequence compression (78 bytes)."}
 
 This would generate the following virtual table _V_.
 
@@ -665,11 +695,26 @@ TBD28259(
 In binary the packed representation of _o_ would be:
 
 ~~~
-d9 6e63 89 63 777777 67 6578616d706c65 63 6f7267
-           82 63 737663 e0
-           63 6f7267 e1 18 2a
-           e3 18 2a
+d9 6e63                 # tag(28259)
+   89                   # array(9)
+      63                # text(3)
+         777777         # "www"
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+      82                # array(2)
+         63             # text(3)
+            737663      # "svc"
+         e0             # simple(0)
+      63                # text(3)
+         6f7267         # "org"
+      e1                # simple(1)
+      18 2a             # unsigned(42)
+      e3                # simple(3)
+      18 2a             # unsigned(42)
 ~~~
+{: #fig:name-compression-example-packed-binary title="Binary of the packed representation of the example (36 bytes)."}
 
 Also note, with "application/dns+cbor;packed=0" the surrounding TBD28259 can be elided (even though the content would not be parsable as "application/dns+cbor").
 
@@ -700,11 +745,30 @@ Note, how the previous references in {{fig:name-compression-example-packed}} do 
 In binary, that example would look like the following
 
 ~~~
-d8 71 d9 6e63 82 82 63 6f7267 18 2a
-                 89 63 777777 67 6578616d706c65 e5
-                    82 63 737663 e0
-                    e5 e1 e6 e3 e6
+d8 71                         # tag(113)
+   d9 6e63                    # tag(28259)
+      82                      # array(2)
+         82                   # array(2)
+            63                # text(3)
+               6f7267         # "org"
+            18 2a             # unsigned(42)
+         89                   # array(9)
+            63                # text(3)
+               777777         # "www"
+            67                # text(7)
+               6578616d706c65 # "example"
+            e5                # simple(5)
+            82                # array(2)
+               63             # text(3)
+                  737663      # "svc"
+               e0             # simple(0)
+            e5                # simple(5)
+            e1                # simple(1)
+            e6                # simple(6)
+            e3                # simple(3)
+            e6                # simple(6)
 ~~~
+{: #fig:name-compression-example-packed-113-binary title="The binary of the packed representation of the example with additional table setup (38 bytes)."}
 
 ## Further DNS Representation with tag 113
 
@@ -885,10 +949,15 @@ represented in CBOR extended diagnostic notation (EDN) (see {{Section 8 of
 [["example", "org"]]
 ~~~
 
-The binary (in hexadecimal encoding) of the query looks as follows:
+The binary (in hexadecimal encoding) of the query looks as follows (14 bytes):
 
 ~~~
-81 82 67 6578616d706c65 63 6f7267
+81                      # array(1)
+   82                   # array(2)
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
 ~~~
 
 A query of an `A` record for the same name is represented as
@@ -897,10 +966,16 @@ A query of an `A` record for the same name is represented as
 [["example", "org", 1]]
 ~~~
 
-or in binary
+or in binary (15 bytes)
 
 ~~~
-81 83 67 6578616d706c65 63 6f7267 01
+81                      # array(1)
+   83                   # array(3)
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+      01                # unsigned(1)
 ~~~
 
 A query of `ANY` record for that name is represented as
@@ -909,10 +984,17 @@ A query of `ANY` record for that name is represented as
 [["example", "org", 255, 255]]
 ~~~
 
-or in binary
+or in binary (18 bytes)
 
 ~~~
-81 84 67 6578616d706c65 63 6f7267 18 ff 18 ff
+81                      # array(1)
+   84                   # array(4)
+      67                # text(7)
+         6578616d706c65 # "example"
+      63                # text(3)
+         6f7267         # "org"
+      18 ff             # unsigned(255)
+      18 ff             # unsigned(255)
 ~~~
 
 ## DNS Responses {#sec:response-examples}
@@ -928,10 +1010,15 @@ response to `[["example", "org"]]` could be
 [[[300, ip'2001:db8::1']]]
 ~~~
 
-or in binary
+or in binary (23 bytes)
 
 ~~~
-81 81 82 19 012c 50 20010db8000000000000000000000001
+81                                            # array(1)
+   81                                         # array(1)
+      82                                      # array(2)
+         19 012c                              # unsigned(300)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
 ~~~
 
 In this case, the name is derived from the query.
@@ -943,11 +1030,19 @@ be valid:
 [[["example", "org", 300, ip'2001:db8::1']]]
 ~~~
 
-In binary that response looks like the following:
+In binary that response looks like the following (35 bytes):
 
 ~~~
-81 81 84 67 6578616d706c65 63 6f7267 19 012c
-         50 20010db8000000000000000000000001
+81                                            # array(1)
+   81                                         # array(1)
+      84                                      # array(4)
+         67                                   # text(7)
+            6578616d706c65                    # "example"
+         63                                   # text(3)
+            6f7267                            # "org"
+         19 012c                              # unsigned(300)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
 ~~~
 
 If the query can not be mapped to the response for some reason, a response
@@ -957,11 +1052,20 @@ would look like:
 [["example", "org"], [[300, ip'2001:db8::1']]]
 ~~~
 
-In binary that response looks like the following:
+In binary that response looks like the following (36 bytes):
 
 ~~~
-82 82 67 6578616d706c65 63 6f7267
-   81 82 19 012c 50 20010db8000000000000000000000001
+82                                            # array(2)
+   82                                         # array(2)
+      67                                      # text(7)
+         6578616d706c65                       # "example"
+      63                                      # text(3)
+         6f7267                               # "org"
+   81                                         # array(1)
+      82                                      # array(2)
+         19 012c                              # unsigned(300)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
 ~~~
 
 To represent a minimal response of an `A` record with TTL 3600 seconds for the IPv4 address
@@ -971,10 +1075,15 @@ To represent a minimal response of an `A` record with TTL 3600 seconds for the I
 [[[300, ip'192.0.2.1']]]
 ~~~
 
-or in binary
+or in binary (11 bytes)
 
 ~~~
-81 81 82 19 012c 44 c0000201
+81                   # array(1)
+   81                # array(1)
+      82             # array(2)
+         19 012c     # unsigned(300)
+         44          # bytes(4)
+            c0000201 # ip'192.0.2.1'
 ~~~
 
 Note that here also the 1 of record type `A` can be elided, as this record
@@ -1054,26 +1163,68 @@ Lastly, a response to `[["example", "org", 255, 255]]` could be
 ]
 ~~~
 
-or in binary
+or in binary (155 bytes)
 
 ~~~
-84 83 67 6578616d706c65 63 6f7267 0c
-   81 84 19 0e10 65 5f636f6170 64 5f756470 65 6c6f63616c
-   82 84 19 0e10 02 63 6e7331 e0
-      84 19 0e10 02 63 6e7332 e0
-   84 84 e2 19 0e10 18 1c
-         50 20010db8000000000000000000000001
-      84 e2 19 0e10 18 1c
-         50 20010db8000000000000000000000002
-      84 e5 19 0e10 18 1c
-         50 20010db8000000000000000000000035
-      84 e6 19 0e10 18 1c
-         50 20010db8000000000000000000003535
+84                                            # array(4)
+   83                                         # array(3)
+      67                                      # text(7)
+         6578616d706c65                       # "example"
+      63                                      # text(3)
+         6f7267                               # "org"
+      0c                                      # unsigned(12)
+   81                                         # array(1)
+      84                                      # array(4)
+         19 0e10                              # unsigned(3600)
+         65                                   # text(5)
+            5f636f6170                        # "_coap"
+         64                                   # text(4)
+            5f756470                          # "_udp"
+         65                                   # text(5)
+            6c6f63616c                        # "local"
+   82                                         # array(2)
+      84                                      # array(4)
+         19 0e10                              # unsigned(3600)
+         02                                   # unsigned(2)
+         63                                   # text(3)
+            6e7331                            # "ns1"
+         e0                                   # simple(0)
+      84                                      # array(4)
+         19 0e10                              # unsigned(3600)
+         02                                   # unsigned(2)
+         63                                   # text(3)
+            6e7332                            # "ns2"
+         e0                                   # simple(0)
+   84                                         # array(4)
+      84                                      # array(4)
+         e2                                   # simple(2)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000000001  # ip'2001:db8::1'
+      84                                      # array(4)
+         e2                                   # simple(2)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000000002  # ip'2001:db8::2'
+      84                                      # array(4)
+         e5                                   # simple(5)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000000035  # ip'2001:db8::35'
+      84                                      # array(4)
+         e6                                   # simple(6)
+         19 0e10                              # unsigned(3600)
+         18 1c                                # unsigned(28)
+         50                                   # bytes(16)
+            20010db8000000000000000000003535  # ip'2001:db8::3535'
 ~~~
 
 This response advertises two local CoAP servers (identified by service name `_coap._udp.local`) at
 2001:db8::1 and 2001:db8::2 and two nameservers for the example.org domain, ns1.example.org at
-2001:db8::35 and ns2.example.org at 2001.db8::3535. Each of the transmitted records has a TTL of
+2001:db8::35 and ns2.example.org at 2001:db8::3535. Each of the transmitted records has a TTL of
 3600 seconds.
 Note the use of name compression (see {{sec:name-compression}}) in this example.
 
