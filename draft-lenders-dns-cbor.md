@@ -1222,7 +1222,7 @@ or in binary (155 bytes)
             20010db8000000000000000000003535  # ip'2001:db8::3535'
 ~~~
 
-This response advertises two local CoAP servers (identified by service name `_coap._udp.local`) at
+This response advertises two local CoAP servers (identified by service name \_coap.\_udp.local) at
 2001:db8::1 and 2001:db8::2 and two nameservers for the example.org domain, ns1.example.org at
 2001:db8::35 and ns2.example.org at 2001:db8::3535. Each of the transmitted records has a TTL of
 3600 seconds.
