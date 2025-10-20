@@ -123,20 +123,21 @@ Internet-Draft                  dns+cbor                    October 2025
      A.2.  DNS Responses . . . . . . . . . . . . . . . . . . . . . .  30
    Appendix B.  Comparison to Classic DNS Wire Format  . . . . . . .  35
    Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  38
-     C.1.  Since draft-lenders-dns-cbor-13 . . . . . . . . . . . . .  38
-     C.2.  Since draft-lenders-dns-cbor-12 . . . . . . . . . . . . .  38
-     C.3.  Since draft-lenders-dns-cbor-11 . . . . . . . . . . . . .  38
-     C.4.  Since draft-lenders-dns-cbor-10 . . . . . . . . . . . . .  38
-     C.5.  Since draft-lenders-dns-cbor-09 . . . . . . . . . . . . .  38
-     C.6.  Since draft-lenders-dns-cbor-08 . . . . . . . . . . . . .  39
-     C.7.  Since draft-lenders-dns-cbor-07 . . . . . . . . . . . . .  39
-     C.8.  Since draft-lenders-dns-cbor-06 . . . . . . . . . . . . .  39
-     C.9.  Since draft-lenders-dns-cbor-05 . . . . . . . . . . . . .  40
-     C.10. Since draft-lenders-dns-cbor-04 . . . . . . . . . . . . .  40
-     C.11. Since draft-lenders-dns-cbor-03 . . . . . . . . . . . . .  40
-     C.12. Since draft-lenders-dns-cbor-02 . . . . . . . . . . . . .  40
-     C.13. Since draft-lenders-dns-cbor-01 . . . . . . . . . . . . .  40
-     C.14. Since draft-lenders-dns-cbor-00 . . . . . . . . . . . . .  41
+     C.1.  Since draft-lenders-dns-cbor-14 . . . . . . . . . . . . .  38
+     C.2.  Since draft-lenders-dns-cbor-13 . . . . . . . . . . . . .  38
+     C.3.  Since draft-lenders-dns-cbor-12 . . . . . . . . . . . . .  38
+     C.4.  Since draft-lenders-dns-cbor-11 . . . . . . . . . . . . .  38
+     C.5.  Since draft-lenders-dns-cbor-10 . . . . . . . . . . . . .  39
+     C.6.  Since draft-lenders-dns-cbor-09 . . . . . . . . . . . . .  39
+     C.7.  Since draft-lenders-dns-cbor-08 . . . . . . . . . . . . .  39
+     C.8.  Since draft-lenders-dns-cbor-07 . . . . . . . . . . . . .  40
+     C.9.  Since draft-lenders-dns-cbor-06 . . . . . . . . . . . . .  40
+     C.10. Since draft-lenders-dns-cbor-05 . . . . . . . . . . . . .  40
+     C.11. Since draft-lenders-dns-cbor-04 . . . . . . . . . . . . .  40
+     C.12. Since draft-lenders-dns-cbor-03 . . . . . . . . . . . . .  40
+     C.13. Since draft-lenders-dns-cbor-02 . . . . . . . . . . . . .  41
+     C.14. Since draft-lenders-dns-cbor-01 . . . . . . . . . . . . .  41
+     C.15. Since draft-lenders-dns-cbor-00 . . . . . . . . . . . . .  41
    Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  41
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  41
 
@@ -161,7 +162,6 @@ Internet-Draft                  dns+cbor                    October 2025
    DNS messages.  To use the outcome of this specification in DoH and
    DoC, this document also specifies a Media Type header for DoH and a
    Content-Format option for DoC.
-
 
 
 
@@ -2076,7 +2076,25 @@ Internet-Draft                  dns+cbor                    October 2025
 
 Appendix C.  Change Log
 
-C.1.  Since draft-lenders-dns-cbor-13
+C.1.  Since draft-lenders-dns-cbor-14
+      (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-14)
+
+   *  Correction and nits
+
+   *  Explicitly state which integration tags are in use
+
+   *  Add binary examples in CBOR-pretty
+
+   *  Unify formatting for and mention explicitly application/dns+cbor
+      from the top
+
+   *  Explicitly define behavior for query[0] = True in response text
+
+   *  Clarifications around media type parameter packed=1
+
+   *  Remove TBD reference (it never came to be)
+
+C.2.  Since draft-lenders-dns-cbor-13
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-13)
 
    *  Make use of splicing integration tag 1115
@@ -2087,14 +2105,14 @@ C.1.  Since draft-lenders-dns-cbor-13
 
    *  Provide extension point for IP addresses
 
-C.2.  Since draft-lenders-dns-cbor-12
+C.3.  Since draft-lenders-dns-cbor-12
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-12)
 
    *  Fix bug in packed examples
 
    *  Improve compression examples for clarity
 
-C.3.  Since draft-lenders-dns-cbor-11
+C.4.  Since draft-lenders-dns-cbor-11
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-11)
 
    *  Update repo links to cbor-wg org in draft
@@ -2105,9 +2123,16 @@ C.3.  Since draft-lenders-dns-cbor-11
 
    *  Remove commented-out parts
 
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 38]
+
+Internet-Draft                  dns+cbor                    October 2025
+
+
    *  Make name compression be based on Packed CBOR
 
-C.4.  Since draft-lenders-dns-cbor-10
+C.5.  Since draft-lenders-dns-cbor-10
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-10)
 
    *  Address IANA #1392416 early review
@@ -2116,19 +2141,12 @@ C.4.  Since draft-lenders-dns-cbor-10
 
    *  Update implementation status
 
-C.5.  Since draft-lenders-dns-cbor-09
+C.6.  Since draft-lenders-dns-cbor-09
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-09)
 
    *  Add recommendation on label encoding
 
    *  Provide extension points
-
-
-
-Lenders, et al.           Expires 23 April 2026                [Page 38]
-
-Internet-Draft                  dns+cbor                    October 2025
-
 
       -  Mark dns-rr specifically as extension point
 
@@ -2143,7 +2161,7 @@ Internet-Draft                  dns+cbor                    October 2025
 
    *  Fix nits and typos
 
-C.6.  Since draft-lenders-dns-cbor-08
+C.7.  Since draft-lenders-dns-cbor-08
       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-08)
 
    *  Clarify why question section was designed the way it is
@@ -2161,24 +2179,6 @@ C.6.  Since draft-lenders-dns-cbor-08
 
    *  Make EDNS options a map
 
-   *  Update examples and comparison table in appendices
-
-   *  Update implementation section
-
-C.7.  Since draft-lenders-dns-cbor-07
-      (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-07)
-
-   *  Add Appendix B with comparison to classic DNS wire format
-
-   *  "wire format" -> "classic DNS wire format"
-
-C.8.  Since draft-lenders-dns-cbor-06
-      (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-06)
-
-   *  Fixes wording and spelling mistakes
-
-
-
 
 
 Lenders, et al.           Expires 23 April 2026                [Page 39]
@@ -2186,8 +2186,24 @@ Lenders, et al.           Expires 23 April 2026                [Page 39]
 Internet-Draft                  dns+cbor                    October 2025
 
 
-C.9.  Since draft-lenders-dns-cbor-05
-      (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-05)
+   *  Update examples and comparison table in appendices
+
+   *  Update implementation section
+
+C.8.  Since draft-lenders-dns-cbor-07
+      (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-07)
+
+   *  Add Appendix B with comparison to classic DNS wire format
+
+   *  "wire format" -> "classic DNS wire format"
+
+C.9.  Since draft-lenders-dns-cbor-06
+      (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-06)
+
+   *  Fixes wording and spelling mistakes
+
+C.10.  Since draft-lenders-dns-cbor-05
+       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-05)
 
    *  Fix Section 7.2.1 title
 
@@ -2197,7 +2213,7 @@ C.9.  Since draft-lenders-dns-cbor-05
 
    *  Use canonical name for CBOR-packed
 
-C.10.  Since draft-lenders-dns-cbor-04
+C.11.  Since draft-lenders-dns-cbor-04
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-04)
 
    *  Add Implementation Status section
@@ -2206,7 +2222,7 @@ C.10.  Since draft-lenders-dns-cbor-04
 
    *  Add note on representation of more structured rdata
 
-C.11.  Since draft-lenders-dns-cbor-03
+C.12.  Since draft-lenders-dns-cbor-03
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-03)
 
    *  Provide format description for EDNS OPT Pseudo-RRs
@@ -2214,22 +2230,6 @@ C.11.  Since draft-lenders-dns-cbor-03
    *  Simplify CDDL to more idiomatic style
 
    *  Remove DNS transaction IDs
-
-C.12.  Since draft-lenders-dns-cbor-02
-       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-02)
-
-   *  Add Discussion section and note on compression
-
-C.13.  Since draft-lenders-dns-cbor-01
-       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-01)
-
-   *  Use MIME type parameter for packed instead of own MIME type
-
-   *  Update definitions to accommodate for TID and flags, as well as
-      more sections in query
-
-   *  Clarify fallback to wire-format
-
 
 
 
@@ -2242,7 +2242,22 @@ Lenders, et al.           Expires 23 April 2026                [Page 40]
 Internet-Draft                  dns+cbor                    October 2025
 
 
-C.14.  Since draft-lenders-dns-cbor-00
+C.13.  Since draft-lenders-dns-cbor-02
+       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-02)
+
+   *  Add Discussion section and note on compression
+
+C.14.  Since draft-lenders-dns-cbor-01
+       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-01)
+
+   *  Use MIME type parameter for packed instead of own MIME type
+
+   *  Update definitions to accommodate for TID and flags, as well as
+      more sections in query
+
+   *  Clarify fallback to wire-format
+
+C.15.  Since draft-lenders-dns-cbor-00
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-00)
 
    *  Add support for DNS transaction IDs
@@ -2274,6 +2289,15 @@ Authors' Addresses
    Email: cabo@tzi.org
 
 
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 41]
+
+Internet-Draft                  dns+cbor                    October 2025
+
+
    Thomas C. Schmidt
    HAW Hamburg
    Email: t.schmidt@haw-hamburg.de
@@ -2293,4 +2317,36 @@ Authors' Addresses
 
 
 
-Lenders, et al.           Expires 23 April 2026                [Page 41]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lenders, et al.           Expires 23 April 2026                [Page 42]
