@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-08T01:18:38.935917+00:00",
+  "timestamp": "2026-01-13T00:57:52.889108+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -116,9 +116,24 @@
       "labels": [],
       "body": "From today's interim:\r\n\r\n> @or13: Would be nice to see hex / EDN examples in this section: https://www.ietf.org/archive/id/draft-lenders-dns-cbor-10.html#name-dns-representation-in-cbor-",
       "createdAt": "2024-12-11T16:05:01Z",
-      "updatedAt": "2024-12-11T16:05:01Z",
+      "updatedAt": "2025-10-16T05:33:45Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Examples are, due to previous decisions made, in [Appendix A](https://www.ietf.org/archive/id/draft-lenders-dns-cbor-14.html#name-examples). There are EDN examples. So, would it suffice to just add hex dumps there as well?",
+          "createdAt": "2025-10-15T13:19:43Z",
+          "updatedAt": "2025-10-15T13:19:43Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Added binary examples in https://github.com/cbor-wg/cbor-dns/commit/39ee3f7b8b00a75e749a4afa2bd66ad2aa18e007",
+          "createdAt": "2025-10-16T05:33:44Z",
+          "updatedAt": "2025-10-16T05:33:44Z"
+        }
+      ]
     },
     {
       "number": 9,
@@ -234,6 +249,67 @@
           "updatedAt": "2025-07-07T20:29:51Z"
         }
       ]
+    },
+    {
+      "number": 12,
+      "id": "I_kwDOIM0M7M7QId38",
+      "title": "Zone files",
+      "url": "https://github.com/cbor-wg/cbor-dns/issues/12",
+      "state": "OPEN",
+      "author": "JeremyRand",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hi again. We're interested in using this spec for encoding zone files as CBOR. I am aware of C-DNS; the use cases we're working with involve heavily constrained storage and very small zone files (for some environments, we're working with a hard limit of 520 bytes per zone file). This is not far off from the network constraints that your draft is aimed to handle, and my understanding of C-DNS and its overhead is that it is not suitable for such small pieces of data (if you disagree with this assessment, please let me know; it's possible that I'm misunderstanding how C-DNS works).\n\nAs far as I can tell, it should not be very difficult to adapt your spec to handle zone files. I would expect the encoding to look very similar to an array of resource records per Sec 3.2. The main difference I see is in the eliding of resource record entries:\n\n* If the name is elided, it can't be inferred from a question since there is no question for a zone file. I would suggest inferring it from the previous resource record, as is done with standard zone files.\n* If the record type or record class is elided, same issue as above; I would suggest inferring `AAAA` and `IN` as is specified in Sec. 3.3.\n* Eliding the TTL seems useful, as is done with standard zone files; an elided TTL would be inferred to match a previously specified default.\n* I'm not certain of the optimal precedence for eliding things, but in our use cases, the TTL and class would generally be elided a lot more often than the name or the record type. Thoughts?\n* Specifying the default TTL would have to be done... somehow? I'm not sure of the best way to mimic a `$TTL` directive in CBOR. Thoughts?\n\nDo the elision thoughts above make sense? Do you see other tweaks that would be needed to support zone files? Curious what your thoughts are here.",
+      "createdAt": "2025-10-07T15:03:29Z",
+      "updatedAt": "2025-10-09T05:42:08Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "JeremyRand",
+          "authorAssociation": "NONE",
+          "body": "> I'm not certain of the optimal precedence for eliding things, but in our use cases, the TTL and class would generally be elided a lot more often than the name or the record type. Thoughts?\n\nPondering this a bit more, the name should always be unambiguous since it's a string, so no precedence rules are necessary for that. Of the other three entries, in our use cases, I'd expect the class to be elided most often, followed by the TTL, with the record type being elided least often.",
+          "createdAt": "2025-10-07T15:14:10Z",
+          "updatedAt": "2025-10-07T15:14:10Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Not 100% clear, if you mean to provide an alternative route for zone files or want to also change the format for the sent data. In my response, I assume the latter.\n  \n> * If the name is elided, it can't be inferred from a question since there is no question for a zone file. I would suggest inferring it from the previous resource record, as is done with standard zone files.\n\nNot sure this is desirable for sent responses.\n\n> * If the record type or record class is elided, same issue as above; I would suggest inferring `AAAA` and `IN` as is specified in Sec. 3.3.\n\nNeed to think about this some more. Having the elision based on the question makes any RR response smaller (which in general is desirable) while focusing on `AAAA` and `IN` only only provides this advantage only for those records (which by their nature are already quite small and might get also other advantages, see #9).\n\n> * Eliding the TTL seems useful, as is done with standard zone files; an elided TTL would be inferred to match a previously specified default.\n> * I'm not certain of the optimal precedence for eliding things, but in our use cases, the TTL and class would generally be elided a lot more often than the name or the record type. Thoughts?\n> * Specifying the default TTL would have to be done... somehow? I'm not sure of the best way to mimic a $TTL directive in CBOR. Thoughts?\n> [...]\n> Pondering this a bit more, the name should always be unambiguous since it's a string, so no precedence rules are necessary for that. Of the other three entries, in our use cases, I'd expect the class to be elided most often, followed by the TTL, with the record type being elided least often.\n\nThat only seems sensible for zone files to me. Have you looked into storing the zone files using packed in general? This would basically allow for a compression of the TTL and define a \u201edefault\u201c in the packing table.\n\nIn any case, there was some desire to integrate zone files into the format in the past by @TheEnbyperor. Are you both, @JeremyRand and @TheEnbyperor, present in Montreal? Maybe we can discuss this there.",
+          "createdAt": "2025-10-08T15:17:26Z",
+          "updatedAt": "2025-10-08T15:17:48Z"
+        },
+        {
+          "author": "JeremyRand",
+          "authorAssociation": "NONE",
+          "body": "> Not 100% clear, if you mean to provide an alternative route for zone files or want to also change the format for the sent data. In my response, I assume the latter.\n\nSorry for the confusion, I meant the former, i.e. a different set of elision rules depending on whether the resource records are in the context of a zone file or a sent response.\n\n> In any case, there was some desire to integrate zone files into the format in the past by [@TheEnbyperor](https://github.com/TheEnbyperor). Are you both, [@JeremyRand](https://github.com/JeremyRand) and [@TheEnbyperor](https://github.com/TheEnbyperor), present in Montreal? Maybe we can discuss this there.\n\n@TheEnbyperor and I are colleagues. I'm not able to be in Montreal unfortunately (not sure about Q). If you might be at 39C3 (and if waiting until December is suitable), I'd be happy to meet up there (I think Q will be there too).",
+          "createdAt": "2025-10-08T20:09:39Z",
+          "updatedAt": "2025-10-08T20:09:39Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> If you might be at 39C3 (and if waiting until December is suitable), I'd be happy to meet up there (I think Q will be there too).\n\nI'm planning to, but as always one can only really say \u201dyes, I will be there\u201c if you have the ticket in your hand :grin:. Then let's try to meet up there.",
+          "createdAt": "2025-10-09T05:42:08Z",
+          "updatedAt": "2025-10-09T05:42:08Z"
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "id": "I_kwDOIM0M7M7dtFED",
+      "title": "Change nesting of 113 and TBD28259 to avoid need of tag content equivalence",
+      "url": "https://github.com/cbor-wg/cbor-dns/issues/13",
+      "state": "OPEN",
+      "author": "mguetschow",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Figure 17 currently reads\n\n```\n   TBD113(\n     TBD28259(\n       [\n         [\"org\", 42],\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       ]\n     )\n   )\n```\n\nI think it should rather be\n\n```\n   TBD113(\n     [\n       [\"org\", 42],\n       TBD28259(\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       )\n     ]\n   )\n```\n\nThis would avoid the need for defining [tag equivalence](https://www.ietf.org/archive/id/draft-ietf-cbor-packed-17.html#name-tag-equivalence) of TBD28259 (in some circumstances) with the 2-element array expected by 113, or a change to the semantics of 113.\n\nThe overall number of bytes is unchanged, but some explanatory wording is needed, especially when TBD28259 is implicitly injected by the media type (\"as enclosing the rump of the outer-most item which should be tag 113\").",
+      "createdAt": "2025-12-11T14:14:35Z",
+      "updatedAt": "2025-12-11T14:15:04Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
