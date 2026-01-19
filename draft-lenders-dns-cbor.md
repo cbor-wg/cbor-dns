@@ -63,6 +63,7 @@ normative:
   RFC9460: svcb
   I-D.ietf-cbor-packed: cbor-packed
   I-D.ietf-cbor-edn-literals: edn
+  I-D.ietf-cbor-edn-e-ref: edn-e-ref
   IANA.cbor-tags: tags
 
 informative:
@@ -122,7 +123,7 @@ Compression:
 - Providing easy to implement name compression that allows for on-the-fly construction of DNS queries and responses and
 - Providing optional address and value compression in DNS responses using Packed CBOR {{-cbor-packed}}.
 
-# Terminology
+# Terminology and Conventions
 
 CBOR types (unsigned integer, byte string, text string, arrays, etc.) are used as defined in
 {{-cbor}}.
@@ -138,6 +139,9 @@ The term "constrained networks" is used as defined in {{-constr-terms}}.
 
 {::boilerplate bcp14-tagged}
 
+To define the representation of binary objects we use the Concise Data Definition Language (CDDL) {{-cddl}}.
+For examples, we use the CBOR Extended Diagnostic Notation {{-edn}} with the `e''` application extension {{-edn-e-ref}}.
+
 # CBOR Representations (application/dns+cbor)
 
 DNS messages in "application/dns+cbor" are represented as CBOR arrays to minimize overhead.
@@ -145,8 +149,6 @@ All CBOR items used in this specification are of definite length.
 CBOR arrays that do not follow the length definitions of this or of follow-up specifications, MUST be silently ignored.
 CBOR arrays that exceed the message size provided by the transport, MUST be silently ignored.
 It is assumed that DNS query and DNS response are distinguished message types and that the query can be mapped to the response by the transfer protocol of choice.
-To define the representation of binary objects we use the Concise Data Definition Language (CDDL) {{-cddl}}.
-For examples, we use the CBOR Extended Diagnostic Notation {{-edn}}.
 
 ~~~ cddl
 dns-message = dns-query / dns-response
@@ -935,15 +937,35 @@ IANA is requested to allocate the tags defined in {{tab-tag-values}}.
 | TBD28259 | any       | Packed CBOR; implicit text string suffix sequence shared-item table  | draft-lenders-dns-cbor |
 {: #tab-tag-values cols='r l l' title="Values for Tag Numbers"}
 
---- back
-
 # Examples
+
+## CDDL model for `e''` application extension
+
+{{fig:e-cddl-model}} shows the CDDL model used for the `e''` application extension (see
+{{-edn-e-ref}}) in our examples.
+`C-` contants define DNS classes as unsigned integers from the "DNS CLASSes" sub-registry of the
+IANA "Domain Name System (DNS) Parameters" registry.
+`RR-` constants define resource record types from the "Resource Record (RR) TYPEs" sub-registry of
+the IANA "Domain Name System (DNS) Parameters" registry.
+
+~~~ cddl
+C-IN = 1
+C-ANY = 255
+
+RR-A = 1
+RR-NS = 2
+RR-CNAME = 5
+RR-PTR = 12
+RR-AAAA = 28
+RR-ANY = 255
+~~~
+{: #fig:e-cddl-model title="CDDL model defining constants for this document for e''."}
 
 ## DNS Queries {#sec:query-examples}
 
 A DNS query of the record `AAAA` in class `IN` for name "example.org" is
-represented in CBOR extended diagnostic notation (EDN) (see {{Section 8 of
--cbor}} and {{Appendix G of -cddl}}) as follows:
+represented in CBOR extended diagnostic notation (EDN) {{-edn}} with `e''`
+application extension {{-edn-e-ref}} as follows:
 
 ~~~ edn
 [["example", "org"]]
@@ -963,7 +985,7 @@ The binary (in hexadecimal encoding) of the query looks as follows (14 bytes):
 A query of an `A` record for the same name is represented as
 
 ~~~ edn
-[["example", "org", 1]]
+[["example", "org", e'RR-A']]
 ~~~
 
 or in binary (15 bytes)
@@ -975,13 +997,13 @@ or in binary (15 bytes)
          6578616d706c65 # "example"
       63                # text(3)
          6f7267         # "org"
-      01                # unsigned(1)
+      01                # e'RR-A' (unsigned(1))
 ~~~
 
 A query of `ANY` record for that name is represented as
 
 ~~~ edn
-[["example", "org", 255, 255]]
+[["example", "org", e'RR-ANY', e'C-ANY']]
 ~~~
 
 or in binary (18 bytes)
@@ -993,14 +1015,15 @@ or in binary (18 bytes)
          6578616d706c65 # "example"
       63                # text(3)
          6f7267         # "org"
-      18 ff             # unsigned(255)
-      18 ff             # unsigned(255)
+      18 ff             # e'RR-ANY' (unsigned(255))
+      18 ff             # e'RR-ANY' (unsigned(255))
 ~~~
 
 ## DNS Responses {#sec:response-examples}
 
 The responses to the examples provided in {{sec:query-examples}} are shown
-below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}}),
+below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}})
+with `e''` application extension {{-edn-e-ref}},
 most notably the "ip" extension to represent binary IP addresses as a IP address app-string literal.
 
 To represent an `AAAA` record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
@@ -1089,7 +1112,7 @@ or in binary (11 bytes)
 Note that here also the 1 of record type `A` can be elided, as this record
 type is specified in the question section.
 
-Lastly, a response to `[["example", "org", 255, 255]]` could be
+Lastly, a response to `[["example", "org", e'RR-ANY', e'C-ANY']]` could be
 
 ~~~ edn
 [
@@ -1099,7 +1122,7 @@ Lastly, a response to `[["example", "org", 255, 255]]` could be
     "example",
     # appends 1 => ["org"] to virtual packing table
     "org",
-    12
+    e'RR-PTR'
   ],
   # Answer section:
   [[
@@ -1120,7 +1143,7 @@ Lastly, a response to `[["example", "org", 255, 255]]` could be
       # NS (2) for "example.org"
       # (name elided since its the same as in question)
       # is "ns1.example.org" with TTL 3600
-      3600, 2,
+      3600, e'RR-NS',
       # appends 5 => ["ns1", simple(0)] to virtual packing table
       "ns1", simple(0)  # expands to ["example", "org"]
     ],
@@ -1128,7 +1151,7 @@ Lastly, a response to `[["example", "org", 255, 255]]` could be
       # NS (2) for "example.org"
       # (name elided since its the same as in question)
       # is "ns2.example.org" with TTL 3600
-      3600, 2
+      3600, e'RR-NS',
       # appends 6 => ["ns2", simple(0)] to virtual packing table
       "ns2", simple(0)  # expands to ["example", "org"]
     ]
@@ -1139,25 +1162,25 @@ Lastly, a response to `[["example", "org", 255, 255]]` could be
       # AAAA (28) for "_coap._udp.local"
       # is 2001:db8::1 with TTL 3600
       simple(2),    # expands to ["_coap", "_udp", "local"]
-      3600, 28, ip'2001:db8::1'
+      3600, e'RR-AAAA', ip'2001:db8::1'
     ],
     [
       # AAAA (28) for "_coap._udp.local"
       # is 2001:db8::2 with TTL 3600
       simple(2),    # expands to ["_coap", "_udp", "local"]
-      3600, 28, ip'2001:db8::2'
+      3600, e'RR-AAAA', ip'2001:db8::2'
     ],
     [
       # AAAA (28) for "ns1.example.org"
       # is 2001:db8::35 with TTL 3600
       simple(5),    # expands to ["ns1", ["example", "org"]]
-      3600, 28, ip'2001:db8::35'
+      3600, e'RR-AAAA', ip'2001:db8::35'
     ],
     [
       # AAAA (28) for "ns2.example.org"
       # is 2001:db8::3535 with TTL 3600
       simple(6),    # expands to ["ns2", ["example", "org"]
-      3600, 28, ip'2001:db8::3535'
+      3600, e'RR-AAAA', ip'2001:db8::3535'
     ]
   ]
 ]
@@ -1172,7 +1195,7 @@ or in binary (155 bytes)
          6578616d706c65                       # "example"
       63                                      # text(3)
          6f7267                               # "org"
-      0c                                      # unsigned(12)
+      0c                                      # e'RR-PTR' (unsigned(12))
    81                                         # array(1)
       84                                      # array(4)
          19 0e10                              # unsigned(3600)
@@ -1185,13 +1208,13 @@ or in binary (155 bytes)
    82                                         # array(2)
       84                                      # array(4)
          19 0e10                              # unsigned(3600)
-         02                                   # unsigned(2)
+         02                                   # e'RR-NS' (unsigned(2))
          63                                   # text(3)
             6e7331                            # "ns1"
          e0                                   # simple(0)
       84                                      # array(4)
          19 0e10                              # unsigned(3600)
-         02                                   # unsigned(2)
+         02                                   # e'RR-NS' (unsigned(2))
          63                                   # text(3)
             6e7332                            # "ns2"
          e0                                   # simple(0)
@@ -1199,25 +1222,25 @@ or in binary (155 bytes)
       84                                      # array(4)
          e2                                   # simple(2)
          19 0e10                              # unsigned(3600)
-         18 1c                                # unsigned(28)
+         18 1c                                # e'RR-AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000000001  # ip'2001:db8::1'
       84                                      # array(4)
          e2                                   # simple(2)
          19 0e10                              # unsigned(3600)
-         18 1c                                # unsigned(28)
+         18 1c                                # e'RR-AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000000002  # ip'2001:db8::2'
       84                                      # array(4)
          e5                                   # simple(5)
          19 0e10                              # unsigned(3600)
-         18 1c                                # unsigned(28)
+         18 1c                                # e'RR-AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000000035  # ip'2001:db8::35'
       84                                      # array(4)
          e6                                   # simple(6)
          19 0e10                              # unsigned(3600)
-         18 1c                                # unsigned(28)
+         18 1c                                # e'RR-AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000003535  # ip'2001:db8::3535'
 ~~~
