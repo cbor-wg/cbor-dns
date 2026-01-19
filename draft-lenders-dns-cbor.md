@@ -425,8 +425,9 @@ Name and record type can be elided as they are always "." and OPT (41), respecti
 The UDP payload size may be the first element as an unsigned integer in the array.
 It MUST be elided if its value is the default value of 512, the maximum allowable size for unextended DNS over UDP (see {{Sections 2.3.4 and 4.2.1 of -dns}}).
 
-The next element is a map of the options, with the option code (unsigned integer) as key and the option data (byte string) as value.
-The type of option data may be extended in future specifications.
+The next element is an array of the options as alternating pairs of option code (as unsigned integer) and option data (as byte string).
+The type of the option data may be extended in future specifications.
+As per {{Section 6.1.2 of -edns}}, the order of options is not defined in this specification, but the considerations to order provided in {{Section 6.1.2 of -edns}} also apply here.
 
 After that, up to three unsigned integers are following.
 The first being the extended flags as unsigned integer (implied to be 0 if elided),
@@ -441,10 +442,13 @@ Note that future EDNS versions may require a different format than the one descr
 ~~~ cddl
 opt-rr = [
   ? udp-payload-size: max-uint16 .default 512,
-  options: {* ocode => $$odata },
+  options: [* opt-pair ],
   ? opt-rcode-v-flags,
 ]
-ocode = max-uint16
+opt-pair = (
+  ocode: max-uint16,
+  odata: $$odata,
+)
 opt-rcode-v-flags = (
   flags: max-uint16 .default 0,
   ? opt-rcode-v,
