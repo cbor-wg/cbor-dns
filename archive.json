@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-18T01:06:11.934563+00:00",
+  "timestamp": "2026-01-20T01:00:48.305292+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -1058,6 +1058,154 @@
         }
       ],
       "reviews": []
+    },
+    {
+      "number": 14,
+      "id": "PR_kwDOIM0M7M6-B8ST",
+      "title": "Provide rt and rc EDN literals for DNS RR types and classes",
+      "url": "https://github.com/cbor-wg/cbor-dns/pull/14",
+      "state": "OPEN",
+      "author": "miri64",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types and classes (mostly because these are the only numbers that show up in our examples), but EDNS(0) option codes and even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.",
+      "createdAt": "2026-01-19T15:11:57Z",
+      "updatedAt": "2026-01-19T17:21:18Z",
+      "baseRepository": "cbor-wg/cbor-dns",
+      "baseRefName": "main",
+      "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
+      "headRepository": "miri64/cbor-dns",
+      "headRefName": "edn-literals",
+      "headRefOid": "e56f73eeb97b1c644603edb5b6504af063374189",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOIM0M7M7bSZxK",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-19T17:07:09Z",
+          "updatedAt": "2026-01-19T17:21:18Z",
+          "comments": [
+            {
+              "originalPosition": 47,
+              "body": "```suggestion\nThe application-extension identifier \"dns-rt\" is used to notate a DNS resource record type (RRTYPE) literal.\n```\n\nmaybe? Just fearing that `rt` might be useful for something else in the future. See https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-6.1",
+              "createdAt": "2026-01-19T17:07:09Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 50,
+              "body": "hum, what do you mean with byte string here? are there DNS RRTYPE that are not ASCII?",
+              "createdAt": "2026-01-19T17:09:12Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 51,
+              "body": "I'm not sure I understand. Why would some mnemonic not be part of the IANA registry?",
+              "createdAt": "2026-01-19T17:12:12Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 54,
+              "body": "```suggestion\nIf the literal matches `[0-9][0-9]*` its value is decimal value of the number matching\n```\n\nWouldn't that also work and be more concise? I'd assume there can be no RRTypes containing numbers?",
+              "createdAt": "2026-01-19T17:13:51Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 54,
+              "body": "also \n\n\n```suggestion\nIf the literal matches `TYPE[0-9][0-9]*` its value is the decimal value of the number matching\n```",
+              "createdAt": "2026-01-19T17:14:21Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 56,
+              "body": "You say this twice, or am I overlooking something?",
+              "createdAt": "2026-01-19T17:15:17Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 77,
+              "body": "```suggestion\nThe application-extension identifier \"dns-rc\" is used to notate a DNS resource record class (RR CLASS) literal.\n```\n\nSame as above",
+              "createdAt": "2026-01-19T17:18:16Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 81,
+              "body": "```suggestion\nOtherwise it must be a mnemonic that is assigned in the paranthesis of the \"Name\" column in the \"DNS\n```",
+              "createdAt": "2026-01-19T17:18:31Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            },
+            {
+              "originalPosition": 135,
+              "body": "much nicer-looking examples!",
+              "createdAt": "2026-01-19T17:19:16Z",
+              "updatedAt": "2026-01-19T17:21:18Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "id": "PR_kwDOIM0M7M6-CFs7",
+      "title": "Make options a list again",
+      "url": "https://github.com/cbor-wg/cbor-dns/pull/15",
+      "state": "OPEN",
+      "author": "miri64",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "TBD28259 (see section Name Compression) put the final death nail into the idea of the EDNS(0) options being a map.",
+      "createdAt": "2026-01-19T15:24:11Z",
+      "updatedAt": "2026-01-19T17:25:31Z",
+      "baseRepository": "cbor-wg/cbor-dns",
+      "baseRefName": "main",
+      "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
+      "headRepository": "miri64/cbor-dns",
+      "headRefName": "opt-list",
+      "headRefOid": "4815fc5ec14fca4c176b44e4511287ceb1af71da",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOIM0M7M7bSjnk",
+          "commit": {
+            "abbreviatedOid": "4815fc5"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-19T17:23:00Z",
+          "updatedAt": "2026-01-19T17:25:31Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\nThe next element is a array of tuples of the options, with the option code (unsigned integer) being the first tuple element and the option data (byte string) being the second tuple element.\n```\n\nDoes that match what you are trying to say?",
+              "createdAt": "2026-01-19T17:23:00Z",
+              "updatedAt": "2026-01-19T17:25:31Z"
+            },
+            {
+              "originalPosition": 6,
+              "body": "Mmmmh, doesn't this add 1B unnecessarily per tuple, also compared to the map encoding?\n\nMaybe this part also warrants a note on why you would not use maps instead of describing maps-semantics based on an array (-> ordering).\n\nBtw, would these options be ordered in any form, e.g., by option number?",
+              "createdAt": "2026-01-19T17:25:14Z",
+              "updatedAt": "2026-01-19T17:25:31Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
