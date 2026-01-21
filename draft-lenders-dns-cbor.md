@@ -954,7 +954,7 @@ for DNS literals in CBOR extended diagnostig notation.
 The application-extension identifier "rt" is used to notate a DNS resource record type (RRTYPE) literal.
 
 The content of the literal is a single mnemonic, mostly as defined in {{Section 3.1 of !RFC6895}} as
-a text or byte string, with the exception that the mnemonic `TYPE[0-9][0-9]*` is also allowed.
+a text or byte string, with the exception that the mnemonic `TYPE[0-9][0-9]*` is also allowed to enable temporary or generic resource record type notation.
 Otherwise, it must be a mnemonic that is assigned in the "TYPE" column in the "Resource Record (RR)
 TYPEs" registry on the IANA "Domain Name System (DNS) Parameters" page or the string "ANY".
 
@@ -984,7 +984,7 @@ TBD
 The application-extension identifier "rc" is used to notate a DNS resource record class (RR CLASS) literal.
 
 The content of the literal is a single mnemonic, mostly as defined in {{Section 3.2 of !RFC6895}} as
-a text or byte string, with the exception that the mnemonic `CLASS[0-9][0-9]*` is also allowed.
+a text or byte string, with the exception that the mnemonic `CLASS[0-9][0-9]*` is also allowed to enable temporary or generic DNS class notation.
 Otherwise, it MUST be a mnemonic that is assigned in the paranthesis of the "Name" column in the "DNS
 CLASSes" registry on the IANA "Domain Name System (DNS) Parameters" page or the string "NONE".
 
