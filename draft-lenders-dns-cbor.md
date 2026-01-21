@@ -958,7 +958,7 @@ a text or byte string, with the exception that the mnemonic `TYPE[0-9][0-9]*` is
 Otherwise, it must be a mnemonic that is assigned in the "TYPE" column in the "Resource Record (RR)
 TYPEs" registry on the IANA "Domain Name System (DNS) Parameters" page or the string "ANY".
 
-If the literal matches `TYPE[0-9][0-9]*` its value is decimal value of the number matching
+If the literal matches `TYPE[0-9][0-9]*` its value is the decimal value of the number matching
 `[0-9][0-9]*` as an unsigned integer. Otherwise, it matches the value assigned to the mnemonic in
 the "Resource Record (RR) TYPEs" registry or, if it is "ANY", it has the value 255.
 
