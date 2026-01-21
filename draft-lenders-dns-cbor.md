@@ -985,7 +985,7 @@ The application-extension identifier "rc" is used to notate a DNS resource recor
 
 The content of the literal is a single mnemonic, mostly as defined in {{Section 3.2 of !RFC6895}} as
 a text or byte string, with the exception that the mnemonic `CLASS[0-9][0-9]*` is also allowed.
-Otherwise itm ust be a mnemonic that is assigned in the paranthesis of the "Name" column in the "DNS
+Otherwise, it MUST be a mnemonic that is assigned in the paranthesis of the "Name" column in the "DNS
 CLASSes" registry on the IANA "Domain Name System (DNS) Parameters" page or the string "NONE".
 
 If the literal matches `CLASS[0-9][0-9]*` its value is decimal value of the number matching
