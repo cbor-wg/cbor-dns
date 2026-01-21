@@ -947,11 +947,11 @@ TBD
 This appendix provides definitions and grammar in ABNF form ({{!STD68}} as extended in {{!RFC7405}})
 for DNS literals in CBOR extended diagnostig notation.
 
-## The "rt" Extension
+## The "dns-rrt" Extension
 
 ### Definition and Examples
 
-The application-extension identifier "rt" is used to notate a DNS resource record type (RRTYPE) literal.
+The application-extension identifier "dns-rrt" is used to notate a DNS resource record type (RRTYPE) literal.
 
 The content of the literal is a single mnemonic, mostly as defined in {{Section 3.1 of !RFC6895}} as
 a text or byte string, with the exception that the mnemonic `TYPE[0-9][0-9]*` is also allowed to enable temporary or generic resource record type notation.
@@ -962,26 +962,26 @@ If the literal matches `TYPE[0-9][0-9]*` its value is the decimal value of the n
 `[0-9][0-9]*` as an unsigned integer. Otherwise, it matches the value assigned to the mnemonic in
 the "Resource Record (RR) TYPEs" registry or, if it is "ANY", it has the value 255.
 
-Each value of {{tab-rt-edn}} shows an example of "rt" notation and equivalent notation not using an
+Each value of {{tab-rrt-edn}} shows an example of "rrt" notation and equivalent notation not using an
 application-extension identifier.
 
-| rt literal    | plain EDN         |
-|---------------|-------------------|
-| rt'CNAME'     | 2                 |
-| rt<<'AAAA'>>  | 28                |
-| rt'ANY'       | 255               |
-| rt'TYPE65280' | 65280             |
-{: #tab-rt-edn cols="l l" title="rt literals vs. plain EDN"}
+| dns-rrt literal    | plain EDN         |
+|--------------------|-------------------|
+| dns-rrt'CNAME'     | 2                 |
+| dns-rrt<<'AAAA'>>  | 28                |
+| dns-rrt'ANY'       | 255               |
+| dns-rrt'TYPE65280' | 65280             |
+{: #tab-rrt-edn cols="l l" title="dns-rrt literals vs. plain EDN"}
 
 ### ABNF
 
 TBD
 
-## The "rc" Extension
+## The "dns-cls" Extension
 
 ### Definition and Examples
 
-The application-extension identifier "rc" is used to notate a DNS resource record class (RR CLASS) literal.
+The application-extension identifier "dns-cls" is used to notate a DNS resource record class (RR CLASS) literal.
 
 The content of the literal is a single mnemonic, mostly as defined in {{Section 3.2 of !RFC6895}} as
 a text or byte string, with the exception that the mnemonic `CLASS[0-9][0-9]*` is also allowed to enable temporary or generic DNS class notation.
@@ -992,16 +992,20 @@ If the literal matches `CLASS[0-9][0-9]*` its value is decimal value of the numb
 `[0-9][0-9]*` as an unsigned integer. Otherwise, it matches the value assigned to the mnemonic in
 the "DNS CLASSs" registry or, if it is "NONE", it has the value 254.
 
-Each value of {{tab-rc-edn}} shows an example of "rc" notation and equivalent notation not using an
+Each value of {{tab-cls-edn}} shows an example of "dns-cls" notation and equivalent notation not using an
 application-extension identifier.
 
-| rc literal     | plain EDN         |
-|----------------|-------------------|
-| rc'IN'         | 1                 |
-| rc<<'CH'>>     | 2                 |
-| rc'NONE'       | 0xfe              |
-| rc'CLASS65534' | 65534             |
-{: #tab-rc-edn cols="l l" title="rc literals vs. plain EDN"}
+| dns-cls literal     | plain EDN         |
+|---------------------|-------------------|
+| dns-cls'IN'         | 1                 |
+| dns-cls<<'CH'>>     | 2                 |
+| dns-cls'NONE'       | 0xfe              |
+| dns-cls'CLASS65534' | 65534             |
+{: #tab-cls-edn cols="l l" title="dns-cls literals vs. plain EDN"}
+
+### ABNF
+
+TBD
 
 ### ABNF
 
@@ -1032,7 +1036,7 @@ The binary (in hexadecimal encoding) of the query looks as follows (14 bytes):
 A query of an `A` record for the same name is represented as
 
 ~~~ edn
-[["example", "org", rt'A']]
+[["example", "org", dns-rrt'A']]
 ~~~
 
 or in binary (15 bytes)
@@ -1044,13 +1048,13 @@ or in binary (15 bytes)
          6578616d706c65 # "example"
       63                # text(3)
          6f7267         # "org"
-      01                # rt'A' (unsigned(1))
+      01                # dns-rrt'A' (unsigned(1))
 ~~~
 
 A query of `ANY` record for that name is represented as
 
 ~~~ edn
-[["example", "org", rt'ANY', rc'ANY']]
+[["example", "org", dns-rrt'ANY', dns-cls'ANY']]
 ~~~
 
 or in binary (18 bytes)
@@ -1062,8 +1066,8 @@ or in binary (18 bytes)
          6578616d706c65 # "example"
       63                # text(3)
          6f7267         # "org"
-      18 ff             # rt'ANY' (unsigned(255))
-      18 ff             # rc'ANY' (unsigned(255))
+      18 ff             # dns-rrt'ANY' (unsigned(255))
+      18 ff             # dns-cls'ANY' (unsigned(255))
 ~~~
 
 ## DNS Responses {#sec:response-examples}
@@ -1158,7 +1162,7 @@ or in binary (11 bytes)
 Note that here also the 1 of record type `A` can be elided, as this record
 type is specified in the question section.
 
-Lastly, a response to `[["example", "org", rt'ANY', rc'ANY']]` could be
+Lastly, a response to `[["example", "org", dns-rrt'ANY', dns-cls'ANY']]` could be
 
 ~~~ edn
 [
@@ -1168,7 +1172,7 @@ Lastly, a response to `[["example", "org", rt'ANY', rc'ANY']]` could be
     "example",
     # appends 1 => ["org"] to virtual packing table
     "org",
-    rt'PTR'
+    dns-rrt'PTR'
   ],
   # Answer section:
   [[
@@ -1189,7 +1193,7 @@ Lastly, a response to `[["example", "org", rt'ANY', rc'ANY']]` could be
       # NS (2) for "example.org"
       # (name elided since its the same as in question)
       # is "ns1.example.org" with TTL 3600
-      3600, rt'NS',
+      3600, dns-rrt'NS',
       # appends 5 => ["ns1", simple(0)] to virtual packing table
       "ns1", simple(0)  # expands to ["example", "org"]
     ],
@@ -1197,7 +1201,7 @@ Lastly, a response to `[["example", "org", rt'ANY', rc'ANY']]` could be
       # NS (2) for "example.org"
       # (name elided since its the same as in question)
       # is "ns2.example.org" with TTL 3600
-      3600, rt'NS',
+      3600, dns-rrt'NS',
       # appends 6 => ["ns2", simple(0)] to virtual packing table
       "ns2", simple(0)  # expands to ["example", "org"]
     ]
@@ -1208,25 +1212,25 @@ Lastly, a response to `[["example", "org", rt'ANY', rc'ANY']]` could be
       # AAAA (28) for "_coap._udp.local"
       # is 2001:db8::1 with TTL 3600
       simple(2),    # expands to ["_coap", "_udp", "local"]
-      3600, rt'AAAA', ip'2001:db8::1'
+      3600, dns-rrt'AAAA', ip'2001:db8::1'
     ],
     [
       # AAAA (28) for "_coap._udp.local"
       # is 2001:db8::2 with TTL 3600
       simple(2),    # expands to ["_coap", "_udp", "local"]
-      3600, rt'AAAA', ip'2001:db8::2'
+      3600, dns-rrt'AAAA', ip'2001:db8::2'
     ],
     [
       # AAAA (28) for "ns1.example.org"
       # is 2001:db8::35 with TTL 3600
       simple(5),    # expands to ["ns1", ["example", "org"]]
-      3600, rt'AAAA', ip'2001:db8::35'
+      3600, dns-rrt'AAAA', ip'2001:db8::35'
     ],
     [
       # AAAA (28) for "ns2.example.org"
       # is 2001:db8::3535 with TTL 3600
       simple(6),    # expands to ["ns2", ["example", "org"]
-      3600, rt'AAAA', ip'2001:db8::3535'
+      3600, dns-rrt'AAAA', ip'2001:db8::3535'
     ]
   ]
 ]
@@ -1241,7 +1245,7 @@ or in binary (155 bytes)
          6578616d706c65                       # "example"
       63                                      # text(3)
          6f7267                               # "org"
-      0c                                      # rt'PTR' (unsigned(12))
+      0c                                      # dns-rrt'PTR' (unsigned(12))
    81                                         # array(1)
       84                                      # array(4)
          19 0e10                              # unsigned(3600)
@@ -1254,13 +1258,13 @@ or in binary (155 bytes)
    82                                         # array(2)
       84                                      # array(4)
          19 0e10                              # unsigned(3600)
-         02                                   # rt'NS' (unsigned(2))
+         02                                   # dns-rrt'NS' (unsigned(2))
          63                                   # text(3)
             6e7331                            # "ns1"
          e0                                   # simple(0)
       84                                      # array(4)
          19 0e10                              # unsigned(3600)
-         02                                   # rt'NS' (unsigned(2))
+         02                                   # dns-rrt'NS' (unsigned(2))
          63                                   # text(3)
             6e7332                            # "ns2"
          e0                                   # simple(0)
@@ -1268,25 +1272,25 @@ or in binary (155 bytes)
       84                                      # array(4)
          e2                                   # simple(2)
          19 0e10                              # unsigned(3600)
-         18 1c                                # rt'AAAA' (unsigned(28))
+         18 1c                                # dns-rrt'AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000000001  # ip'2001:db8::1'
       84                                      # array(4)
          e2                                   # simple(2)
          19 0e10                              # unsigned(3600)
-         18 1c                                # rt'AAAA' (unsigned(28))
+         18 1c                                # dns-rrt'AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000000002  # ip'2001:db8::2'
       84                                      # array(4)
          e5                                   # simple(5)
          19 0e10                              # unsigned(3600)
-         18 1c                                # rt'AAAA' (unsigned(28))
+         18 1c                                # dns-rrt'AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000000035  # ip'2001:db8::35'
       84                                      # array(4)
          e6                                   # simple(6)
          19 0e10                              # unsigned(3600)
-         18 1c                                # rt'AAAA' (unsigned(28))
+         18 1c                                # dns-rrt'AAAA' (unsigned(28))
          50                                   # bytes(16)
             20010db8000000000000000000003535  # ip'2001:db8::3535'
 ~~~
