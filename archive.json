@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-20T01:00:48.305292+00:00",
+  "timestamp": "2026-01-22T01:02:43.850855+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -1071,13 +1071,13 @@
       "labels": [],
       "body": "This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types and classes (mostly because these are the only numbers that show up in our examples), but EDNS(0) option codes and even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.",
       "createdAt": "2026-01-19T15:11:57Z",
-      "updatedAt": "2026-01-19T17:21:18Z",
+      "updatedAt": "2026-01-21T17:44:39Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "edn-literals",
-      "headRefOid": "e56f73eeb97b1c644603edb5b6504af063374189",
+      "headRefOid": "61a175b36e805c4141383af571fbdb46d07b2006",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -1151,6 +1151,166 @@
               "updatedAt": "2026-01-19T17:21:18Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bxdqE",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:10:07Z",
+          "updatedAt": "2026-01-21T13:10:07Z",
+          "comments": [
+            {
+              "originalPosition": 47,
+              "body": "> Just fearing that `rt` might be useful for something else in the future. See https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-6.1\r\n\r\nI leave that decision to the experts of that IANA registry. I was actually taking inspiration from the initial set there and I think a short(er) identifier would motivate usage more. To me, if the identifier is longer than the content (dns-rt'A') or the actual value (1), I already see people using intransparent shorthands (like a/d+c for this format e.g.).",
+              "createdAt": "2026-01-21T13:10:07Z",
+              "updatedAt": "2026-01-21T13:10:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bxhhN",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:13:53Z",
+          "updatedAt": "2026-01-21T13:13:53Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "This wording was taken verbatim from EDN. E.g. for `ip''` [its draft says](https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-3.2-2):\r\n\r\n> The content of the literal is a single IPv4address or IPv6address as per [Section 3.2.2](https://rfc-editor.org/rfc/rfc3986#section-3.2.2) of [[RFC3986](https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#RFC3986)], as **a text or byte string**.\r\n\r\nAnd actually, given that in EDN [byte strings are notated with `''`](https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-2.5.3), all examples out there (even the pure ASCII ones) are using byte strings. So your question should rather be \"why allow text strings ([which exclusively use `\"\"`](https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#name-text-string-literals))?\" ;-)",
+              "createdAt": "2026-01-21T13:13:53Z",
+              "updatedAt": "2026-01-21T13:14:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bxldX",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:17:42Z",
+          "updatedAt": "2026-01-21T13:17:43Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "Because a draft author might not have it registered yet. See in this draft e.g. TBD28259 for tag 28259. Having `TYPE1234` or `CLASS5678` gives draft authors (and also just example authors a nice way to distinguish between type and class (which in raw CBOR would both be just unsigned integers) when there is no mnemonic for that number (yet).",
+              "createdAt": "2026-01-21T13:17:42Z",
+              "updatedAt": "2026-01-21T13:17:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bxsqh",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:24:44Z",
+          "updatedAt": "2026-01-21T13:24:45Z",
+          "comments": [
+            {
+              "originalPosition": 54,
+              "body": "> Wouldn't that also work and be more concise? I'd assume there can be no RRTypes containing numbers?\r\n\r\nEDN isn't and shouldn't be about conciseness, but readability and familiarity. When using just numbers I can also just use the unsigned integer outright (yes there is the EDN identifier 'rt' marking it as a type, but that can easily be overlooked) and using `TYPE1234` or `CLASS5678` is something already used within the DNS community for generic types and classes (see [RFC3597, section 5](https://datatracker.ietf.org/doc/html/rfc3597#section-5)).",
+              "createdAt": "2026-01-21T13:24:44Z",
+              "updatedAt": "2026-01-21T13:24:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bxvCN",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:26:43Z",
+          "updatedAt": "2026-01-21T13:26:44Z",
+          "comments": [
+            {
+              "originalPosition": 56,
+              "body": "Can you point me to the other mention please? I only see [the definition that the mnemonic \"ANY\" is a legal content of `rt`](https://github.com/cbor-wg/cbor-dns/pull/14/changes#diff-c1ee54122d8c0f166af4524c64e92b0795cd43782536a16364a57a948d8cc838R959). Here I state, that that mnemonic \"ANY\" evaluates to the value 255.",
+              "createdAt": "2026-01-21T13:26:43Z",
+              "updatedAt": "2026-01-21T13:27:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bxwiH",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:28:11Z",
+          "updatedAt": "2026-01-21T13:28:11Z",
+          "comments": [
+            {
+              "originalPosition": 77,
+              "body": "And my answer is the same as in https://github.com/cbor-wg/cbor-dns/pull/14/changes#r2712512085",
+              "createdAt": "2026-01-21T13:28:11Z",
+              "updatedAt": "2026-01-21T13:28:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bxyii",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:30:13Z",
+          "updatedAt": "2026-01-21T13:30:13Z",
+          "comments": [
+            {
+              "originalPosition": 135,
+              "body": "Would it still be nice if it were `[[\"example\", \"org\", dns-rt'255', dns-rc'255']]`? ;-)",
+              "createdAt": "2026-01-21T13:30:13Z",
+              "updatedAt": "2026-01-21T13:30:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7b2ypl",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T17:44:38Z",
+          "updatedAt": "2026-01-21T17:44:39Z",
+          "comments": [
+            {
+              "originalPosition": 47,
+              "body": "@cabo do you maybe have an opinion on the matter?",
+              "createdAt": "2026-01-21T17:44:38Z",
+              "updatedAt": "2026-01-21T17:44:39Z"
+            }
+          ]
         }
       ]
     },
@@ -1166,18 +1326,26 @@
       "labels": [],
       "body": "TBD28259 (see section Name Compression) put the final death nail into the idea of the EDNS(0) options being a map.",
       "createdAt": "2026-01-19T15:24:11Z",
-      "updatedAt": "2026-01-19T17:25:31Z",
+      "updatedAt": "2026-01-21T15:55:10Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "opt-list",
-      "headRefOid": "4815fc5ec14fca4c176b44e4511287ceb1af71da",
+      "headRefOid": "df6d2d160528af0db1c82c412d2647d9f3c9d0b3",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In the interest of consistency it probably makes sense to encode the list of options in the same manner as we do SvcParams (a flat list with interleaving optnum-optval-pairs). We do that their, because SvcParams MUST have a predetermined order, but does not hurt to do it here as well. Will do!",
+          "createdAt": "2026-01-21T15:49:13Z",
+          "updatedAt": "2026-01-21T15:50:14Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOIM0M7M7bSjnk",
@@ -1202,6 +1370,46 @@
               "body": "Mmmmh, doesn't this add 1B unnecessarily per tuple, also compared to the map encoding?\n\nMaybe this part also warrants a note on why you would not use maps instead of describing maps-semantics based on an array (-> ordering).\n\nBtw, would these options be ordered in any form, e.g., by option number?",
               "createdAt": "2026-01-19T17:25:14Z",
               "updatedAt": "2026-01-19T17:25:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7bx0Sj",
+          "commit": {
+            "abbreviatedOid": "4815fc5"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:31:47Z",
+          "updatedAt": "2026-01-21T13:31:47Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I actually wanted to include as well, that the tuple has exactly 2 elements.... but maybe this can be done with\r\n\r\n```suggestion\r\nThe next element is a array of 2-tuples of the options, with the option code (unsigned integer) being the first tuple element and the option data (byte string) being the second tuple.\r\n```\r\n?",
+              "createdAt": "2026-01-21T13:31:47Z",
+              "updatedAt": "2026-01-21T13:31:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7byBR_",
+          "commit": {
+            "abbreviatedOid": "4815fc5"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-21T13:43:24Z",
+          "updatedAt": "2026-01-21T13:43:24Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "> Mmmmh, doesn't this add 1B unnecessarily per tuple, also compared to the map encoding?\r\n>\r\n> Maybe this part also warrants a note on why you would not use maps instead of describing maps-semantics based on an array (-> ordering).\r\n\r\nSo you think we rather should put the lexicographic ordering encoding constrained from [from draft-ietf-cbor-serialization](https://www.ietf.org/archive/id/draft-ietf-cbor-serialization-01.html#section-4.1) here? Could be tricky to just get that out of there, since the draft does not define that independently as `draft-ietf-cbor-cde` did (while \"ordinary serialization\" is preferred, I don't think it should be a requirement). Maybe an incentive for the working group to have this defined independently? However ...\r\n\r\n> Btw, would these options be ordered in any form, e.g., by option number?\r\n\r\nSee [RFC 6891, section 6.1.2](https://datatracker.ietf.org/doc/html/rfc6891#section-6.1.2):\r\n\r\n>    The order of appearance of option tuples is not defined.  If one\r\n>    option modifies the behaviour of another or multiple options are\r\n>    related to one another in some way, they have the same effect\r\n>    regardless of ordering in the RDATA wire encoding.\r\n\r\nSo no. But continuing my parenthesis from above ... However, I think it is better to not put any requirement on the order of options on an encoder. This might come directly from another server. Putting then work into reordering the options seems like a waste to me and I have the hunch that it does not really help us with our problem for name compression here...",
+              "createdAt": "2026-01-21T13:43:24Z",
+              "updatedAt": "2026-01-21T13:43:24Z"
             }
           ]
         }
