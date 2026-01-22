@@ -1499,4 +1499,4 @@ Since [draft-lenders-dns-cbor-00]
 # Acknowledgments
 {:unnumbered}
 
-TODO acknowledge.
+We want to extend special thanks to Christian Amsüss for his input in the brainstorming session that resulted in the current form of name compression.
