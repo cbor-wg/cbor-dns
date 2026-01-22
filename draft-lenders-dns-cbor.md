@@ -52,6 +52,17 @@ author:
     country: Germany
     email: m.waehlisch@tu-dresden.de
 
+contributor:
+- name: Mikolai Gütschow
+  org: TUD Dresden University of Technology
+  abbrev: TU Dresden
+  street: Helmholtzstr. 10
+  city: Dresden
+  code: D-01069
+  country: Germany
+  email: mikolai.guetschow@tu-dresden.de
+- name: Vadim Goncharov
+
 normative:
   RFC1035: dns
   RFC3596: aaaa
