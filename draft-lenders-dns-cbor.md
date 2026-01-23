@@ -956,7 +956,7 @@ The application-extension identifier "dns-rrt" is used to notate a DNS resource 
 The content of the literal is a single mnemonic, mostly as defined in {{Section 3.1 of !RFC6895}} as
 a text or byte string, with the exception that the mnemonic `TYPE[0-9][0-9]*` is also allowed to enable temporary or generic resource record type notation.
 Otherwise, it must be a mnemonic that is assigned in the "TYPE" column in the "Resource Record (RR)
-TYPEs" registry on the IANA "Domain Name System (DNS) Parameters" page or the string "ANY".
+TYPEs" registry on the IANA "Domain Name System (DNS) Parameters" page (case sensitive) or the string "ANY".
 
 If the literal matches `TYPE[0-9][0-9]*` its value is the decimal value of the number matching
 `[0-9][0-9]*` as an unsigned integer. Otherwise, it matches the value assigned to the mnemonic in
@@ -986,7 +986,7 @@ The application-extension identifier "dns-cls" is used to notate a DNS resource 
 The content of the literal is a single mnemonic, mostly as defined in {{Section 3.2 of !RFC6895}} as
 a text or byte string, with the exception that the mnemonic `CLASS[0-9][0-9]*` is also allowed to enable temporary or generic DNS class notation.
 Otherwise, it MUST be a mnemonic that is assigned in the paranthesis of the "Name" column in the "DNS
-CLASSes" registry on the IANA "Domain Name System (DNS) Parameters" page or the string "NONE".
+CLASSes" registry on the IANA "Domain Name System (DNS) Parameters" page (case sensitive) or the string "NONE".
 
 If the literal matches `CLASS[0-9][0-9]*` its value is decimal value of the number matching
 `[0-9][0-9]*` as an unsigned integer. Otherwise, it matches the value assigned to the mnemonic in
@@ -1006,6 +1006,60 @@ application-extension identifier.
 ### ABNF
 
 TBD
+
+## The "dns-opt" Extension
+
+### Definition and Examples
+
+The application-extension identifier "dns-opt" is used to notate a DNS EDNS0 Option Code (OPT) literal.
+
+The content of the literal is a single name as a text or byte string.
+It MUST be a name that is assigned in the paranthesis of the "Name" column in the "DNS EDNS0 Option
+Code (OPT)" registry on the IANA "Domain Name System (DNS) Parameters" page (case insensitive) or
+match `OPT[0-9][0-9]*` to enable the use of temporary, local or experimental option numbers.
+
+If the literal matches `OPT[0-9][0-9]*` its value is decimal value of the number matching
+`[0-9][0-9]*` as an unsigned integer. Otherwise, it matches the value assigned to the name in
+the "DNS EDNS0 Option Code (OPT)" registry.
+
+Each value of {{tab-opt-edn}} shows an example of "dns-opt" notation and equivalent notation not using an
+application-extension identifier.
+
+| dns-opt literal       | plain EDN         |
+|-----------------------|-------------------|
+| dns-opt'COOKIE'       | 10                |
+| dns-opt<<'PADDING'>>  | 12                |
+| dns-opt<<'OPT65001'>> | 65001             |
+{: #tab-opt-edn cols="l l" title="dns-opt literals vs. plain EDN"}
+
+### ABNF
+
+TBD
+
+## The "dns-svp" Extension
+
+### Definition and Examples
+
+The application-extension identifier "dns-svp" is used to notate a DNS SVCB Service Parameter Key (SvcParamKey) literal.
+
+The content of the literal is a single name as a text or byte string.
+It MUST be a name that is assigned in the paranthesis of the "Name" column in the
+"DNS SVCB Service Parameter Keys (SvcParamKeys)" registry on the IANA "DNS Service Bindings (SVCB)" page (case sensitive) or
+match `SVCB[0-9][0-9]*` to enable the use of temporary or private use service parameter keys.
+
+If the literal matches `SVCB[0-9][0-9]*` its value is decimal value of the number matching
+`[0-9][0-9]*` as an unsigned integer. Otherwise, it matches the number assigned to the name in
+the "DNS SVCB Service Parameter Keys (SvcParamKeys)" registry.
+
+Each value of {{tab-svp-edn}} shows an example of "dns-svp" notation and equivalent notation not using an
+application-extension identifier.
+
+| dns-svp literal        | plain EDN         |
+|------------------------|-------------------|
+| dns-svp'alpn'          | 1                 |
+| dns-svp<<'ipv4hint'>>  | 4                 |
+| dns-svp<<'SVCB65281'>> | 65281             |
+{: #tab-svp-edn cols="l l" title="dns-svp literals vs. plain EDN"}
 
 ### ABNF
 
