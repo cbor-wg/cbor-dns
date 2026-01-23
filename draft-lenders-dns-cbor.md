@@ -1040,7 +1040,7 @@ fn _rec_unpack_names(obj: Object, unpacker: Unpacker): Object {
           }
         }
         else {
-          /* not part of a name anymore, so close local name reference*/
+          /* not part of a name anymore, so close local name reference */
           name_ref = None
           type_match (elem) {
             /* step into arrays and tags */
