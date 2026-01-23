@@ -62,6 +62,7 @@ contributor:
   country: Germany
   email: mikolai.guetschow@tu-dresden.de
 - name: Vadim Goncharov
+  email: vadimnuclight@gmail.com
 
 normative:
   RFC1035: dns
