@@ -608,6 +608,7 @@ The resulting rump should look like referencing the first instance of the _i_-th
 It is NOT RECOMMENDED to use any other table building tag as defined in {{Section 3 of -cbor-packed}} within TBD28259, as the implicit table of TBD28259 may otherwise lead to more complicating en- and decoding steps.
 Particularly, a one-pass decoding with minimal state of DNS messages SHOULD be ensured to be viable on constrained devices.
 If another table setup needs to be transported within TBD28259, e.g., certain RDATA or option values might elect to use Packed CBOR as well, they SHOULD be encapsulated as encoded CBOR within a byte string using tag 24 {{-cbor}}.
+
 Due to the order of strings being important, special care should be taken for the order of map (major type 5, {{-cbor}}) elements within tag TBD28259.
 The "application/dns+cbor" media type specified within this document avoids maps for this reason, in addition to enforcing orders derived from DNS specifications, e.g., {{-svcb}} for SvcParams.
 If any other CBOR object than an object defined by `dns-message` in {{fig:dns-msg}} is compressed using TBD28259, keys of maps MUST be encoded in bytewise lexicographic order, as specified in {{Section 4.2.1 of -cbor}}, unless the definition of that particular object type provides a different predetermined order.
