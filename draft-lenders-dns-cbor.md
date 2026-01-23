@@ -715,11 +715,22 @@ This would generate the following virtual table _V_.
 ~~~
 {: #fig:name-compression-example-table title="Implicit table of shared items for the example _o_."}
 
-Note that the sequence "org", "example", "org" is added at index 4 with leading "org", instead of referencing index 2 + index 1 (`simple(2), simple(1)`), as it is its own distinct suffix sequence.
-However, its suffix "example", "org" is not added to the table again, as it is already present at index 2.
-Also note that, e.g., the sequence "www", "example", "org" (appears as index 0) is not referenced as `simple(0)` within index 3 as this is how _V_ would be read given {{fig:name-compression-example-unpacked}}.
-An implementation MAY choose to use references here to reduce memory consumption.
+An implementation MAY choose to use references here to reduce memory consumption, as represented in {{fig:name-compression-example-table-comp}}.
 Circular references are not possible due to the construction algorithm of _V_.
+
+~~~ edn
+[
+    /index 0:/ 1115(["www", "example", "org"]),
+    /index 1:/ 1115(["example", "org"]),
+    /index 2:/ 1115(["org"]),
+    /index 3:/ 1115(["svc", simple(0)]),
+    /index 4:/ 1115(["org", simple(1)])
+]
+~~~
+{: #fig:name-compression-example-table-comp title="Implicit table of shared items for the example _o_ with self-references."}
+
+Note that the sequence "org", simple(0) is added at index 4 with leading "org", instead of referencing index 2 + index 1 (`simple(2), simple(1)`), as it is its own distinct suffix sequence.
+However, its suffix "example", "org" is not added to the table again, as it is already present at index 1.
 
 Assuming media type "application/dns+cbor;packed=0" (i.e. an implicit tag TBD28259), the packed representation of _o_ would thus be:
 
