@@ -961,129 +961,145 @@ TBD113(
 A decoder to interpret an object like the one in {{fig:name-compression-example-packed-113}} would have the following pseudo-code:
 
 ~~~
-fn decode_dns(binary: bytes, packed: uint = 0): Object {
-  obj: Object = cbor.decode(binary)
+function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
+  obj: CBORObject = cbor.decode(binary)
   unpacker: Unpacker = Unpacker()
   match (packed) {
-    0 => {
+    when 0 then {
       packing_table = []
       rump = obj
     },
-    1 => {
+    when 1 then {
       /* except explicit 113 */
-      if (typeof(obj) is Tag and obj.value == 113) {
-        obj = obj.content
+      if (typeof(obj) is CBORTag and tag number of obj == 113) {
+        obj = tag content of obj
       }
-      assert (typeof(obj) is Array and obj.length == 2)
 
-      assert (typeof(obj[0]) is Array)
-      /* ensure reference context for tag 113 */
-      unpacker.register(113)
+      assume that typeof(obj) is CBORArray and obj.length == 2
+      assume that typeof(obj[0]) is CBORArray  # packing table
+
+      Tell `unpacker` that we are in rump of tag 113 now
+
       /* prepend to current packing table of unpacker */
       unpacker.packing_table = obj[0] concat unpacker.packing_table
       rump = obj[1]
     },
-    * => {
+    when anything else then {
       throw "Not supported yet!"
     },
   }
 
-  return _unpack_names(rump, unpacker)
+  return unpack_names(rump, unpacker)
 }
 
-fn _unpack_names(rump: Any, unpacker: Unpacker): Object {
+fn unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
   /* except explicit 28259 */
-  if (typeof(rump) is Tag and rump.value == 28259) {
-    rump = rump.content
+  if (typeof(rump) is CBORTag and tag number of obj == 28259) {
+    rump = tag content of obj
   }
-  /* ensure reference context for tag 28259 */
-  unpacker.register(28259)
-  return _rec_unpack_names(rump, unpacker, unpacker.packing_table.length)
+
+  Tell `unpacker` that we are in rump of tag 2859 now
+
+  return recursive_unpack_names(rump, unpacker, unpacker.packing_table.length)
 }
 
-fn _is_splice_tag(obj: Object): bool {
-  return (typeof(packed_idx) is Tag and packed_idx.value == 1115)
+fn is_splice_tag(obj: CBORObject): bool {
+  return (typeof(packed_idx) is CBORTag and tag number of packed_idx == 1115)
 }
 
-fn _rec_unpack_names(
-    obj: Object, unpacker: Unpacker, outer_table_len: Integer
-): Object {
-  type_match (obj) {
-    Int, ByteStrings, TextStrings => {
+fn recursive_unpack_names(
+    obj: CBORObject, unpacker: Unpacker, outer_table_len: Integer
+): CBORObject {
+  match typeof(obj) {
+    when CBORInt, CBORByteString, or CBORTextString then {
       return obj
     }
-    Array => {
-      result: Array = []
-      idx: Optional[Int] = None
+    when CBORArray then {
+      result: CBORArray = []
+      idx: CBORInt or null = null
       for (elem in obj) {
-        if (typeof(elem) is TextString) {
+        if (typeof(elem) is CBORTextString) {
           /* Create a local name reference in packing table for this name
            * and all its suffixes */
-          if (idx is None) {
-            unpacker.packing_table.append(Tag(1115, []))
+          if (idx is null) {
+            unpacker.packing_table = unpacker.packing_table concat [
+              CBORTag(tag number = 1115, tag content = []))
+            ]
             idx = unpacker.packing_table.length - 1
           }
           else {
             /* create packing table entry for new suffix */
-            unpacker.packing_table.append(Tag(1115, []))
+            unpacker.packing_table = unpacker.packing_table concat [
+              CBORTag(tag number = 1115, tag content = []))
+            ]
           }
+
           /* Append to all suffixes in local name reference */
-          for (i in range(idx, unpacker.packing_table.length)) {
-            unpacker.packing_table[i].content.append(elem)
+          for (i from i == idx to i < unpacker.packing_table.length)) {
+            append elem to tag content of unpacker.packing_table[i]
           }
-          result.append(elem)
+          append elem to result
         }
         elif (unpacker.is_reference(elem)) {   /* is simple() or 6() */
           /* calculate index from simple() or 6() */
-          ref_idx = unpacker.ref_idx(elem)
-          assert (ref_idx < unpacker.packing_table.length)
+          ref_idx: uint = unpacker.ref_idx(elem)
+          assume that (ref_idx < unpacker.packing_table.length)
+
+          packed_obj: CBORObject = unpacker.packing_table[ref_idx]
+
           /* check if this reference is part of a longer name */
-          packed_obj: Object = unpacker.packing_table[ref_idx]
-          if (_is_splice_tag(packed_obj) || typeof(packed_obj) is TextString) {
-            if (idx is not None) {
-              /* if yes, append to all suffixes in local name reference */
-              for (i in range(idx, unpacker.packing_table.length)) {
-                unpacker.packing_table[i].content.append(elem)
+          if (is_splice_tag(packed_obj) || typeof(packed_obj) is CBORTextString) {
+            if (idx is not null) {
+              /* if idx is already set, append to all suffixes from idx to
+               * end of packing table */
+              for (i from i =idx to i < unpacker.packing_table.length)) {
+                append elem to unpacker.packing_table[i].content
               }
+
+              /* check if ref_idx references implicit table V */
               if (ref_idx > outer_table_len) {
-                /* close the local name reference, as only TextStrings (including
-                 * those in outer tables) continue the name */
-                name_ref = None
+                /* close idx pointing to first element of name sequence, as
+                 * only CBORTextStrings (including those referenced in outer tables)
+                 * continue the name */
+                idx = null
               }
             }
           }
-          if (_is_splice_tag(packed_obj)) {
+          if (is_splice_tag(packed_obj)) {
             /* name suffix is spliced in */
-            result.extend(packed_obj.content)
+            result = result concat packed_obj.content
           }
           else {
-            /* just append */
-            result.append(packed_obj)
+            append packed_obj to result
           }
         }
         else {
-          /* not part of a name anymore, so close local name reference */
-          name_ref = None
-          type_match (elem) {
+          /* not part of a name anymore, so close idx pointing to
+           * first element of name sequence */
+          idx = null
+          match typeof(elem) {
             /* step into arrays and tags */
-            Array => {
-              result.extend(_rec_unpack_names(elem, unpacker))
+            when CBORArray then {
+              result = result concat recursive_unpack_names(elem, unpacker)
             }
-            Tag => {
-              result.append(Tag(elem.value, _rec_unpack_names(elem.content, unpacker)))
+            when CBORTag then {
+              append CBORTag(
+                tag number = tag number of elem,
+                tag content = recursive_unpack_names(elem.content, unpacker),
+              )
             }
-            Map => {
+            when CBORMap then {
               throw warning "Ignore maps which are not part of this spec"
             }
-            * => {
-              result.append(elem)
+            when anything else then {
+              append elem to result
             }
           }
         }
       }
       return result
     }
-    * => {
+    when anything else then {
       throw warning "Ignore other types not part of this spec"
     }
   }
