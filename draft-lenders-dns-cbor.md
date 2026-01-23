@@ -602,7 +602,6 @@ It provides an implicit text string suffix sequence table for shared items _V_.
 This table _V_ is appended to the existing table for shared items of any table setup tag enclosing tag TBD28259 (by default empty table).
 This implicit (i.e. not explicitly represented) table _V_ is constructed as follows:
 Any coherent sequence of text strings encountered within the rump of tag TBD28259 when reading it depth-first, as well as any of its non-empty suffixes, are added to the table as arrays marked with the splice integration tag 1115 (see {{-cbor-packed, Section 5.1}}).
-Text string sequences within any tables for shared items or argument items within the rump MUST not be added to _V_.
 If a sequence for which a tagged array is already in _V_ is encountered, a shared item reference _i_ is added to the rump instead, splicing the content of 1115 tag and array into the existing array (see {{-cbor-packed, Section 5.1}}) and that sequence as well as its non-empty suffixes is not added again to _V_.
 The resulting rump should look like referencing the first instance of the _i_-th complete string sequence (depth first) in the sequence.
 
