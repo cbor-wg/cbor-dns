@@ -987,32 +987,38 @@ fn _unpack_names(rump: Any, unpacker: Unpacker): Object {
   }
   /* ensure reference context for tag 28259 */
   unpacker.register(28259)
-  return _rec_unpack_names(rump, unpacker)
+  return _rec_unpack_names(rump, unpacker, unpacker.packing_table.length)
 }
 
-fn _rec_unpack_names(obj: Object, unpacker: Unpacker): Object {
+fn _is_splice_tag(obj: Object): bool {
+  return (typeof(packed_idx) is Tag and packed_idx.value == 1115)
+}
+
+fn _rec_unpack_names(
+    obj: Object, unpacker: Unpacker, outer_table_len: Integer
+): Object {
   type_match (obj) {
     Int, ByteStrings, TextStrings => {
       return obj
     }
     Array => {
       result: Array = []
-      name_ref: Optional[Array] = None
+      idx: Optional[Int] = None
       for (elem in obj) {
         if (typeof(elem) is TextString) {
           /* Create a local name reference in packing table for this name
            * and all its suffixes */
-          if (name_ref is None) {
+          if (idx is None) {
             unpacker.packing_table.append(Tag(1115, []))
-            name_ref = unpacker.packing_table[:-1]
+            idx = unpacker.packing_table.length - 1
           }
           else {
             /* create packing table entry for new suffix */
             unpacker.packing_table.append(Tag(1115, []))
           }
           /* Append to all suffixes in local name reference */
-          for (table_entry in name_ref) {
-            table_entry.content.append(elem)
+          for (i in range(idx, unpacker.packing_table.length)) {
+            unpacker.packing_table[i].content.append(elem)
           }
           result.append(elem)
         }
@@ -1021,17 +1027,21 @@ fn _rec_unpack_names(obj: Object, unpacker: Unpacker): Object {
           ref_idx = unpacker.ref_idx(elem)
           assert (ref_idx < unpacker.packing_table.length)
           /* check if this reference is part of a longer name */
-          if (name_ref is not None) {
-            /* if yes, append to all suffixes in local name reference */
-            for (table_entry in name_ref) {
-              table_entry.content.append(elem)
-            }
-            /* but then close that local name reference, as only
-             * TextStrings continue the name */
-            name_ref = None
-          }
           packed_obj: Object = unpacker.packing_table[ref_idx]
-          if (typeof(packed_obj) is Tag and packed_obj == 1115) {
+          if (_is_splice_tag(packed_obj) || typeof(packed_obj) is TextString) {
+            if (idx is not None) {
+              /* if yes, append to all suffixes in local name reference */
+              for (i in range(idx, unpacker.packing_table.length)) {
+                unpacker.packing_table[i].content.append(elem)
+              }
+              if (ref_idx > outer_table_len) {
+                /* close the local name reference, as only TextStrings (including
+                 * those in outer tables) continue the name */
+                name_ref = None
+              }
+            }
+          }
+          if (_is_splice_tag(packed_obj)) {
             /* name suffix is spliced in */
             result.extend(packed_obj.content)
           }
