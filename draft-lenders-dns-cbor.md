@@ -1048,7 +1048,7 @@ fn _rec_unpack_names(obj: Object, unpacker: Unpacker): Object {
               result.extend(_rec_unpack_names(elem, unpacker))
             }
             Tag => {
-              result.append(Tag(elem.value, _rec_unpack_names(elem, unpacker)))
+              result.append(Tag(elem.value, _rec_unpack_names(elem.content, unpacker)))
             }
             Map => {
               throw warning "Ignore maps which are not part of this spec"
