@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-22T01:02:43.850855+00:00",
+  "timestamp": "2026-01-25T01:08:09.511683+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -1062,27 +1062,42 @@
     {
       "number": 14,
       "id": "PR_kwDOIM0M7M6-B8ST",
-      "title": "Provide rt and rc EDN literals for DNS RR types and classes",
+      "title": "Provide dns-rrt, dns-cls, dns-opt, and dns-svp EDN literals",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/14",
       "state": "OPEN",
       "author": "miri64",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types and classes (mostly because these are the only numbers that show up in our examples), but EDNS(0) option codes and even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.",
+      "body": "This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types, classes, EDNS(0) option codes and SVCB SvcParamKeb but even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.",
       "createdAt": "2026-01-19T15:11:57Z",
-      "updatedAt": "2026-01-21T17:44:39Z",
+      "updatedAt": "2026-01-23T23:56:23Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "edn-literals",
-      "headRefOid": "61a175b36e805c4141383af571fbdb46d07b2006",
+      "headRefOid": "d51d93b8fc73857a97659e222eb794c539dc01fa",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "As the new title implies: I now added a few more literals.",
+          "createdAt": "2026-01-23T16:03:00Z",
+          "updatedAt": "2026-01-23T16:03:00Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "Gah. Of course people won't use such long literals for such short substrings. What people do expect is familiar syntax:\r\n```\r\ndns-rr'example.org  3600 IN A 192.0.0.2'\r\n```\r\ntranslating to entire RR array. Or sequence to be inside array... because actually, from data model point of view, every item should have explicit tag on it, e.g.\r\n`TBDrr([\"example\", \"org\", 3600, 5, \"ns1\", \"example\", \"org\"])`\r\nIt is just that we omit such tags for the compactness of wire representation, but in application data structures implementers will have data types more explicit - RR, name, type, class, ...\r\n\r\nUPD: ...Yes, I think it should expand to CBOR sequence: for allowing things like\r\n`[dns-rr'example.com 4800 A', ip'192.0.0.2']`\r\nor actually, for better specifying bstr-s as RRDATA unknown to (current version of) parser, or - for example - to `dns-opt''` and `dns-svp''`.\r\nSo it will expand to only those things explicitly listed inside quotes, allowing to specify more precisely what goes to array. And paying attention to dot at end to produce empty string, thus allowing to support zone files also, but `$ORIGIN` suggestion etc. is better to discuss in #12 \r\n\r\nTo summarize, `dns-rrt`, `dns-rrc` and `dns-cls` are not needed, unified `dns-rr` should be used instead. As for `dns-opt''` and `dns-svp''`, these are fine.",
+          "createdAt": "2026-01-23T23:19:27Z",
+          "updatedAt": "2026-01-23T23:56:23Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOIM0M7M7bSZxK",
@@ -1311,6 +1326,386 @@
               "updatedAt": "2026-01-21T17:44:39Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cI8CK",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-22T16:18:27Z",
+          "updatedAt": "2026-01-22T16:18:27Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "Ah so both `rt'XXX'` and `rt\"XXX\"` would be valid and equivalent? Not sure I like that design decision of allowing both, especially if we already know we would only ever use ASCII strings here.",
+              "createdAt": "2026-01-22T16:18:27Z",
+              "updatedAt": "2026-01-22T16:18:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cI8hQ",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-22T16:18:56Z",
+          "updatedAt": "2026-01-22T16:18:57Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "Hum okay, I see. Maybe make that intention explicit?",
+              "createdAt": "2026-01-22T16:18:57Z",
+              "updatedAt": "2026-01-22T16:18:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cI9Lw",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-22T16:19:33Z",
+          "updatedAt": "2026-01-22T16:19:34Z",
+          "comments": [
+            {
+              "originalPosition": 54,
+              "body": "Convincing, especially now that I understood what `TYPEXXX` is meant for :)",
+              "createdAt": "2026-01-22T16:19:33Z",
+              "updatedAt": "2026-01-22T16:19:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cI_As",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-22T16:20:55Z",
+          "updatedAt": "2026-01-22T16:20:55Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "> [\u2026] especially if we already know we would only ever use ASCII strings here.\r\n\r\nNot sure where this ASCII constraint is coming from, btw... Text strings in CBOR are UTF-8. And binary strings do not carry any encoding AFAIK.",
+              "createdAt": "2026-01-22T16:20:55Z",
+              "updatedAt": "2026-01-22T16:20:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cI_E2",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-22T16:20:59Z",
+          "updatedAt": "2026-01-22T16:20:59Z",
+          "comments": [
+            {
+              "originalPosition": 135,
+              "body": "No, but it would if it were `[[\"example\", \"org\", dns-rt'ANY', dns-rc'ANY']]`!",
+              "createdAt": "2026-01-22T16:20:59Z",
+              "updatedAt": "2026-01-22T16:20:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cJAca",
+          "commit": {
+            "abbreviatedOid": "61a175b"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-22T16:22:18Z",
+          "updatedAt": "2026-01-22T16:22:18Z",
+          "comments": [
+            {
+              "originalPosition": 56,
+              "body": "True, my bad.",
+              "createdAt": "2026-01-22T16:22:18Z",
+              "updatedAt": "2026-01-22T16:22:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cOJV_",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-22T21:35:54Z",
+          "updatedAt": "2026-01-22T21:35:54Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "See 96b48f30e20fe82b1f3cf21ee",
+              "createdAt": "2026-01-22T21:35:54Z",
+              "updatedAt": "2026-01-22T21:35:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cVhL6",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T09:37:27Z",
+          "updatedAt": "2026-01-23T09:37:27Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "Good point, then I'd rephrase the above as\r\n\r\n> Ah so both `rt'XXX'` and `rt\"XXX\"` would be valid and equivalent? Not sure I like that design decision of allowing both, especially if we already know we would only ever use UTF-8 strings here.\r\n\r\n(I highly doubt RTYPE or RCLASS would have names that are not UTF-8 at some point, which would be an argument for allowing byte strings, but maybe I'm wrong?)\r\n\r\n",
+              "createdAt": "2026-01-23T09:37:27Z",
+              "updatedAt": "2026-01-23T09:37:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cYQRj",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T12:52:44Z",
+          "updatedAt": "2026-01-23T12:52:44Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "Again, I just copied verbatim from the EDN draft. See https://github.com/cbor-wg/cbor-dns/pull/14#discussion_r2712525828. `dt` has the same wording as `ip`\r\n\r\n> The content of the literal is a single Standard Date/Time String as per Section [3.4.1](https://rfc-editor.org/rfc/rfc8949#section-3.4.1) of RFC 8949 [[STD94](https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#STD94)], as a *text or byte string*.\r\n\r\n`hash` only says \"string\" and does not specify and `cri` does not mention strings at all:\r\n\r\n> The content of the literal is a single Standard Date/Time String as per Section [3.4.1](https://rfc-editor.org/rfc/rfc8949#section-3.4.1) of RFC 8949 [[STD94](https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#STD94)], as a text or byte string.\r\n\r\nGiven that `dt` and `ip` are the only ones that explicitly mention text and byte strings and from their semantic `rt` and `rc` are closer to them, why should they only allow byte strings while `dt` and `ip` also allow text strings. Not sure what this extra restriction would achieve.\r\n\r\n> > Ah so both `rt'XXX'` and `rt\"XXX\"` would be valid and equivalent? Not sure I like that design decision of allowing both, especially if we already know we would only ever use UTF-8 strings here.\r\n> \r\n> (I highly doubt RTYPE or RCLASS would have names that are not UTF-8 at some point, which would be an argument for allowing byte strings, but maybe I'm wrong?)\r\n\r\nYes, the definition of the mnemonics makes it clear that they are only ASCII (only upper case letters and digits, in fact) and it will be part of the ABNF once the format somewhat settles. But I am not sure what you expect from me here? I already refer to the definition and there is no dedicated type for ASCII strings in CBOR.",
+              "createdAt": "2026-01-23T12:52:44Z",
+              "updatedAt": "2026-01-23T12:52:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cYvIW",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:26:49Z",
+          "updatedAt": "2026-01-23T13:26:49Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "I'm challenging the design decision in EDN that now trickled down into this draft of allowing both `ip'xxx'` and `ip\"xxx\"` even if they are equivalent and having non-UTF8 (actually anything else than numbers and dots or colons) is never needed. But given the precedent, I can live with it.",
+              "createdAt": "2026-01-23T13:26:49Z",
+              "updatedAt": "2026-01-23T13:26:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cY1bi",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:33:48Z",
+          "updatedAt": "2026-01-23T13:33:48Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "> I'm challenging the design decision in EDN that now trickled down into this draft of allowing both ip'xxx' and ip\"xxx\" even if they are equivalent and having non-UTF8 (actually anything else than numbers and dots or colons) is never needed. But given the precedent, I can live with it.\r\n\r\nBut what has the major type of the content to do with wether it is non-UTF8 or not? Both byte strings and text strings are allowed to carry UTF-8 in EDN. The only difference between them in [raw] EDN is the type of quotation marks and some differring rules on escaping (when necessary) as far as I understand.",
+              "createdAt": "2026-01-23T13:33:48Z",
+              "updatedAt": "2026-01-23T13:34:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cZFCe",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:47:41Z",
+          "updatedAt": "2026-01-23T13:47:42Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "> I'm challenging the design decision in EDN that now trickled down into this draft of allowing both `ip'xxx'` and `ip\"xxx\"` even if they are equivalent and having non-UTF8 (actually anything else than numbers and dots or colons) is never needed. But given the precedent, I can live with it.\r\n\r\nCan you explain that decision some more?\r\n\r\nAs far as I can see, the grammar only allows\r\n\r\n```abnf\r\napp-string      = app-prefix sqstr\r\n```\r\n(where sqstr is a single-quoted string.)\r\n\r\nWe may need to add some text on the equivalence of ext'foo' and ext<<\"foo\">>, is that what you are criticizing?",
+              "createdAt": "2026-01-23T13:47:41Z",
+              "updatedAt": "2026-01-23T13:47:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cZJDy",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:51:05Z",
+          "updatedAt": "2026-01-23T13:51:06Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "As a general observation, we could add rt'' (indeed not a great abbrev, as rt usually is a CoAP resource type) and rc'', but could this also be addressed with e''?\r\ne'' is really what was designed to address these cases.",
+              "createdAt": "2026-01-23T13:51:06Z",
+              "updatedAt": "2026-01-23T13:51:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7caOWm",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T14:41:37Z",
+          "updatedAt": "2026-01-23T14:41:37Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "> > I'm challenging the design decision in EDN that now trickled down into this draft of allowing both `ip'xxx'` and `ip\"xxx\"` even if they are equivalent and having non-UTF8 (actually anything else than numbers and dots or colons) is never needed. But given the precedent, I can live with it.\r\n> \r\n> Can you explain that decision some more?\r\n> \r\n> As far as I can see, the grammar only allows\r\n> \r\n> ```abnf\r\n> app-string      = app-prefix sqstr\r\n> ```\r\n> \r\n> (where sqstr is a single-quoted string.)\r\n\r\nMh, did not see that ABNF, but this discussion was purely based on the wording in https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-3.1-2 and https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-3.2-2 where it explicitly mentions text strings (double quoted as per https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-2.5.1) and byte strings (single quoted as per https://www.ietf.org/archive/id/draft-ietf-cbor-edn-literals-19.html#section-2.5.1).\r\n\r\n> We may need to add some text on the equivalence of ext'foo' and ext<<\"foo\">>, is that what you are criticizing?\r\n\r\nAt least I understand this equivalent and pretty sure @mguetschow does, too. As far as I understand, @mguetschow is concerned about a pure ASCII string being able to be expressible in two data types (but that's then where I am not sure what the actual problem is).",
+              "createdAt": "2026-01-23T14:41:37Z",
+              "updatedAt": "2026-01-23T14:41:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7caUo1",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T14:46:39Z",
+          "updatedAt": "2026-01-23T14:46:40Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "> As a general observation, we could add rt'' (indeed not a great abbrev, as rt usually is a CoAP resource type) and rc'', but could this also be addressed with e''?\r\n> e'' is really what was designed to address these cases.\r\n\r\nYou mean https://www.ietf.org/archive/id/draft-ietf-cbor-edn-e-ref-02.html? Only learned about this draft now, but from what I can gather: Yes, it could fit, but due to its temporary nature (as far as I understand this is meant for drafts) would probably mean continuous updating of the `e''` constants to stay in sync with the IANA tables later on. So having something fixed that can be used in more official documents (or even parsers/sniffers/...) would be great, IMHO.",
+              "createdAt": "2026-01-23T14:46:39Z",
+              "updatedAt": "2026-01-23T14:46:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7calWf",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T14:59:17Z",
+          "updatedAt": "2026-01-23T14:59:17Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "> > As a general observation, we could add rt'' (indeed not a great abbrev, as rt usually is a CoAP resource type) and rc'', but could this also be addressed with e''?\r\n> > e'' is really what was designed to address these cases.\r\n> \r\n> You mean https://www.ietf.org/archive/id/draft-ietf-cbor-edn-e-ref-02.html? Only learned about this draft now, but from what I can gather: Yes, it could fit, but due to its temporary nature (as far as I understand this is meant for drafts) would probably mean continuous updating of the `e''` constants to stay in sync with the IANA tables later on. So having something fixed that can be used in more official documents (or even parsers/sniffers/...) would be great, IMHO.\r\n\r\nI dimly remember some work (I think it was even yours, @cabo) to import a IANA registry into _something_..., I couldn't find it that quickly in the datatracker (since I am unsure about the \"something\" I am not even sure where to search) but if the \"something\" was EDN, that would help more!",
+              "createdAt": "2026-01-23T14:59:17Z",
+              "updatedAt": "2026-01-23T14:59:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cbMo0",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T15:27:16Z",
+          "updatedAt": "2026-01-23T15:27:17Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "> As a general observation, we could add rt'' (indeed not a great abbrev, as rt usually is a CoAP resource type) [...]\r\n\r\nOk, conceding to a 2:1 vote then and changed the names to `dns-rrt` (DNS resource record type) and `dns-cls` (DNS class) in 0cf0f06",
+              "createdAt": "2026-01-23T15:27:16Z",
+              "updatedAt": "2026-01-23T15:27:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7ci4Ju",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T23:48:15Z",
+          "updatedAt": "2026-01-23T23:48:15Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "`e''` and `ref''` extensions are good (though I don't remember their discussion in m.list right now), but are solving slightly different task: if all your data are described by authoritative primary source being CBOR-oriented, currently meaning CDDL.\r\nBut for DNS data such source is outside of us, and people are already accustomed for decades to textual form from RFC 1035. So I've put a top-level comment below about that we should take it different way...",
+              "createdAt": "2026-01-23T23:48:15Z",
+              "updatedAt": "2026-01-23T23:48:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7ci44T",
+          "commit": {
+            "abbreviatedOid": "e56f73e"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T23:49:57Z",
+          "updatedAt": "2026-01-23T23:49:57Z",
+          "comments": [
+            {
+              "originalPosition": 135,
+              "body": "As per https://github.com/cbor-wg/cbor-dns/pull/14#issuecomment-3792984448, the\r\n`[[dns-rr'example.org ANY ANY']]`\r\nis looking much more better!",
+              "createdAt": "2026-01-23T23:49:57Z",
+              "updatedAt": "2026-01-23T23:49:57Z"
+            }
+          ]
         }
       ]
     },
@@ -1326,7 +1721,7 @@
       "labels": [],
       "body": "TBD28259 (see section Name Compression) put the final death nail into the idea of the EDNS(0) options being a map.",
       "createdAt": "2026-01-19T15:24:11Z",
-      "updatedAt": "2026-01-21T15:55:10Z",
+      "updatedAt": "2026-01-23T23:40:05Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
@@ -1344,6 +1739,13 @@
           "body": "In the interest of consistency it probably makes sense to encode the list of options in the same manner as we do SvcParams (a flat list with interleaving optnum-optval-pairs). We do that their, because SvcParams MUST have a predetermined order, but does not hurt to do it here as well. Will do!",
           "createdAt": "2026-01-21T15:49:13Z",
           "updatedAt": "2026-01-21T15:50:14Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "I support making it array (so that *everything* structured is array which allows for subset coding in CBAPT, but this I'll write more detailed later in #12), however did not quite understand why name compression was that nail.\r\n\r\nThe only possible thing I may be suggesting here is to add a phrase that order of key-value pairs is, like in original DNS, not important (behaves like map) - for those fearless who could try to add determinism here in future...",
+          "createdAt": "2026-01-23T23:40:05Z",
+          "updatedAt": "2026-01-23T23:40:05Z"
         }
       ],
       "reviews": [
@@ -1410,6 +1812,673 @@
               "body": "> Mmmmh, doesn't this add 1B unnecessarily per tuple, also compared to the map encoding?\r\n>\r\n> Maybe this part also warrants a note on why you would not use maps instead of describing maps-semantics based on an array (-> ordering).\r\n\r\nSo you think we rather should put the lexicographic ordering encoding constrained from [from draft-ietf-cbor-serialization](https://www.ietf.org/archive/id/draft-ietf-cbor-serialization-01.html#section-4.1) here? Could be tricky to just get that out of there, since the draft does not define that independently as `draft-ietf-cbor-cde` did (while \"ordinary serialization\" is preferred, I don't think it should be a requirement). Maybe an incentive for the working group to have this defined independently? However ...\r\n\r\n> Btw, would these options be ordered in any form, e.g., by option number?\r\n\r\nSee [RFC 6891, section 6.1.2](https://datatracker.ietf.org/doc/html/rfc6891#section-6.1.2):\r\n\r\n>    The order of appearance of option tuples is not defined.  If one\r\n>    option modifies the behaviour of another or multiple options are\r\n>    related to one another in some way, they have the same effect\r\n>    regardless of ordering in the RDATA wire encoding.\r\n\r\nSo no. But continuing my parenthesis from above ... However, I think it is better to not put any requirement on the order of options on an encoder. This might come directly from another server. Putting then work into reordering the options seems like a waste to me and I have the hunch that it does not really help us with our problem for name compression here...",
               "createdAt": "2026-01-21T13:43:24Z",
               "updatedAt": "2026-01-21T13:43:24Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "id": "PR_kwDOIM0M7M6-y9dm",
+      "title": "Pass on name compression",
+      "url": "https://github.com/cbor-wg/cbor-dns/pull/16",
+      "state": "OPEN",
+      "author": "miri64",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This reworks the name compression as discussed during the last few meetings we had.\r\n\r\nNamely:\r\n\r\n- TBD28259 now appends, rather than prepends to existing packing tables to allow for single pass decoders with minimum state.\r\n-  Consequently, disallow inner table setup tags to TBD28259, as that would increase complexity of both decoders and encoders\r\n- Clarify implicit nature with `packed`\r\n- Use actual DNS examples\r\n- Add example decoder as pseudo-code\r\n- Additionally, add some considerations on maps within TBD28259 (see also #15)",
+      "createdAt": "2026-01-22T21:30:42Z",
+      "updatedAt": "2026-01-24T13:42:34Z",
+      "baseRepository": "cbor-wg/cbor-dns",
+      "baseRefName": "main",
+      "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
+      "headRepository": "miri64/cbor-dns",
+      "headRefName": "tbd28259-order",
+      "headRefOid": "55ed1d88c9e4d098e60a21c16b580ce02e782d70",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOIM0M7M7cUr0s",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "Thanks, this is a huge step forward. Some nits and a few major points below.",
+          "createdAt": "2026-01-23T08:46:08Z",
+          "updatedAt": "2026-01-23T09:30:04Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I'd argue that the order of adding the sequence and its suffixes could be more explicit. Maybe\n\n\n```suggestion\nAny coherent sequence of text strings encountered within the rump of tag TBD28259 when reading it depth-first, as well as any of its non-empty suffixes, ordered by sequence length, are added to the table as arrays marked with the splice integration tag 1115 (see {{-cbor-packed, Section 5.1}}).\n```",
+              "createdAt": "2026-01-23T08:46:08Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 14,
+              "body": "I think we could remove this sentence now that inner table setups are NOT RECOMMENDED (which is different to disallowed, as you state in the PR description, btw).",
+              "createdAt": "2026-01-23T08:47:09Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "```suggestion\nIf a sequence for which a tagged array is already in _V_ is encountered, a shared item reference _i_ is added to the rump instead, splicing the content of the array within tag 1115 into the existing array (see {{-cbor-packed, Section 5.1}}) and that sequence as well as its non-empty suffixes is not added again to _V_.\n```",
+              "createdAt": "2026-01-23T08:48:32Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 22,
+              "body": "Do you mean future setup tags for dns+cbor? If so, I would explicitly say so.\n\nBut in any case I'd argue that this statement is not needed as it follows from the fact that table setup tags can define their semantics and (content) restrictions.",
+              "createdAt": "2026-01-23T08:50:54Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "```suggestion\nDue to the order of strings being important, special care should be taken for the order of map (major type 5, {{-cbor}}) elements within tag TBD28259.\n```\n\nThis sentence could actually start a new paragraph.",
+              "createdAt": "2026-01-23T08:51:54Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 26,
+              "body": "```suggestion\nIf any other CBOR object than an object defined by `dns-message` in {{fig:dns-msg}} is compressed using TBD28259, map elements MUST be encoded in bytewise lexicographic order of their keys, as specified in {{Section 4.2.1 of -cbor}}, unless the definition of that particular object type provides a different predetermined order.\n```",
+              "createdAt": "2026-01-23T08:53:16Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "```suggestion\nIf the decoder encounters an object marked with \"application/dns+cbor;packed=0\" that is tagged TBD28259, it MUST NOT discard it and treat the tag as explicit.\n```\n\nor is there a reason not to capitalize it?",
+              "createdAt": "2026-01-23T08:54:11Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 35,
+              "body": "```suggestion\nOtherwise, it might incur an additional message to be sent and media type negotiation might fail unnecessarily.\n```",
+              "createdAt": "2026-01-23T08:55:49Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "Also, what does \"treat the tag as explicit\" mean? I'd rather say it the other way around, i.e. \"treat the content of the tag as the object, i.e., ignoring the explicit tag\".",
+              "createdAt": "2026-01-23T08:57:00Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 37,
+              "body": "Why \"only within _V_\"? Why couldn't I (for some reason) add a 1115-tagged array in my outer setup table provided to 113?",
+              "createdAt": "2026-01-23T08:58:10Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 180,
+              "body": "```suggestion\nAlso note that, e.g., the sequence \"www\", \"example\", \"org\" (appears as index 0) is not referenced as `simple(0)` within index 3 as this is how _V_ would be read given {{fig:name-compression-example-unpacked}}.\n```",
+              "createdAt": "2026-01-23T09:00:47Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 179,
+              "body": "```suggestion\nNote that the sequence \"org\", \"example\", \"org\" is added at index 4 with leading \"org\", instead of referencing index 2 + index 1 (`simple(2), simple(1)`), as it is its own distinct suffix sequence.\nIts suffix \"example\", \"org\" is however not added to the table again, as it is already present at index 2.\n```\n\nJust to make it more explicit.",
+              "createdAt": "2026-01-23T09:01:51Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 283,
+              "body": "```suggestion\n(see {{Section 3.1 of -cbor-packed}}) compressing the name-compressed response as rump.\n```",
+              "createdAt": "2026-01-23T09:05:09Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 299,
+              "body": "```suggestion\nPacked-Text-String-Suffix-Sequence-Packed-CBOR = #6.113(\n```\n\n(typo :P)",
+              "createdAt": "2026-01-23T09:05:51Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 311,
+              "body": "So this means sending tag 113 explicitly is _not_ allowed, while sending tag TBDnc for `packed=0` MUST be accepted? But sending TBDnc explicitly within `packed=1` is again disallowed? Why this difference?\n\nAs argued offline, I'd rather prohibit the explicit tag TBDnc for `packed=0` as well, as I see no benefit of allowing it, but might lead to confusion of the reader of the document and potential encoder implementation that introduce 3B of overhead in every response. But if we allow it for `packed=0`, we should also for `packed=1`, and for both tags.",
+              "createdAt": "2026-01-23T09:12:17Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 314,
+              "body": "Okay, this was a bit surprising for me. Maybe make it more explicit that `packed=0` can be used for both queries and responses above.",
+              "createdAt": "2026-01-23T09:13:31Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 371,
+              "body": "```suggestion\nNote, that the encoder needs to rewrite the references from {{fig:name-compression-example-unpacked}} as the implicit table _V_ is appended to the shared argument table `[\"org\", 600]`.\n```\n\nwhy confusing the reader by describing it the other way round here?",
+              "createdAt": "2026-01-23T09:15:39Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 481,
+              "body": "Thanks for the pseudocode! I would move it to the appendix, though.",
+              "createdAt": "2026-01-23T09:16:45Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 501,
+              "body": "This is invalid according to https://github.com/cbor-wg/cbor-dns/pull/16/changes#r2720352516",
+              "createdAt": "2026-01-23T09:17:47Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 543,
+              "body": "This could be misinterpreted to get the reference to the tag 1115.\n\nI think what you mean is storing the index of the last start of a consecutive string sequence, right? Maybe it's clearer if you get the index here...",
+              "createdAt": "2026-01-23T09:25:28Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 552,
+              "body": "... and iterate from that index here (and below)",
+              "createdAt": "2026-01-23T09:25:40Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 567,
+              "body": "I fear this could break if for some reason \"example\" would have been part of the outer 113-packing table in our running example. Maybe worth going through step-by-step again to double-check.",
+              "createdAt": "2026-01-23T09:27:44Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 580,
+              "body": "```suggestion\n          /* not part of a name anymore, so close local name reference */\n```",
+              "createdAt": "2026-01-23T09:28:20Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            },
+            {
+              "originalPosition": 588,
+              "body": "```suggestion\n              result.append(Tag(elem.value, _rec_unpack_names(elem.content, unpacker)))\n```",
+              "createdAt": "2026-01-23T09:29:23Z",
+              "updatedAt": "2026-01-23T09:30:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cVhyX",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T09:37:57Z",
+          "updatedAt": "2026-01-23T09:37:57Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "It's not ordered by sequence length. Its ordered by appearance in the rump (which coincides of course with the length for a sequence of strings; but ordered by length could make this make misunderstandable). I think \"ordered by appearance\" just duplicates the first half of the sentence, but if it helps getting a better idea, I can add it.",
+              "createdAt": "2026-01-23T09:37:57Z",
+              "updatedAt": "2026-01-23T09:37:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cVqyl",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T09:45:47Z",
+          "updatedAt": "2026-01-23T09:45:48Z",
+          "comments": [
+            {
+              "originalPosition": 543,
+              "body": "> This could be misinterpreted to get the reference to the tag 1115.\r\n\r\nI'm confused... I _want_ (an array of) references to whatever is in the packing table here, so yes to tag 1115. That's why I use `table_entry.`_`content`_ to append the string to all table rows down in l1014 which in my pseudo-code accesses the content of a tag.\r\n\r\n> I think what you mean is storing the index of the last start of a consecutive string sequence, right? Maybe it's clearer if you get the index here... \r\n\r\nNo, I want a reference to the last few string sequence_s_, including all the suffixes that came before, so I can append the current string to _all_",
+              "createdAt": "2026-01-23T09:45:48Z",
+              "updatedAt": "2026-01-23T09:45:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cVrW1",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T09:46:20Z",
+          "updatedAt": "2026-01-23T09:46:20Z",
+          "comments": [
+            {
+              "originalPosition": 543,
+              "body": "Not sure, how to help here. The comments already describe what I was saying.",
+              "createdAt": "2026-01-23T09:46:20Z",
+              "updatedAt": "2026-01-23T09:46:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cVsfs",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T09:47:27Z",
+          "updatedAt": "2026-01-23T09:47:28Z",
+          "comments": [
+            {
+              "originalPosition": 552,
+              "body": "mhh... if it really helps, I can use indexes. Maybe indeed more useful from a C perspective, too.",
+              "createdAt": "2026-01-23T09:47:27Z",
+              "updatedAt": "2026-01-23T09:47:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cVt0t",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T09:48:50Z",
+          "updatedAt": "2026-01-23T09:48:50Z",
+          "comments": [
+            {
+              "originalPosition": 567,
+              "body": "??!? the outer packing table should not be touched here, as it is before the reference that the _local variable_ `name_ref` carries.",
+              "createdAt": "2026-01-23T09:48:50Z",
+              "updatedAt": "2026-01-23T09:48:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cV3Kc",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T09:57:35Z",
+          "updatedAt": "2026-01-23T09:57:35Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I'm referring to the order of the suffixes. Going by your description, I would have `1115([\"www\"]), 1115([\"www\", \"example\"]), 1115([\"www\", \"example\", \"org\"])` as my first three packing table entries, as \"www\" appears first in the rump.\r\n\r\nSo the idea is: Identify coherent sequences of text strings. For each of them, in order of appearance in the rump, you add the sequence and all its non-empty suffixes starting from the longest suffix.\r\n\r\nNot sure how to phrase that in an easily understandable way. Maybe breaking the sentence into several parts.",
+              "createdAt": "2026-01-23T09:57:35Z",
+              "updatedAt": "2026-01-23T09:57:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cV-zP",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:03:21Z",
+          "updatedAt": "2026-01-23T10:03:21Z",
+          "comments": [
+            {
+              "originalPosition": 543,
+              "body": "> I'm confused... I _want_ (an array of) references to whatever is in the packing table here, so yes to tag 1115.\r\n\r\nBut if you get a reference to tag 1115, then you get the reference only to this one entry, and not to the subsequent ones?\r\n\r\n> No, I want a reference to the last few string sequence_s_, including all the suffixes that came before, so I can append the current string to _all_\r\n\r\nbefore the current string, but after the tag 1115 that is stored in `name_ref` right? This is where it is confusing for me, when you store `name_ref`, it is at the end of the packing table, and these suffixes are only added afterwards. That's why I think indexes are much clearer.",
+              "createdAt": "2026-01-23T10:03:21Z",
+              "updatedAt": "2026-01-23T10:03:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cWAZx",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:04:57Z",
+          "updatedAt": "2026-01-23T10:04:57Z",
+          "comments": [
+            {
+              "originalPosition": 567,
+              "body": "Sure, but we are decoding, we have (for some reason) `[\"example\"]` as our 113 packing table, and we encounter `\"www\", simple(0), \"org\"`.",
+              "createdAt": "2026-01-23T10:04:57Z",
+              "updatedAt": "2026-01-23T10:04:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cWM9x",
+          "commit": {
+            "abbreviatedOid": "38db69f"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:18:15Z",
+          "updatedAt": "2026-01-23T10:18:15Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "The outer setup table is not part of the TBD28259 table setup and comes with its own sets of rules. But I guess this point became moot since there are no inner table setups with TBD28259, and https://datatracker.ietf.org/doc/html/draft-ietf-cbor-packed#section-5-2 makes it clear that integration tags are only allowed in reference tables.",
+              "createdAt": "2026-01-23T10:18:15Z",
+              "updatedAt": "2026-01-23T10:18:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cWQjU",
+          "commit": {
+            "abbreviatedOid": "38db69f"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:22:16Z",
+          "updatedAt": "2026-01-23T10:22:16Z",
+          "comments": [
+            {
+              "originalPosition": 311,
+              "body": "> So this means sending tag 113 explicitly is _not_ allowed, while sending tag TBDnc for `packed=0` MUST be accepted? But sending TBDnc explicitly within `packed=1` is again disallowed? Why this difference?\n\nBecause our argument confused me now \ud83d\ude05. Of course tag 113 is also allowed explicitly. Should I put it into the rule again or just mention it here.",
+              "createdAt": "2026-01-23T10:22:16Z",
+              "updatedAt": "2026-01-23T10:25:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cWRKu",
+          "commit": {
+            "abbreviatedOid": "38db69f"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:23:00Z",
+          "updatedAt": "2026-01-23T10:23:01Z",
+          "comments": [
+            {
+              "originalPosition": 314,
+              "body": "This has _always_ been the case for `packed=1`, so I am a bit confused how this surprised you.",
+              "createdAt": "2026-01-23T10:23:00Z",
+              "updatedAt": "2026-01-23T10:23:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cWSBG",
+          "commit": {
+            "abbreviatedOid": "38db69f"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:24:01Z",
+          "updatedAt": "2026-01-23T10:24:01Z",
+          "comments": [
+            {
+              "originalPosition": 481,
+              "body": "Agreed, but let's keep it here for the review first.",
+              "createdAt": "2026-01-23T10:24:01Z",
+              "updatedAt": "2026-01-23T10:24:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cWTUy",
+          "commit": {
+            "abbreviatedOid": "38db69f"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:25:31Z",
+          "updatedAt": "2026-01-23T10:25:31Z",
+          "comments": [
+            {
+              "originalPosition": 501,
+              "body": "See https://github.com/cbor-wg/cbor-dns/pull/16/changes#r2720612202",
+              "createdAt": "2026-01-23T10:25:31Z",
+              "updatedAt": "2026-01-23T10:25:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cWXPd",
+          "commit": {
+            "abbreviatedOid": "0b62f08"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T10:29:10Z",
+          "updatedAt": "2026-01-23T10:29:10Z",
+          "comments": [
+            {
+              "originalPosition": 314,
+              "body": "> Maybe make it more explicit that `packed=0` can be used for both queries and responses above.\n\nhttps://github.com/cbor-wg/cbor-dns/pull/16/changes#diff-c1ee54122d8c0f166af4524c64e92b0795cd43782536a16364a57a948d8cc838R600 isn't explicit enough?",
+              "createdAt": "2026-01-23T10:29:10Z",
+              "updatedAt": "2026-01-23T10:29:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cXqDx",
+          "commit": {
+            "abbreviatedOid": "0b62f08"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T12:04:30Z",
+          "updatedAt": "2026-01-23T12:04:40Z",
+          "comments": [
+            {
+              "originalPosition": 543,
+              "body": "Ah, true I meant `[-1:]` instead of `[:-1]` \ud83d\ude05 will go for indexes, then it should be clearer.",
+              "createdAt": "2026-01-23T12:04:30Z",
+              "updatedAt": "2026-01-23T12:04:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cXxyz",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T12:14:10Z",
+          "updatedAt": "2026-01-23T12:14:10Z",
+          "comments": [
+            {
+              "originalPosition": 567,
+              "body": "Ah, right, those would need to be resolved first.",
+              "createdAt": "2026-01-23T12:14:10Z",
+              "updatedAt": "2026-01-23T12:14:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cYfHR",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:10:21Z",
+          "updatedAt": "2026-01-23T13:10:21Z",
+          "comments": [
+            {
+              "originalPosition": 311,
+              "body": "No, don't put the rule in again, that will make it more confusing. As stated before, I'd ideally have a sentence mirroring what is said above about TBDnc but for 113.\r\n\r\nEDIT: seen, you've already added that.",
+              "createdAt": "2026-01-23T13:10:21Z",
+              "updatedAt": "2026-01-23T13:21:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cYf_k",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:11:20Z",
+          "updatedAt": "2026-01-23T13:11:21Z",
+          "comments": [
+            {
+              "originalPosition": 314,
+              "body": "Yes, thats enough, thanks for making it explicit.",
+              "createdAt": "2026-01-23T13:11:20Z",
+              "updatedAt": "2026-01-23T13:15:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cYjEL",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:14:38Z",
+          "updatedAt": "2026-01-23T13:14:39Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Minor: something in this sentence is off grammatically. Maybe missing a \"for\".\n\nBut I'd also argue that the whole sentence is mood as in why would I expect another integration tag to be used, if it was not defined to be used above?",
+              "createdAt": "2026-01-23T13:14:39Z",
+              "updatedAt": "2026-01-23T13:14:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cY5S9",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T13:37:35Z",
+          "updatedAt": "2026-01-23T13:37:35Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "> But I'd also argue that the whole sentence is mood as in why would I expect another integration tag to be used, if it was not defined to be used above?\r\n\r\nThe sentence is required by `-packed`:\r\n\r\n> Application protocol specifications need to be **explicit about which integration tags are in use** [...]\r\n\r\nThe rest I will look into, once I have a physical keyboard under my fingers again. ",
+              "createdAt": "2026-01-23T13:37:35Z",
+              "updatedAt": "2026-01-23T13:37:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7caRBO",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T14:43:44Z",
+          "updatedAt": "2026-01-23T14:43:44Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Fun, well, good point indeed.",
+              "createdAt": "2026-01-23T14:43:44Z",
+              "updatedAt": "2026-01-23T14:43:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7cjGNq",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2026-01-24T00:20:21Z",
+          "updatedAt": "2026-01-24T13:42:34Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "Why had it lost `simple(0)` ? Constrained implementations probably will want to save some memory as table _V_ already grows fast.\r\n\r\nUPD: I see a paragraph about it below at line 720 but phrasing is not clear to me.",
+              "createdAt": "2026-01-24T00:20:21Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
+            },
+            {
+              "originalPosition": 509,
+              "body": "What does `register()`  method of unpacker do?",
+              "createdAt": "2026-01-24T13:21:50Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
+            },
+            {
+              "originalPosition": 545,
+              "body": "This pseudocode looks more like some existing language which may be unfamiliar to significant part of readers. The pseudocode should be more similar to English prose, prog.language-independent. While `if` and `for` are ubiquitous, `match`/`type_match` are not so.\r\nAlso, it's better to use CBOR types - what is `None` when mapped to CBOR? Is it `null` or `undef`? Probably this line should look like:\r\n`idx: Int or null = null`\r\n\r\nAnd also we call it `map` in CBOR instead of JavaScript's `Object`.",
+              "createdAt": "2026-01-24T13:29:10Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
+            },
+            {
+              "originalPosition": 560,
+              "body": "What is `content` here?",
+              "createdAt": "2026-01-24T13:30:57Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
+            },
+            {
+              "originalPosition": 559,
+              "body": "`range` may be different in different programming languages. In pseudocode it is better (less ambiguously) written as:\r\n\r\n`for i := idx to unpacker.packing_table.length inclusive {`\r\n\r\nbecause off-by-one errors are too common.",
+              "createdAt": "2026-01-24T13:32:28Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
+            },
+            {
+              "originalPosition": 502,
+              "body": "`value` and `content` sound too synonymous. I think better names would be `tag_number` and `tag_content`.",
+              "createdAt": "2026-01-24T13:39:12Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
+            },
+            {
+              "originalPosition": 585,
+              "body": "What does `extend()` method do?",
+              "createdAt": "2026-01-24T13:40:27Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
+            },
+            {
+              "originalPosition": 481,
+              "body": "I was unable to grok algorithm in 5 minutes. I'll try again and return if it should be made more \"pseudo\".",
+              "createdAt": "2026-01-24T13:42:25Z",
+              "updatedAt": "2026-01-24T13:42:34Z"
             }
           ]
         }
