@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-25T01:08:09.511683+00:00",
+  "timestamp": "2026-01-27T01:05:27.145650+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -262,7 +262,7 @@
       "labels": [],
       "body": "Hi again. We're interested in using this spec for encoding zone files as CBOR. I am aware of C-DNS; the use cases we're working with involve heavily constrained storage and very small zone files (for some environments, we're working with a hard limit of 520 bytes per zone file). This is not far off from the network constraints that your draft is aimed to handle, and my understanding of C-DNS and its overhead is that it is not suitable for such small pieces of data (if you disagree with this assessment, please let me know; it's possible that I'm misunderstanding how C-DNS works).\n\nAs far as I can tell, it should not be very difficult to adapt your spec to handle zone files. I would expect the encoding to look very similar to an array of resource records per Sec 3.2. The main difference I see is in the eliding of resource record entries:\n\n* If the name is elided, it can't be inferred from a question since there is no question for a zone file. I would suggest inferring it from the previous resource record, as is done with standard zone files.\n* If the record type or record class is elided, same issue as above; I would suggest inferring `AAAA` and `IN` as is specified in Sec. 3.3.\n* Eliding the TTL seems useful, as is done with standard zone files; an elided TTL would be inferred to match a previously specified default.\n* I'm not certain of the optimal precedence for eliding things, but in our use cases, the TTL and class would generally be elided a lot more often than the name or the record type. Thoughts?\n* Specifying the default TTL would have to be done... somehow? I'm not sure of the best way to mimic a `$TTL` directive in CBOR. Thoughts?\n\nDo the elision thoughts above make sense? Do you see other tweaks that would be needed to support zone files? Curious what your thoughts are here.",
       "createdAt": "2025-10-07T15:03:29Z",
-      "updatedAt": "2026-01-17T19:54:33Z",
+      "updatedAt": "2026-01-25T01:16:24Z",
       "closedAt": null,
       "comments": [
         {
@@ -306,6 +306,13 @@
           "body": "Reading about [C-DNS](https://datatracker.ietf.org/doc/html/rfc8618), yes, it is not assumed to be used on such small data. However, some of it's techniques can be utilized for small zone files, like referencing tables or IP prefixes. However, this is not much different from cbor-packed), so yet to be thought. Let's begin from a preprocessing step after which usual name compression applied (and possibly cbor-packed or CBAPT).\n\nGiven that zone file is table with just few fixed columns, we can apply column-oriented to part of it wit run-length encoding:\n* class and TTL columns are taken out from individual RRs entirely\n* zone data is prepended with `[ ? $ORIGIN, [classes], [TTLs]]`\n   - `$ORIGIN`, if present, serves to ensure this label always gets low number in _V_ table so would be referenced by one byte, just as `@` in traditional text format\n* Both `classes` and `TTLs` arrays have run-length encoding of corresponding column:\n   - uint: number itself\n   - negative integer: minus how many times previous field was repeated\n   - truncated array mean repeating last element as many times as necessary\n\nFor example, in fragment like\n```\n...   3600  IN  ...\n...   3600  IN  ...\n...   3600  IN  ...\n...   3600  IN  ...\n...     60  IN  ...\n...   3600  IN  ...\n...   3600  IN  ...\n...   3600  CH  ...\n...   3600  HS  ...\n...   3600  IN  ...\n...    600  IN  ...\n...    600  IN  ...\n```\nthese can be `[3600, -3, 60, 3600, -4, 600], [1, -6, 3, 4, 1]`.\n\nNote that RR type is problematic to such technique because it introduces ambiguity in some cases: in\n`[\"foo\", \"bar\", \"ns2\", simple(4)]`\nwhere NAME stops and DATA begins? Human can deduce from \"ns2\" that it is probably\n`foo.bar   IN NS  ns2.example.com`\nbut what to do in algorithm?..\nOf course name could be always FQDN so ending with `simple(N)` of `6(N)` reference, but that would not utilize relative names possible even in a text zone file, and will spend a byte anyway.",
           "createdAt": "2026-01-17T19:54:33Z",
           "updatedAt": "2026-01-17T19:54:33Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "I'd record here some other ideas came to me for the week passed.\n\nFirst, about `$ORIGIN` and `$TTL`. Note that current DNS-CBOR format describes root label as empty string but omits it it for compactness. While someone can say it is non-conformant, actually this could be used for zone files: we just declare that by default `$ORIGIN` is `\"\"` and elided, that is, current format is particular case, where all labels are added `$ORIGIN` at end (after expansion from _V_) becoming absolute names for typical queries/responses. And we augment format with:\n```\norigin-defttl = (\n   domain-name .default \"\",\n   ? ttl\n)\n```\nadding `? origin-defttl` between `? flags,` and `? question-section,`. Note that this also could be used not in zone files but usual responses where all names are under same domain - it will save one byte for `simple(N)` in each RR.\n\nThen, alternative compression encodings... observe that DNS-CBOR uses original binary format for RDATA  if it is shorter than CBOR version - that is, parser for original format must be included anyway even on constrained implementation. Also note that CBAR is just one bstr format in CBAPT, but others are possible and encouraged - so we can create modified format for original DNS format with e.g. bitmap of which fields are elided or shorter! And this can try achieve additional compactness\nbecause e.g. TTL in DNS-CBOR always has 1-byte overhead (0x18-0x1A).\n\nA small interlude with explanation of data models (much discussed in CBOR WG ML last months) must be said here. Observe that from \"purist\" CBOR view every data type must be explicit - i.e. register a tag for label, a tag for RR, a tag for RFC 1035's `<character-string>` (because e.g. `HINFO` uses them *not* as concatenation and was unobsoleted by Cloudflare), and so on. It is just we omit all that for the goal of compact representation, but implicitly - in application data structures - we have them anyway. This means, we can define alternative encodings for DNS-CBOR, better suited for your use cases, as long as we can provide lossless conversion to (and back from) CBOR. And CBAPT (CBOR-TPL) is all about such things.\n\nSo it could like e.g.\n`10(['nc', 'atom1', 'atom2', \"foo\", 3600, bstr-rump])`\nwith possibly tag and and function omitted by media type for your 520 bytes, and the bstring contains encodings better suited for DNS than CBOR (e.g. `\"awseb-e-t-awsebloa-9999999999\"` example from mentioned ticket is longer than 23 so has overhead, bstr can't be longer 64k), however made in a way that stream parser of it can return CBOR items to your API. \nSo our type byte must encode not only elision of type/class/TTL at record start, but other things also, including \"repeat  previous name/type/class/TTL\" (instead of `rrset=true)`,   and '[' and ']' and label start and may be even several 4-byte fields (for SOA) if we'll have enough codepoint space; need type for `<character-string>` (alas not set of: HINFO consists of exactly two distinct and unobsoleted by RFC 8482) and generic RDLENGTH/RDATA (as new types format is not always known), look if need hack for `OPT (#6.141)` or can go without it, and probably need escape to general CBOR item. Because we work on zone files, we can bring back some constructs from it also, such as `@`.\n\n```\n      0               \n      0 1 2 3 4 5 6 7\n     +-+-+-+-+-+-+-+-+\n     |0 0|LabelLength| as in classic DNS\n     +-+-+-+-+-+-+-+-+\n\n      0               \n      0 1 2 3 4 5 6 7\n     +-+-+-+-+-+-+-+-+\n     |0 1|0 0|0 0 0 0| '@' special label, literally \n     +-+-+-+-+-+-+-+-+\n\n      0               \n      0 1 2 3 4 5 6 7\n     +-+-+-+-+-+-+-+-+\n     |0 1 0| ArrSize | repeat previous Name/Class/TTL here, instead of rrset=true\n     +-+-+-+-+-+-+-+-+\n```\nHere, codes 65-86 are the same as usual array open but denote it is RR with RDATA only, and it can be 1-22 items (not zero!) and 87 (0x57) is for \"indefinite-array start\".\n\nCodes 0x58-0x5f are for special \"compressed short bstr\", low bits denoting unpacked length:\n|val | bytes\n|---|---\n|  0 | 6\n|  1 | 8\n|  2 | 10\n|  3 | 12\n|  4 | 14\n|  5 | 16\n|  6 | 18\n|  7 | 20\n\n* 0x60-0x7f is treated as unsigned integer from CBOR (just shifted because label occupied 0x00-0x1f).\n* 0x80-0x8f is same as in CBOR - array.\n* 0xA0-0xBf: non-label bstr 0-29 bytes, 30=1 byte len, 31=2 bytes len\n* 0xC0-0xCF: sequence of 1 to 16 <character-string> follows\n* 0xD0-0xF3: Label Reference in _V_ 0..35\n* 0xF4-0xF7: false/true/null/undefined\n* 0xf8: 1 byte reference in _V_ follows,\n* 0xf9: 2 bytes reference in _V_ follows\n* 0xfA: 4 byte  reference in _V_ follows\n* 0xFB: escape to single CBOR item, possibly tagged and/or structural (e.g. map)\n* atoms as in CBAR\n* 0xff indefinite terminator as in CBOR\n\nImportant: we have **distinct** reference space here, one for _V_ and one for atoms. This eliminates problem with _V_ growing too fast for cbor-packed so references become fat too early.\n\nMost interesting here is special \"compressed short bstr\". It is intended as efficiency hack for 3 cases:\n1.  instead of `ttl, record-type, record-class` sequence\n2. compressing runs of zeroes in IPv6 addresses\n3. five integers in SOA record - a chance for less overhead when having label sequences\n\nWhen it terminates label sequence for `domain-name`, it is 6 or 8 bytes (in former case `record-class` is elided as in DNS-CBOR), like wire representation, but reordered to match DNS-CBOR: TTL then Type then Class. As before, it is used only if resulting representation is shorter.\n\nNow, how this compressed short string may be encoded? I have several variants. Don't know which is better - probably need tests against large sets of data.\n\nFirst is VarNibbles from muSCTP: chunks of nibbles in format:\n* bitmap nibble - 1 for RLE, 0 for just zero\n* non-zero nibbles are copied as-is\n* if nibble is zero, then next bit in bitmap is consulted - if it is 1, then after this zero nibble follows nibble with how many times to repeat that nibble\n\nFor example, let's encode OPT (untagged version) like it is in classic DNS (excerpts from RFC 6891 below), but in our format it is rearranged payload size is passed minus 512, i.e. 0 if it is 512 (because :\n\n```\n       | TYPE       | u_int16_t    | OPT (41)                     |\n       | CLASS      | u_int16_t    | requestor's UDP payload size |\n       | TTL        | u_int32_t    | extended RCODE and flags     |\n\nso with TTL being first and our rearrangement it is\n\n                  +0 (MSB)                            +1 (LSB)\n       +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+\n    0: |         EXTENDED-RCODE        |            VERSION            |\n       +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+\n    2: | DO|                           Z                               |\n       +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+\n    4: |                                                         2   9 | TYPE\n       +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+\n    6: |                               Z                               | CLASS\n       +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+\n```\nSo with flag  DO=1 (and 41=0x29) we have nibbles (`<size>` denotes repeat):\n\n`\"\" 0x5a 0b1100 0 <4> 8 0 <5> 2 9 = 6 bytes total`\n\n(the cheat here to cut class as it is zeroes and pass 6 bytes instead of 8).\n\nThere is possible addition here: permutation before VarNibbles: first lowest nibbles of every int, then second low, third, and highest ones, so the tail likely will have many zeroes combined, but requires storing original size and same width for all integers. But this may have bad impact for IPv6 address so need a flag...\n\nYet another idea is Bitmap Ranges (muSCTP but simplified): view as bitstring and have:\n```\n      0                   0                   0               \n      0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7 \n     +-+-+-+-+-+-+-+-+   +-+-+-+-+-+-+-+-+   +-+-+-+-+-+-+-+-+\n     |0|   Bitmap    |   |1 0|   N 0's   |   |1 1|   N 1's   |\n     +-+-+-+-+-+-+-+-+   +-+-+-+-+-+-+-+-+   +-+-+-+-+-+-+-+-+\n```\nwhere \"bitmap\" are seven bits copied as-is if there are too many alternating, and other are RLE counts of long runs of 0's or 1's. Could be optimized to seven bits: just N<96 for zeroes and N-96 for up to 32 ones.\n\n---\nLastly, crazy idea of yet another overall compression format: have original DNS wire format and intersperse it with instruction bytes in LZ4/RLE style, taking Bitmap Ranges idea, but make two-bit for RLE: run of zero bytes, run of literal bytes, an atom (or several atoms in a row), a reference to table _V_ (how many in run of them? at most 2?), and a variant like \"0|Bitmap\" for just few of them alternating; atoms/references are VarUInt30 in the stream, and probably don't need to pull entire bitmap at start - just opcode byte as in LZ-family; like in C-DNS we can predefine common type/class combinations into _V_; Pyramint6 could be simplified to 0..51 and then in 16-units:\n```\n   110011 - 51\n   110100 - 64  = 4*16\n   110101 - 80  = 5*16\n   ...\n   111111 - 240 = 15 *16\n\nTBD how many codepoints for each\n```\nI'll finish it here now in not very explained form because GitHub interface becomes more and more slow while I typing it...",
+          "createdAt": "2026-01-25T01:16:24Z",
+          "updatedAt": "2026-01-25T01:16:24Z"
         }
       ]
     },
@@ -321,7 +328,7 @@
       "labels": [],
       "body": "Figure 17 currently reads\n\n```\n   TBD113(\n     TBD28259(\n       [\n         [\"org\", 42],\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       ]\n     )\n   )\n```\n\nI think it should rather be\n\n```\n   TBD113(\n     [\n       [\"org\", 42],\n       TBD28259(\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       )\n     ]\n   )\n```\n\nThis would avoid the need for defining [tag equivalence](https://www.ietf.org/archive/id/draft-ietf-cbor-packed-17.html#name-tag-equivalence) of TBD28259 (in some circumstances) with the 2-element array expected by 113, or a change to the semantics of 113.\n\nThe overall number of bytes is unchanged, but some explanatory wording is needed, especially when TBD28259 is implicitly injected by the media type (\"as enclosing the rump of the outer-most item which should be tag 113\").",
       "createdAt": "2025-12-11T14:14:35Z",
-      "updatedAt": "2026-01-16T17:05:06Z",
+      "updatedAt": "2026-01-26T19:16:09Z",
       "closedAt": null,
       "comments": [
         {
@@ -344,6 +351,20 @@
           "body": "> I think there is a slight confusion here: The goal of this ticket is fixing the order of the (implicit, aka not-sent-on-the-wire) TBD28259 and TBD113 in case `packed=1`. So TBD113 is \"needed\" as an (implicit) outer table setup.\n\nReally? I thought Figure 17 was about using combination of tags in explicit form... Implicit in `packed=1` should be different Figure, then - because implicit form can go further beyond simple \"tag stripped\" and potentially re-arrange data.\n\n> But we indeed discussed disallowing nested (_inner_, and thereby explicit) occurrences of TBD113/TBD1113 inside TBD28259.\n\nI think we discussed changing TBD28259 in a way that it (under `packed=1`) don't need TBD113/TBD1113 now (taking it's functions to itself) due to \"appending vs prepending\" issue.",
           "createdAt": "2026-01-16T17:05:06Z",
           "updatedAt": "2026-01-16T17:05:06Z"
+        },
+        {
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "body": "Is the description in https://github.com/cbor-wg/cbor-dns/pull/16/changes#diff-c1ee54122d8c0f166af4524c64e92b0795cd43782536a16364a57a948d8cc838R795-R823 clear enough? Merging that PR could then close this issue.",
+          "createdAt": "2026-01-26T13:08:58Z",
+          "updatedAt": "2026-01-26T13:08:58Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "I thought we discussed changing TBD28259 definition to be that _instead_ of using TBD113, so interaction between 113 and 28259 is not quite clearly depicted in that range of lines.\n\nBut yes, that merging PR (after changes) should close this issue.",
+          "createdAt": "2026-01-26T19:16:09Z",
+          "updatedAt": "2026-01-26T19:16:09Z"
         }
       ]
     }
@@ -1071,7 +1092,7 @@
       "labels": [],
       "body": "This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types, classes, EDNS(0) option codes and SVCB SvcParamKeb but even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.",
       "createdAt": "2026-01-19T15:11:57Z",
-      "updatedAt": "2026-01-23T23:56:23Z",
+      "updatedAt": "2026-01-26T20:14:59Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
@@ -1096,6 +1117,34 @@
           "body": "Gah. Of course people won't use such long literals for such short substrings. What people do expect is familiar syntax:\r\n```\r\ndns-rr'example.org  3600 IN A 192.0.0.2'\r\n```\r\ntranslating to entire RR array. Or sequence to be inside array... because actually, from data model point of view, every item should have explicit tag on it, e.g.\r\n`TBDrr([\"example\", \"org\", 3600, 5, \"ns1\", \"example\", \"org\"])`\r\nIt is just that we omit such tags for the compactness of wire representation, but in application data structures implementers will have data types more explicit - RR, name, type, class, ...\r\n\r\nUPD: ...Yes, I think it should expand to CBOR sequence: for allowing things like\r\n`[dns-rr'example.com 4800 A', ip'192.0.0.2']`\r\nor actually, for better specifying bstr-s as RRDATA unknown to (current version of) parser, or - for example - to `dns-opt''` and `dns-svp''`.\r\nSo it will expand to only those things explicitly listed inside quotes, allowing to specify more precisely what goes to array. And paying attention to dot at end to produce empty string, thus allowing to support zone files also, but `$ORIGIN` suggestion etc. is better to discuss in #12 \r\n\r\nTo summarize, `dns-rrt`, `dns-rrc` and `dns-cls` are not needed, unified `dns-rr` should be used instead. As for `dns-opt''` and `dns-svp''`, these are fine.",
           "createdAt": "2026-01-23T23:19:27Z",
           "updatedAt": "2026-01-23T23:56:23Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "While I like the idea, I am not sure how practical it is: What about elided fields? When using your proposal, these elisions would be hidden from the reader. This could have advantages, e.g. when reading a dump of a DNS+CBOR object, but it also comes with the usual pitfalls when hiding information from the reader... Case end point: you also elide the IN class already in your example. Maybe a compromise which would not follow the text representation format of DNS 100% would be something like:\r\n\r\n```\r\n[dns-rr'4800 example.com (IN) (AAAA)', ip'2001:db8::1']\r\n```\r\n\r\nWhere `()` signifies that the field was elided. Given the prevalence of `IN` it could be elided in EDN as well...\r\n\r\n> To summarize, `dns-rrt`, `dns-rrc` and `dns-cls` are not needed, unified `dns-rr` should be used instead. As for `dns-opt''` and `dns-svp''`, these are fine.\r\n\r\n\"not needed\" I wouldn't say, I still see some potential use when classes or types are represented on their own somehow. But granted, I have no example for that.\r\n\r\n`dns-opt` and `dns-svp` should work then similar to your `dns-rr` proposal, IMHO.\r\n\r\n`dns-opt` somewhat inspired by the expired [draft-peltan-edns-presentation-format](https://datatracker.ietf.org/doc/draft-peltan-edns-presentation-format/03/)\r\n\r\n```\r\n[dns-rr'4800 example.com (IN) OPT', dns-opt'COOKIE: 36714f2e8805a93d,4654b4ed3279001b OPT1234: 000004d2']\r\n```\r\n\r\nand `dns-svcb` just following the text representation specified in [RFC 9460](https://datatracker.ietf.org/doc/html/rfc9460):\r\n\r\n```\r\n[dns-rr'4800 _dns.example.com (IN) SVCB', dns-svcb'1 dns.example.org alpn=co,docpath']\r\n[dns-rr'4800 example.com (IN) HTTPS', dns-svcb'1 . alpn=h3']\r\n```\r\n\r\n_Edit:_ fixed some syntax errors and brought the `dns-svcb` examples more in line with RFC9460 text representation.",
+          "createdAt": "2026-01-26T13:51:58Z",
+          "updatedAt": "2026-01-26T13:57:22Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> `[dns-rr'4800 example.com (IN) (AAAA)', ip'2001:db8::1']`\r\n\r\n(took the liberty to put the TTL first, differing from your example. This way it is more in line with the textual format used in zone files and also the order of values used in DNS+CBOR)",
+          "createdAt": "2026-01-26T13:59:24Z",
+          "updatedAt": "2026-01-26T13:59:24Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "No, there is no problem with elision: see, the EDN means \"diagnostic\" so it primarily should fit display purposes of data - which could be not valid - not only due to bugs but e.g. in unit tests etc. So the mapping back and forth must be 1-to-1 to be unambiguous what is sent/received (yes, you are right, not 100% follow the text representation format of DNS, because that will make you to write **much more** code, especially if you parse every RDATA inside `dns-rr` instead of separate app-strings for each type... ok, if someone in future want to implement full parser, we can be pedantic and for now call it `dns-rrh` for \"head\"). That is, elision happens on layer upper to particular RR, and parser do not have to have complications about guessing elisions or supporting parentheses - i.e.\r\n\r\n```\r\n[dns-rr'example.com 4800 A', ip'192.0.0.2']  <=> [\"example\", \"com\", 4800, 1, ip'192.0.0.2']\r\n\r\n[dns-rr'example.com 4800 IN NS', ip'192.0.0.2']  <=> [\"example\", \"com\", 4800, 2, 1, ip'192.0.0.2']\r\n\r\n[dns-rr'example.com 4800', ip'192.0.0.2']  <=> [\"example\", \"com\", 4800, ip'192.0.0.2']\r\n```\r\n\r\nNote that latter is invalid from the point of view of zone files syntax, which always requires record type, but we can pay this price for elisions - this is not full zone file to DNS-CBOR converter, but just part of it to make human life easy 80/20 (BTW I don't remember if EDN supports expansion of single-quote `app''` string to CBOR sequence; if not, should be fixed in EDN, not us here).\r\n\r\n> \"not needed\" I wouldn't say, I still see some potential use when classes or types are represented on their own somehow. But granted, I have no example for that.\r\n\r\nIn a form which I propose, we just use same `dns-rr''` for single field - e.g.\r\n`dns-rr'4800', ip'192.0.0.2']  <=> [4800, ip'192.0.0.2']`\r\nfor just TTL [*], or `dns-rr'CNAME'` for just `5`. Again, such reduced syntax is not valid for zone files, but we are not obliged to have 100% conformance here, e.g. even parentheses and comments are not needed because EDN has it's own. Should support \\DDD escape sequences, though.\r\n\r\n> dns-opt and dns-svp should work then similar to your dns-rr proposal, IMHO.\r\n> \r\n> dns-opt somewhat inspired by the expired [draft-peltan-edns-presentation-format](https://datatracker.ietf.org/doc/draft-peltan-edns-presentation-format/03/)\r\n> \r\n> [dns-rr'4800 example.com (IN) OPT', dns-opt'COOKIE: 36714f2e8805a93d,4654b4ed3279001b OPT1234: 000004d2']\r\n> \r\n> and dns-svcb just following the text representation specified in [RFC 9460](https://datatracker.ietf.org/doc/html/rfc9460):\r\n> \r\n> [dns-rr'4800 _dns.example.com (IN) SVCB', dns-svcb'1 dns.example.org alpn=co,docpath']\r\n> [dns-rr'4800 example.com (IN) HTTPS', dns-svcb'1 . alpn=h3']\r\n\r\nDid not read that draft yet, but I like your examples.\r\n\r\n[*] *Edit:* That probably should be `dns-rr' 4800'` with blank to distinguish from generating `\"4800\"` label, see next comment...",
+          "createdAt": "2026-01-26T19:44:32Z",
+          "updatedAt": "2026-01-26T20:14:59Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> > `[dns-rr'4800 example.com (IN) (AAAA)', ip'2001:db8::1']`\r\n> \r\n> (took the liberty to put the TTL first, differing from your example. This way it is more in line with the textual format used in zone files and also the order of values used in DNS+CBOR)\r\n\r\nNo, TTL first is invalid in zone files, and DNS-CBOR also has label before TTL when not elided (to make decoder know that label ended). [RFC 1035](https://www.rfc-editor.org/rfc/rfc1035) describes syntax on pages 34-36:\r\n```\r\n    <domain-name><rr> [<comment>]\r\n\r\n    <blank><rr> [<comment>]\r\n...\r\n<rr> contents take one of the following forms:\r\n\r\n    [<TTL>] [<class>] <type> <RDATA>\r\n\r\n    [<class>] [<TTL>] <type> <RDATA>\r\n\r\n@               A free standing @ is used to denote the current origin.\r\n\r\n\\X              where X is any character other than a digit (0-9), is\r\n                used to quote that character so that its special meaning\r\n                does not apply.  For example, \"\\.\" can be used to place\r\n                a dot character in a label.\r\n\r\n\\DDD            where each D is a digit is the octet corresponding to\r\n                the decimal number described by DDD.  The resulting\r\n                octet is assumed to be text and is not checked for\r\n                special meaning.\r\n\r\n( )             Parentheses are used to group data that crosses a line\r\n                boundary.  In effect, line terminations are not\r\n                recognized within parentheses.\r\n\r\n;               Semicolon is used to start a comment; the remainder of\r\n                the line is ignored.\r\n```\r\nSo parentheses in `(AAAA)` will be with unexpected meaning for those accustomed to 1035 zone files. But as I've said in earlier comment, we can just omit them; and 1035 syntax even allows that except for record type, which we can also relax here, because we provide EDN description for one RR in isolation, and full 1035 requires parser with state between lines, which would unnecessarily complicate EDN.\r\n\r\n**N.B.:** that original 1035 just prohibited labels starting from numbers to distinguish from TTL in parser, but now these are allowed, so we have to think about EDN parser here in case of elisions. May be a blank before TTL?..\r\n",
+          "createdAt": "2026-01-26T19:52:57Z",
+          "updatedAt": "2026-01-26T19:56:16Z"
         }
       ],
       "reviews": [
@@ -1721,7 +1770,7 @@
       "labels": [],
       "body": "TBD28259 (see section Name Compression) put the final death nail into the idea of the EDNS(0) options being a map.",
       "createdAt": "2026-01-19T15:24:11Z",
-      "updatedAt": "2026-01-23T23:40:05Z",
+      "updatedAt": "2026-01-26T22:09:37Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
@@ -1746,6 +1795,55 @@
           "body": "I support making it array (so that *everything* structured is array which allows for subset coding in CBAPT, but this I'll write more detailed later in #12), however did not quite understand why name compression was that nail.\r\n\r\nThe only possible thing I may be suggesting here is to add a phrase that order of key-value pairs is, like in original DNS, not important (behaves like map) - for those fearless who could try to add determinism here in future...",
           "createdAt": "2026-01-23T23:40:05Z",
           "updatedAt": "2026-01-23T23:40:05Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> ..., however did not quite understand why name compression was that nail.\r\n\r\nBecause the order, strings appear within the object, is important with name compression. Unless when using deterministic encoding (or more specific just what used to be called `lexicographic-map-sorting` encoding constrained) there is no given order to maps in CBOR. So unless we enforce the encoding constraint we can't use maps within TBD28259. However, given that we don't have strings here in the keys, but unsigned ints, and those ints are to be in numerical order for SvcParamKeys, I'd rather avoid confusion and don't use such encoding constraints and just provide an order with the list encoding.",
+          "createdAt": "2026-01-26T13:33:34Z",
+          "updatedAt": "2026-01-26T13:33:34Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "Ah, so we could get different compressed size depending on order of strings within maps. Got it.\r\nWhere's the approve button here...",
+          "createdAt": "2026-01-26T18:29:58Z",
+          "updatedAt": "2026-01-26T18:29:58Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Ah, so we could get different compressed size depending on order of strings within maps. Got it.\r\n> Where's the approve button here...\r\n\r\nNot a different size. Depending on how you write and in which programming language your encoder, e.g., use an in-memory representation of a hash map of objects first, and then convert to binary. This can actually completely mess up your references, as strings might not be in the same order in the binary as they were in your in-memory representation.",
+          "createdAt": "2026-01-26T21:09:44Z",
+          "updatedAt": "2026-01-26T21:09:44Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Where's the approve button here...\r\n\r\nUnder the \"Files changed\" tab.",
+          "createdAt": "2026-01-26T21:10:08Z",
+          "updatedAt": "2026-01-26T21:10:08Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Not a different size. Depending on how you write and in which programming language your encoder, e.g., use an in-memory representation of a hash map of objects first, and then convert to binary. This can actually completely mess up your references, as strings might not be in the same order in the binary as they were in your in-memory representation.\r\n\r\nAnd sure, a smart programmer will not make such a mistake, but let's try to prevent potentials for programmers to shoot themselves in the foot directly here.",
+          "createdAt": "2026-01-26T21:11:47Z",
+          "updatedAt": "2026-01-26T21:12:29Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> The only possible thing I may be suggesting here is to add a phrase that order of key-value pairs is, like in original DNS, not important (behaves like map) - for those fearless who could try to add determinism here in future...\r\n\r\nThought I amended something for that, but apparently, I forgot. Please wait with the merge until tomorrow when I can check my work machine.",
+          "createdAt": "2026-01-26T21:14:56Z",
+          "updatedAt": "2026-01-26T21:14:56Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> > Ah, so we could get different compressed size depending on order of strings within maps. Got it.\r\n> > Where's the approve button here...\r\n> \r\n> Not a different size. Depending on how you write and in which programming language your encoder, e.g., use an in-memory representation of a hash map of objects first, and then convert to binary. This can actually completely mess up your references, as strings might not be in the same order in the binary as they were in your in-memory representation.\r\n\r\nAh, not thought about it. So I am not so smart programmer :) let's prevent foot guns directly.\r\n\r\n> Under the \"Files changed\" tab.\r\n\r\nDon't see it here either, but OK, let's wait.",
+          "createdAt": "2026-01-26T22:09:37Z",
+          "updatedAt": "2026-01-26T22:09:37Z"
         }
       ],
       "reviews": [
@@ -1829,7 +1927,7 @@
       "labels": [],
       "body": "This reworks the name compression as discussed during the last few meetings we had.\r\n\r\nNamely:\r\n\r\n- TBD28259 now appends, rather than prepends to existing packing tables to allow for single pass decoders with minimum state.\r\n-  Consequently, disallow inner table setup tags to TBD28259, as that would increase complexity of both decoders and encoders\r\n- Clarify implicit nature with `packed`\r\n- Use actual DNS examples\r\n- Add example decoder as pseudo-code\r\n- Additionally, add some considerations on maps within TBD28259 (see also #15)",
       "createdAt": "2026-01-22T21:30:42Z",
-      "updatedAt": "2026-01-24T13:42:34Z",
+      "updatedAt": "2026-01-26T19:08:39Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
@@ -2479,6 +2577,246 @@
               "body": "I was unable to grok algorithm in 5 minutes. I'll try again and return if it should be made more \"pseudo\".",
               "createdAt": "2026-01-24T13:42:25Z",
               "updatedAt": "2026-01-24T13:42:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c40so",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T12:44:06Z",
+          "updatedAt": "2026-01-26T12:44:06Z",
+          "comments": [
+            {
+              "originalPosition": 560,
+              "body": "`.content` is used to access the tag content",
+              "createdAt": "2026-01-26T12:44:06Z",
+              "updatedAt": "2026-01-26T12:44:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c41sH",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T12:45:11Z",
+          "updatedAt": "2026-01-26T12:45:11Z",
+          "comments": [
+            {
+              "originalPosition": 502,
+              "body": "+1 for tag number instead of value, but I'd leave out the `tag_` prefix",
+              "createdAt": "2026-01-26T12:45:11Z",
+              "updatedAt": "2026-01-26T12:45:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c42r9",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T12:46:26Z",
+          "updatedAt": "2026-01-26T12:46:26Z",
+          "comments": [
+            {
+              "originalPosition": 585,
+              "body": "extending an array (in-place) by another array, as in\r\n\r\n```\r\n[1,2].extend([3,4]) == [1,2,3,4]\r\n```",
+              "createdAt": "2026-01-26T12:46:26Z",
+              "updatedAt": "2026-01-26T12:46:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c5QzC",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T13:17:56Z",
+          "updatedAt": "2026-01-26T13:17:56Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "Before _V_ was more how a decoder would see it. Since the construction algorithm above is more from an encoder view, I decided to bring it more in line with that. Still, an encoder can decide to use the reference here (as described below), as it will eventually find it when searching for `\"www\", \"example\", \"org\"`. Memory isn't that much of an issue here as _V_ is an implicit table. I find it more important to be in line with the text to understand the construction of _V_ than prematurely provide optimizations for implementers.",
+              "createdAt": "2026-01-26T13:17:56Z",
+              "updatedAt": "2026-01-26T13:17:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c5SpA",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T13:19:57Z",
+          "updatedAt": "2026-01-26T13:19:57Z",
+          "comments": [
+            {
+              "originalPosition": 509,
+              "body": "Tell it that \"113\" is a setup tag. In my mind, this would allow the unpacker to recognize references in the first place (e.g., simple values can be, as we know, used for something else in different contexts). But maybe I am shooting over the target here.",
+              "createdAt": "2026-01-26T13:19:57Z",
+              "updatedAt": "2026-01-26T13:19:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c5UTj",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T13:21:57Z",
+          "updatedAt": "2026-01-26T13:21:57Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "> This pseudocode looks more like some existing language which may be unfamiliar to significant part of readers. The pseudocode should be more similar to English prose, prog.language-independent. While `if` and `for` are ubiquitous, `match`/`type_match` are not so.\r\n> Also, it's better to use CBOR types - what is `None` when mapped to CBOR? Is it `null` or `undef`? Probably this line should look like:\r\n> `idx: Int or null = null`\r\n\r\nAgreed. My pseudo code could be more pseudo and not some wild mixture of Python and Rust ^^.\r\n\r\n> And also we call it `map` in CBOR instead of JavaScript's `Object`.\r\n\r\nObject isn't meant to be an Object in the JavaScript sense here, but a general CBOR-represented object that we do not know the type of (yet). In OOP, all major types would inherit from Object. But again, I guess this needs to be more generalistic.",
+              "createdAt": "2026-01-26T13:21:57Z",
+              "updatedAt": "2026-01-26T13:21:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c-ziC",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T18:42:35Z",
+          "updatedAt": "2026-01-26T18:42:35Z",
+          "comments": [
+            {
+              "originalPosition": 509,
+              "body": "Just that reminds me we discussed registering things for Tag Equivalence on one of cbor-packed meetings in December. But probably your intent was different: does\r\n```\r\n/* make simple(N) and 6() references behave as per cbor-packed */\r\nunpacker.we_are_in_cbor-packed_rump_now(true)\r\n```\r\ndescribe what you wanted to express or something missing yet?",
+              "createdAt": "2026-01-26T18:42:35Z",
+              "updatedAt": "2026-01-26T18:42:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c_DK6",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T18:57:47Z",
+          "updatedAt": "2026-01-26T18:57:59Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "So the ambiguity had rise because usually such RFCs are written from decoder's point of view (encoder's parts are non-default explicitly marked), and line 718 left text from decoder's part. Memory has some issue on constrained devices because _V_ grows faster than in 113's case. May be make two figures, for encoder and decoder, with corresponding comments? 720 has thus ambiguity currently.",
+              "createdAt": "2026-01-26T18:57:47Z",
+              "updatedAt": "2026-01-26T18:57:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c_IzP",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T19:01:47Z",
+          "updatedAt": "2026-01-26T19:01:47Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "I'd suggest SQL's style as English-enough here:\r\n```\r\ncase typeof(X)\r\nwhen Array then {...\r\n```\r\n\r\nFor Object, to not include these explanations, in assumption that reader will read code more than once, I think adding just one line in appropriate place could give enough hint:\r\n`when Map then throw error \"Maps were supported in pre-RFC version, upgrade your code\"`",
+              "createdAt": "2026-01-26T19:01:47Z",
+              "updatedAt": "2026-01-26T19:02:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c_LlG",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T19:03:51Z",
+          "updatedAt": "2026-01-26T19:03:51Z",
+          "comments": [
+            {
+              "originalPosition": 560,
+              "body": "Again too generic, better have `tag_content` in such places for clarity.",
+              "createdAt": "2026-01-26T19:03:51Z",
+              "updatedAt": "2026-01-26T19:03:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c_NwZ",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T19:05:58Z",
+          "updatedAt": "2026-01-26T19:05:59Z",
+          "comments": [
+            {
+              "originalPosition": 502,
+              "body": "I'd agree if we were in real programming language (terseness is one of things for which I love Perl), but in standard specification clarity is better and verboseness is not a problem (we write it once).",
+              "createdAt": "2026-01-26T19:05:58Z",
+              "updatedAt": "2026-01-26T19:05:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7c_QKz",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-26T19:08:39Z",
+          "updatedAt": "2026-01-26T19:08:39Z",
+          "comments": [
+            {
+              "originalPosition": 585,
+              "body": "Ah, those `push_back`, `push_front` in different languages... So in pseudocode it reads\r\n\r\n`add elements of packed_obj.tag_content array to end of result array`\r\n\r\nwhich you can try to translate to your \"language\" if it is needed :)",
+              "createdAt": "2026-01-26T19:08:39Z",
+              "updatedAt": "2026-01-26T19:09:17Z"
             }
           ]
         }
