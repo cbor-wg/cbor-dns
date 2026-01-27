@@ -994,7 +994,7 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
 
 fn unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
   /* except explicit 28259 */
-  if (typeof(rump) is CBORTag and tag number of obj == 28259) {
+  if (typeof(rump) is CBORTag and tag number of rump == 28259) {
     rump = rump content of obj
   }
 
