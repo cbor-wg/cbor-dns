@@ -995,10 +995,10 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
 fn unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
   /* except explicit 28259 */
   if (typeof(rump) is CBORTag and tag number of obj == 28259) {
-    rump = tag content of obj
+    rump = rump content of obj
   }
 
-  Tell `unpacker` that we are in rump of tag 2859 now
+  Tell `unpacker` that we are in rump of tag 28259 now
 
   return recursive_unpack_names(rump, unpacker, unpacker.packing_table.length)
 }
@@ -1016,16 +1016,18 @@ fn recursive_unpack_names(
     }
     when CBORArray then {
       result: CBORArray = []
-      idx: CBORInt or null = null
+      /* name_start_idx will point to first element of a name and its suffixes
+       * in the packing table */
+      name_start_idx: CBORInt or null = null
       for (elem in obj) {
         if (typeof(elem) is CBORTextString) {
           /* Create a local name reference in packing table for this name
            * and all its suffixes */
-          if (idx is null) {
+          if (name_start_idx is null) {
             unpacker.packing_table = unpacker.packing_table concat [
               CBORTag(tag number = 1115, tag content = []))
             ]
-            idx = unpacker.packing_table.length - 1
+            name_start_idx = unpacker.packing_table.length - 1
           }
           else {
             /* create packing table entry for new suffix */
@@ -1035,7 +1037,8 @@ fn recursive_unpack_names(
           }
 
           /* Append to all suffixes in local name reference */
-          for (i from i == idx to i < unpacker.packing_table.length)) {
+          for (i from i == name_start_idx
+                 to i < unpacker.packing_table.length)) {
             append elem to tag content of unpacker.packing_table[i]
           }
           append elem to result
@@ -1048,20 +1051,22 @@ fn recursive_unpack_names(
           packed_obj: CBORObject = unpacker.packing_table[ref_idx]
 
           /* check if this reference is part of a longer name */
-          if (is_splice_tag(packed_obj) || typeof(packed_obj) is CBORTextString) {
-            if (idx is not null) {
-              /* if idx is already set, append to all suffixes from idx to
-               * end of packing table */
-              for (i from i =idx to i < unpacker.packing_table.length)) {
+          if (is_splice_tag(packed_obj) or
+              typeof(packed_obj) is CBORTextString) {
+            if (name_start_idx is not null) {
+              /* if name_start_idx is already set, append to all suffixes
+               * from name_start_idx to end of packing table */
+              for (i from i == name_start_idx
+                     to i < unpacker.packing_table.length)) {
                 append elem to unpacker.packing_table[i].content
               }
 
               /* check if ref_idx references implicit table V */
               if (ref_idx > outer_table_len) {
-                /* close idx pointing to first element of name sequence, as
-                 * only CBORTextStrings (including those referenced in outer tables)
-                 * continue the name */
-                idx = null
+                /* close name_start_idx pointing to first element of name
+                 * sequence, as only CBORTextStrings (including those
+                 * referenced in outer tables) continue the name */
+                name_start_idx = null
               }
             }
           }
@@ -1074,9 +1079,9 @@ fn recursive_unpack_names(
           }
         }
         else {
-          /* not part of a name anymore, so close idx pointing to
+          /* not part of a name anymore, so close name_start_idx pointing to
            * first element of name sequence */
-          idx = null
+          name_start_idx = null
           match typeof(elem) {
             /* step into arrays and tags */
             when CBORArray then {
@@ -1086,7 +1091,7 @@ fn recursive_unpack_names(
               append CBORTag(
                 tag number = tag number of elem,
                 tag content = recursive_unpack_names(elem.content, unpacker),
-              )
+              ) to result
             }
             when CBORMap then {
               throw warning "Ignore maps which are not part of this spec"
