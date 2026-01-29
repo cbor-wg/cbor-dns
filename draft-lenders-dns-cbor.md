@@ -1083,7 +1083,7 @@ function recursive_unpack_names(
           }
         }
         /* is 248(suffix)..256(suffix) or 6([N, suffix])*/
-        elif (outer_table_len and unpacker.is_straight_reference(elem)) {
+        elif (outer_table_len > 0 and unpacker.is_straight_reference(elem)) {
           /* get table index part of reference */
           ref_idx: uint = unpacker.ref_idx(elem)
           /* get rump part of reference */
