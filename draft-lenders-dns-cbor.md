@@ -971,13 +971,15 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
     },
     when 1 then {
       /* except explicit 113 */
-      if (typeof(obj) is CBORTag and tag number of obj == 113) {
-        obj = tag content of obj
+      if (typeof(obj) is CBORTag and tag-number of obj == 113) {
+        obj = tag-content of obj
       }
 
       assume that typeof(obj) is CBORArray and obj.length == 2
       assume that typeof(obj[0]) is CBORArray  # packing table
 
+      /* step into tag 113 context for unpacker with all its references
+       * (simple values and tag 6) and function tags */
       Tell `unpacker` that we are in rump of tag 113 now
 
       /* prepend to current packing table of unpacker */
@@ -994,17 +996,19 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
 
 fn unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
   /* except explicit 28259 */
-  if (typeof(rump) is CBORTag and tag number of rump == 28259) {
-    rump = rump content of obj
+  if (typeof(rump) is CBORTag and tag-number of rump == 28259) {
+    rump = tag-content of rump
   }
 
+  /* step into tag 28259 context for unpacker with all its references
+   * (simple values and tag 6) */
   Tell `unpacker` that we are in rump of tag 28259 now
 
   return recursive_unpack_names(rump, unpacker, unpacker.packing_table.length)
 }
 
 fn is_splice_tag(obj: CBORObject): bool {
-  return (typeof(packed_idx) is CBORTag and tag number of packed_idx == 1115)
+  return (typeof(packed_idx) is CBORTag and tag-number of packed_idx == 1115)
 }
 
 fn recursive_unpack_names(
@@ -1025,21 +1029,21 @@ fn recursive_unpack_names(
            * and all its suffixes */
           if (name_start_idx is null) {
             unpacker.packing_table = unpacker.packing_table concat [
-              CBORTag(tag number = 1115, tag content = []))
+              CBORTag(tag-number = 1115, tag-content = []))
             ]
             name_start_idx = unpacker.packing_table.length - 1
           }
           else {
             /* create packing table entry for new suffix */
             unpacker.packing_table = unpacker.packing_table concat [
-              CBORTag(tag number = 1115, tag content = []))
+              CBORTag(tag-number = 1115, tag-content = []))
             ]
           }
 
           /* Append to all suffixes in local name reference */
           for (i from i == name_start_idx
                  to i < unpacker.packing_table.length)) {
-            append elem to tag content of unpacker.packing_table[i]
+            append elem to tag-content of unpacker.packing_table[i]
           }
           append elem to result
         }
@@ -1085,12 +1089,16 @@ fn recursive_unpack_names(
           match typeof(elem) {
             /* step into arrays and tags */
             when CBORArray then {
-              result = result concat recursive_unpack_names(elem, unpacker)
+              result = result concat recursive_unpack_names(
+                  elem, unpacker, outer_table_len
+              )
             }
             when CBORTag then {
               append CBORTag(
-                tag number = tag number of elem,
-                tag content = recursive_unpack_names(elem.content, unpacker),
+                tag-number = tag-number of elem,
+                tag-content = recursive_unpack_names(
+                    elem.content, unpacker, outer_table_len
+                ),
               ) to result
             }
             when CBORMap then {
