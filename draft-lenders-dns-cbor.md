@@ -1047,7 +1047,7 @@ fn recursive_unpack_names(
           }
           append elem to result
         }
-        elif (unpacker.is_reference(elem)) {   /* is simple() or 6() */
+        elif (unpacker.is_shared_reference(elem)) {   /* is simple() or 6() */
           /* calculate index from simple() or 6() */
           ref_idx: uint = unpacker.ref_idx(elem)
           assume that (ref_idx < unpacker.packing_table.length)
@@ -1081,6 +1081,21 @@ fn recursive_unpack_names(
           else {
             append packed_obj to result
           }
+        }
+        /* is 248(suffix)..256(suffix) or 6([N, suffix])*/
+        elif (outer_table_len and unpacker.is_straight_reference(elem)) {
+          /* get table index part of reference */
+          ref_idx: uint = unpacker.ref_idx(elem)
+          /* get rump part of reference */
+          suffix: CBORObject = unpacker.get_arg(elem)
+
+          assume that (ref_idx < outer_table_len)
+          assume that (typeof(suffix) is CBORByteString)
+
+          packed_obj: CBORObject = unpacker.packing_table[ref_idx]
+          assume that (typeof(packed_obj) is CBORByteString)
+
+          result.append(packed_obj concat suffix)
         }
         else {
           /* not part of a name anymore, so close name_start_idx pointing to
