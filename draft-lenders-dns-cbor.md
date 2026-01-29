@@ -40,6 +40,14 @@ author:
     country: Germany
     phone: +49-421-218-63921
     email: cabo@tzi.org
+ -  name: Mikolai Gütschow
+    org: TUD Dresden University of Technology
+    abbrev: TU Dresden
+    street: Helmholtzstr. 10
+    city: Dresden
+    code: D-01069
+    country: Germany
+    email: mikolai.guetschow@tu-dresden.de
  -  fullname: Thomas C. Schmidt
     organization: HAW Hamburg
     email: t.schmidt@haw-hamburg.de
@@ -53,14 +61,6 @@ author:
     email: m.waehlisch@tu-dresden.de
 
 contributor:
-- name: Mikolai Gütschow
-  org: TUD Dresden University of Technology
-  abbrev: TU Dresden
-  street: Helmholtzstr. 10
-  city: Dresden
-  code: D-01069
-  country: Germany
-  email: mikolai.guetschow@tu-dresden.de
 - name: Vadim Goncharov
   email: vadimnuclight@gmail.com
 
