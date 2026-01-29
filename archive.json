@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-27T01:05:27.145650+00:00",
+  "timestamp": "2026-01-29T01:11:26.214764+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -328,7 +328,7 @@
       "labels": [],
       "body": "Figure 17 currently reads\n\n```\n   TBD113(\n     TBD28259(\n       [\n         [\"org\", 42],\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       ]\n     )\n   )\n```\n\nI think it should rather be\n\n```\n   TBD113(\n     [\n       [\"org\", 42],\n       TBD28259(\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       )\n     ]\n   )\n```\n\nThis would avoid the need for defining [tag equivalence](https://www.ietf.org/archive/id/draft-ietf-cbor-packed-17.html#name-tag-equivalence) of TBD28259 (in some circumstances) with the 2-element array expected by 113, or a change to the semantics of 113.\n\nThe overall number of bytes is unchanged, but some explanatory wording is needed, especially when TBD28259 is implicitly injected by the media type (\"as enclosing the rump of the outer-most item which should be tag 113\").",
       "createdAt": "2025-12-11T14:14:35Z",
-      "updatedAt": "2026-01-26T19:16:09Z",
+      "updatedAt": "2026-01-27T09:34:10Z",
       "closedAt": null,
       "comments": [
         {
@@ -365,6 +365,13 @@
           "body": "I thought we discussed changing TBD28259 definition to be that _instead_ of using TBD113, so interaction between 113 and 28259 is not quite clearly depicted in that range of lines.\n\nBut yes, that merging PR (after changes) should close this issue.",
           "createdAt": "2026-01-26T19:16:09Z",
           "updatedAt": "2026-01-26T19:16:09Z"
+        },
+        {
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "body": "> I thought we discussed changing TBD28259 definition to be that _instead_ of using TBD113\n\nYes, TBD113 (same as TBD28259) SHOULD be omitted on the wire. But @miri64 didn't want to disallow explicitly sending it even if it adds unnecessary byte overhead to avoid extra round-trips. That's why an encoder MUST NOT discard the payload for `packed=1` even if either or both of TBD28259 and TBD113 are explicitly present.",
+          "createdAt": "2026-01-27T09:34:10Z",
+          "updatedAt": "2026-01-27T09:34:10Z"
         }
       ]
     }
@@ -1092,7 +1099,7 @@
       "labels": [],
       "body": "This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types, classes, EDNS(0) option codes and SVCB SvcParamKeb but even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.",
       "createdAt": "2026-01-19T15:11:57Z",
-      "updatedAt": "2026-01-26T20:14:59Z",
+      "updatedAt": "2026-01-27T20:42:10Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
@@ -1145,6 +1152,62 @@
           "body": "> > `[dns-rr'4800 example.com (IN) (AAAA)', ip'2001:db8::1']`\r\n> \r\n> (took the liberty to put the TTL first, differing from your example. This way it is more in line with the textual format used in zone files and also the order of values used in DNS+CBOR)\r\n\r\nNo, TTL first is invalid in zone files, and DNS-CBOR also has label before TTL when not elided (to make decoder know that label ended). [RFC 1035](https://www.rfc-editor.org/rfc/rfc1035) describes syntax on pages 34-36:\r\n```\r\n    <domain-name><rr> [<comment>]\r\n\r\n    <blank><rr> [<comment>]\r\n...\r\n<rr> contents take one of the following forms:\r\n\r\n    [<TTL>] [<class>] <type> <RDATA>\r\n\r\n    [<class>] [<TTL>] <type> <RDATA>\r\n\r\n@               A free standing @ is used to denote the current origin.\r\n\r\n\\X              where X is any character other than a digit (0-9), is\r\n                used to quote that character so that its special meaning\r\n                does not apply.  For example, \"\\.\" can be used to place\r\n                a dot character in a label.\r\n\r\n\\DDD            where each D is a digit is the octet corresponding to\r\n                the decimal number described by DDD.  The resulting\r\n                octet is assumed to be text and is not checked for\r\n                special meaning.\r\n\r\n( )             Parentheses are used to group data that crosses a line\r\n                boundary.  In effect, line terminations are not\r\n                recognized within parentheses.\r\n\r\n;               Semicolon is used to start a comment; the remainder of\r\n                the line is ignored.\r\n```\r\nSo parentheses in `(AAAA)` will be with unexpected meaning for those accustomed to 1035 zone files. But as I've said in earlier comment, we can just omit them; and 1035 syntax even allows that except for record type, which we can also relax here, because we provide EDN description for one RR in isolation, and full 1035 requires parser with state between lines, which would unnecessarily complicate EDN.\r\n\r\n**N.B.:** that original 1035 just prohibited labels starting from numbers to distinguish from TTL in parser, but now these are allowed, so we have to think about EDN parser here in case of elisions. May be a blank before TTL?..\r\n",
           "createdAt": "2026-01-26T19:52:57Z",
           "updatedAt": "2026-01-26T19:56:16Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> No, TTL first is invalid in zone files, and DNS-CBOR also has label before TTL when not elided (to make decoder know that label ended). [RFC 1035](https://www.rfc-editor.org/rfc/rfc1035) describes syntax on pages 34-36:\r\n\r\nOh, you are right! I thought I saw a reference where the TTL was written first, but can't find it anymore and RFC 1035 is the more trustworthy source. And not sure where I got he idea for DNS+CBOR from...",
+          "createdAt": "2026-01-27T09:31:22Z",
+          "updatedAt": "2026-01-27T09:31:22Z"
+        },
+        {
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "body": "I understand the goal of matching a well-known visual representation for humans, for example when inspecting actual dns+cbor data. But I honestly dislike the idea of using that in the EDN representations in this draft, as it hides the actual array structure, which the examples are meant to showcase.",
+          "createdAt": "2026-01-27T09:42:39Z",
+          "updatedAt": "2026-01-27T09:42:39Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> So parentheses in `(AAAA)` will be with unexpected meaning for those accustomed to 1035 zone files.\r\n\r\nWe always could use something else (e.g., `[]` which are widely used for optional values). Especially considering elision of names and when using name compression, I think this can have value, e.g. see the following query:\r\n\r\n```\r\n[\r\n   [dns-rr'example.org [A]'],  # question => [\"example\", \"org\"]\r\n   [  # answer\r\n      [dns-rr'[example.org] 3600 CNAME', \"iot\", \"example\", \"org\"]  # => [3600, 5, \"example\", \"org\"]\r\n   ] ,\r\n   [\r\n     [dns-rr'iot[.example.org] 3600 [AAAA]', ip'2001:db8::1']   # => [\"iot\", simple(0), 3600, ip'2001:db8::1']\r\n   ]\r\n]\r\n```\r\n\r\nI think this would be much better readable for an uninitiated reader (these markings, as illustrated with my omission of `[IN]` could still be purely optional).\r\n\r\nMaybe it is best to have a separate marking for name compression? Otherwise, there could be ambiguity when resolving `[example.org] 3600` which either could be `[simple(x), 3600]` (or `[6(y), 3600]` for that matter) or `[3600]`.\r\n\r\n> Did not read that draft yet, but I like your examples.\r\n\r\nDid not update the draft yet, just making discussion proposals ;-).",
+          "createdAt": "2026-01-27T09:45:06Z",
+          "updatedAt": "2026-01-27T09:45:06Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I understand the goal of matching a well-known visual representation for humans, for example when inspecting actual dns+cbor data. But I honestly dislike the idea of using that in the EDN representations in this draft, as it hides the actual array structure, which the examples are meant to showcase.\r\n\r\nConsidering my musings on ambiguity in https://github.com/cbor-wg/cbor-dns/pull/14#issuecomment-3804161321, I think I tend to agree now. But maybe let's put this up for discussion in ~~tomorrow's~~ Thursday's meeting.",
+          "createdAt": "2026-01-27T09:46:11Z",
+          "updatedAt": "2026-01-27T09:49:20Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I also talked to @waehlisch now. He doesn't like the `dns-rr''` format either. Besides potentially confusing CBOR people by hiding structure, as @mguetschow pointed out, we also risk confusing DNS people. Yes, they are familiar with zone file formatting, but \r\n\r\n1. This familiarity and the unfamiliarity with EDN may become a problem (\"What, those people want to put zone file data into DNS messages??!?\")\r\n2. The fact that we omit/notate things like RRTYPE from that notation on elision might lead to further confusion (\"What, those people want to change the zone file format??!?\")\r\n\r\nSo I think we are coming to a conclusion, that the `dns-rr` proposal is more confusing than helpful for the uninitiated reader, while with something like `[\"example\", \"com\", dns-rrt'A', ip'192.0.2.1']` it is much clearer _for this draft_ what DNS+CBOR wants to achieve.",
+          "createdAt": "2026-01-27T16:18:59Z",
+          "updatedAt": "2026-01-27T16:18:59Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> I understand the goal of matching a well-known visual representation for humans, for example when inspecting actual dns+cbor data. But I honestly dislike the idea of using that in the EDN representations in this draft, as it hides the actual array structure, which the examples are meant to showcase.\r\n\r\nWell, we can move it to appendix with mark \"it is not normative yet, subject to future changes in EDN\" and describe it fully in next RFC together with zone files. BTW, I'd want to include `$ORIGIN` (and may be even `$TTL` adding to _V_ even without `packed=1`) in this version, because labels are not absolute now, though full zone files should be postponed to separate document.",
+          "createdAt": "2026-01-27T20:10:15Z",
+          "updatedAt": "2026-01-27T20:10:15Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> > So parentheses in `(AAAA)` will be with unexpected meaning for those accustomed to 1035 zone files.\r\n> \r\n> We always could use something else (e.g., `[]` which are widely used for optional values). Especially considering elision of names and when using name compression, I think this can have value, e.g. see the following query:\r\n> \r\n> ```\r\n> [\r\n>    [dns-rr'example.org [A]'],  # question => [\"example\", \"org\"]\r\n>    [  # answer\r\n>       [dns-rr'[example.org] 3600 CNAME', \"iot\", \"example\", \"org\"]  # => [3600, 5, \"example\", \"org\"]\r\n>    ] ,\r\n>    [\r\n>      [dns-rr'iot[.example.org] 3600 [AAAA]', ip'2001:db8::1']   # => [\"iot\", simple(0), 3600, ip'2001:db8::1']\r\n>    ]\r\n> ]\r\n> ```\r\n> \r\n> I think this would be much better readable for an uninitiated reader (these markings, as illustrated with my omission of `[IN]` could still be purely optional).\r\n\r\nWon't this need more complicated parser as now you are not passed just contents of app-string bit have to process whole message deducing it should be exactly `simple(0)` and not some other reference?.. Too complex, I think.\r\n\r\n> Maybe it is best to have a separate marking for name compression? Otherwise, there could be ambiguity when resolving `[example.org] 3600` which either could be `[simple(x), 3600]` (or `[6(y), 3600]` for that matter) or `[3600]`.\r\n\r\nThis could be something like `dns-rr'iot.{0} 3600 [AAAA]'` to denote index 0 in _V_ but now this complicates syntax even more for human reader...",
+          "createdAt": "2026-01-27T20:17:52Z",
+          "updatedAt": "2026-01-27T20:17:52Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> I also talked to @waehlisch now. He doesn't like the `dns-rr''` format either. Besides potentially confusing CBOR people by hiding structure, as @mguetschow pointed out, we also risk confusing DNS people. Yes, they are familiar with zone file formatting, but\r\n> \r\n>     1. This familiarity and the unfamiliarity with EDN may become a problem (\"What, those people want to put zone file data into DNS messages??!?\")\r\n\r\nWell, this is simply not true. The 1035's format is used not only in zone files but also in utilities exactly for DNS messages. Two examples (this is `drill` from `unbound` because on my local machine, but it modeled after more popular `dig` from BIND):\r\n\r\n```\r\n$ drill ANY github.com \r\n;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 38158\r\n;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0 \r\n;; QUESTION SECTION:\r\n;; github.com.  IN      ANY\r\n\r\n;; ANSWER SECTION:\r\ngithub.com.     3600    IN      HINFO   \"RFC8482\" \"\"\r\n\r\n;; AUTHORITY SECTION:\r\n\r\n;; ADDITIONAL SECTION:\r\n\r\n;; Query time: 159 msec\r\n;; SERVER: 127.0.0.1\r\n;; WHEN: Tue Jan 27 21:47:16 2026\r\n;; MSG SIZE  rcvd: 49\r\n$ drill github.com     \r\n;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1835\r\n;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0 \r\n;; QUESTION SECTION:\r\n;; github.com.  IN      A\r\n\r\n;; ANSWER SECTION:\r\ngithub.com.     60      IN      A       140.82.121.3\r\n\r\n;; AUTHORITY SECTION:\r\n\r\n;; ADDITIONAL SECTION:\r\n\r\n;; Query time: 47 msec\r\n;; SERVER: 127.0.0.1\r\n;; WHEN: Tue Jan 27 21:50:50 2026\r\n;; MSG SIZE  rcvd: 44\r\n```\r\n\r\nBTW this output suggests us to provide also EDN for flags/opcode/rcode.\r\n\r\n>     2. The fact that we omit/notate things like RRTYPE from that notation on elision might lead to further confusion (\"What, those people want to change the zone file format??!?\")\r\n> \r\n> So I think we are coming to a conclusion, that the `dns-rr` proposal is more confusing than helpful for the uninitiated reader, while with something like `[\"example\", \"com\", dns-rrt'A', ip'192.0.2.1']` it is much clearer _for this draft_ what DNS+CBOR wants to achieve.\r\n\r\nOK, point 2 is more serious, but alternative with\r\n`[\"example\", \"com\", dns-rrt'A', dns-cls'IN', ip'192.0.2.1']`\r\nstill looks ugly (lengthy, too much punctuation) and I doubt people will like it - because it would be more simple and readable to just use comments:\r\n`[\"example\", \"com\", 5 /CNAME/, 1 /IN/, ip'192.0.2.1']`\r\n\r\nGiven that main usage in RR head is for constants if types/classes, I think we can make following compromise:\r\n* name it `dns''` - as short as possible (`dns-svcb` and like are not affected)\r\n* when presenting from CBOR, tools ALWAYS generate EDN without hiding structure, on individual fields: `dns'A', dns'IN'` and only for type & class\r\n* human MAY write combined `dns'example.com 3000 IN NS'` for machine to parse for non-complicated cases - e.g. it would require distinct `[dns'iot.subdomain', simple(0), dns'CNAME IN', ...]` to not invent much syntax.\r\n\r\nThat is, being used mostly for constants and labels with dots, as single `[\"www\", ...]` is shorter/readable than `[dns'www', ...]` - and described in text as used for constants, with phrasing which can't give impression \"this is a new zone file syntax\". Just helpers.",
+          "createdAt": "2026-01-27T20:42:10Z",
+          "updatedAt": "2026-01-27T20:42:10Z"
         }
       ],
       "reviews": [
@@ -1763,24 +1826,26 @@
       "id": "PR_kwDOIM0M7M6-CFs7",
       "title": "Make options a list again",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/15",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "miri64",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "TBD28259 (see section Name Compression) put the final death nail into the idea of the EDNS(0) options being a map.",
       "createdAt": "2026-01-19T15:24:11Z",
-      "updatedAt": "2026-01-26T22:09:37Z",
+      "updatedAt": "2026-01-27T09:47:20Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
-      "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
+      "baseRefOid": "491f40872d0a50ba8f4f87431b152501fb319d71",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "opt-list",
-      "headRefOid": "df6d2d160528af0db1c82c412d2647d9f3c9d0b3",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "812bdbfba76c56c9578bce1352a4fbe3efe68b1f",
+      "closedAt": "2026-01-27T09:47:16Z",
+      "mergedAt": "2026-01-27T09:47:16Z",
+      "mergedBy": "miri64",
+      "mergeCommit": {
+        "oid": "a36070680414deb0dd52b058664244237f9e3566"
+      },
       "comments": [
         {
           "author": "miri64",
@@ -1844,6 +1909,13 @@
           "body": "> > Ah, so we could get different compressed size depending on order of strings within maps. Got it.\r\n> > Where's the approve button here...\r\n> \r\n> Not a different size. Depending on how you write and in which programming language your encoder, e.g., use an in-memory representation of a hash map of objects first, and then convert to binary. This can actually completely mess up your references, as strings might not be in the same order in the binary as they were in your in-memory representation.\r\n\r\nAh, not thought about it. So I am not so smart programmer :) let's prevent foot guns directly.\r\n\r\n> Under the \"Files changed\" tab.\r\n\r\nDon't see it here either, but OK, let's wait.",
           "createdAt": "2026-01-26T22:09:37Z",
           "updatedAt": "2026-01-26T22:09:37Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Thought I amended something for that, but apparently, I forgot. Please wait with the merge until tomorrow when I can check my work machine.\r\n\r\nDone.",
+          "createdAt": "2026-01-27T09:23:55Z",
+          "updatedAt": "2026-01-27T09:23:55Z"
         }
       ],
       "reviews": [
@@ -1912,6 +1984,19 @@
               "updatedAt": "2026-01-21T13:43:24Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dI-yM",
+          "commit": {
+            "abbreviatedOid": "812bdbf"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-27T09:36:58Z",
+          "updatedAt": "2026-01-27T09:36:58Z",
+          "comments": []
         }
       ]
     },
@@ -1927,13 +2012,13 @@
       "labels": [],
       "body": "This reworks the name compression as discussed during the last few meetings we had.\r\n\r\nNamely:\r\n\r\n- TBD28259 now appends, rather than prepends to existing packing tables to allow for single pass decoders with minimum state.\r\n-  Consequently, disallow inner table setup tags to TBD28259, as that would increase complexity of both decoders and encoders\r\n- Clarify implicit nature with `packed`\r\n- Use actual DNS examples\r\n- Add example decoder as pseudo-code\r\n- Additionally, add some considerations on maps within TBD28259 (see also #15)",
       "createdAt": "2026-01-22T21:30:42Z",
-      "updatedAt": "2026-01-26T19:08:39Z",
+      "updatedAt": "2026-01-28T20:26:00Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "tbd28259-order",
-      "headRefOid": "55ed1d88c9e4d098e60a21c16b580ce02e782d70",
+      "headRefOid": "1da6cd609ca7728f32008955634f9a857e45eab6",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -2817,6 +2902,360 @@
               "body": "Ah, those `push_back`, `push_front` in different languages... So in pseudocode it reads\r\n\r\n`add elements of packed_obj.tag_content array to end of result array`\r\n\r\nwhich you can try to translate to your \"language\" if it is needed :)",
               "createdAt": "2026-01-26T19:08:39Z",
               "updatedAt": "2026-01-26T19:09:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dI093",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T09:27:42Z",
+          "updatedAt": "2026-01-27T09:27:42Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "That's maybe turning into bikeshedding, but I really prefer the `match` syntax instead of your switch-case example, arguing that it is even harder to grasp the context in further `when` statements below.\r\n\r\nIf this gets too controversial, we could also simply use several if-else-ifs.",
+              "createdAt": "2026-01-27T09:27:42Z",
+              "updatedAt": "2026-01-27T09:27:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dI172",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T09:28:36Z",
+          "updatedAt": "2026-01-27T09:28:36Z",
+          "comments": [
+            {
+              "originalPosition": 560,
+              "body": "In this place I actually do agree it would help for clarity. So yes, +1 for switching to `tag_content` and `tag_number`.",
+              "createdAt": "2026-01-27T09:28:36Z",
+              "updatedAt": "2026-01-27T09:28:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dJUjo",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T09:56:01Z",
+          "updatedAt": "2026-01-27T09:56:01Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "See 3a6b9b5.",
+              "createdAt": "2026-01-27T09:56:01Z",
+              "updatedAt": "2026-01-27T09:56:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dJWod",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T09:57:54Z",
+          "updatedAt": "2026-01-27T09:57:54Z",
+          "comments": [
+            {
+              "originalPosition": 509,
+              "body": "> [...] does\r\n>\r\n> ```\r\n> /* make simple(N) and 6() references behave as per cbor-packed */\r\n> unpacker.we_are_in_cbor-packed_rump_now(true)\r\n> ```\r\n> \r\n> describe what you wanted to express or something missing yet?\r\n\r\nI would even say `unpacker.we_are_in_cbor-packed-table-setup-113-rump-now(true)` as future, currently unspecified, table setup tags may choose to have different reference tags.",
+              "createdAt": "2026-01-27T09:57:54Z",
+              "updatedAt": "2026-01-27T09:57:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dJXp0",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T09:58:52Z",
+          "updatedAt": "2026-01-27T09:58:53Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "> That's maybe turning into bikeshedding, but I really prefer the `match` syntax instead of your switch-case example, arguing that it is even harder to grasp the context in further `when` statements below.\r\n> \r\n> If this gets too controversial, we could also simply use several if-else-ifs.\r\n\r\nIt's all pseudo-code. I will try to come up with something mostly universally intuitive.",
+              "createdAt": "2026-01-27T09:58:53Z",
+              "updatedAt": "2026-01-27T09:58:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dLn3I",
+          "commit": {
+            "abbreviatedOid": "3a6b9b5"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T12:05:52Z",
+          "updatedAt": "2026-01-27T12:07:39Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "See 7578fa9",
+              "createdAt": "2026-01-27T12:05:52Z",
+              "updatedAt": "2026-01-27T12:07:39Z"
+            },
+            {
+              "originalPosition": 559,
+              "body": "It's exclusive actually, see 7578fa9",
+              "createdAt": "2026-01-27T12:06:19Z",
+              "updatedAt": "2026-01-27T12:07:39Z"
+            },
+            {
+              "originalPosition": 560,
+              "body": "See 7578fa9",
+              "createdAt": "2026-01-27T12:06:28Z",
+              "updatedAt": "2026-01-27T12:07:39Z"
+            },
+            {
+              "originalPosition": 585,
+              "body": "See 7578fa9, I just reused the already used `concat`.",
+              "createdAt": "2026-01-27T12:06:42Z",
+              "updatedAt": "2026-01-27T12:07:39Z"
+            },
+            {
+              "originalPosition": 502,
+              "body": "See 7578fa9.",
+              "createdAt": "2026-01-27T12:07:04Z",
+              "updatedAt": "2026-01-27T12:07:39Z"
+            },
+            {
+              "originalPosition": 481,
+              "body": "See 7578fa9.",
+              "createdAt": "2026-01-27T12:07:15Z",
+              "updatedAt": "2026-01-27T12:07:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dLthY",
+          "commit": {
+            "abbreviatedOid": "7578fa9"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T12:11:17Z",
+          "updatedAt": "2026-01-27T12:16:12Z",
+          "comments": [
+            {
+              "originalPosition": 53,
+              "body": "s/obj/rump/",
+              "createdAt": "2026-01-27T12:11:17Z",
+              "updatedAt": "2026-01-27T12:16:12Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "28259",
+              "createdAt": "2026-01-27T12:11:33Z",
+              "updatedAt": "2026-01-27T12:16:12Z"
+            },
+            {
+              "originalPosition": 138,
+              "body": "`i == idx` to match above",
+              "createdAt": "2026-01-27T12:14:07Z",
+              "updatedAt": "2026-01-27T12:16:12Z"
+            },
+            {
+              "originalPosition": 150,
+              "body": "idx could probably have a more telling name, too",
+              "createdAt": "2026-01-27T12:15:13Z",
+              "updatedAt": "2026-01-27T12:16:12Z"
+            },
+            {
+              "originalPosition": 186,
+              "body": "... to result",
+              "createdAt": "2026-01-27T12:16:00Z",
+              "updatedAt": "2026-01-27T12:16:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dL6rG",
+          "commit": {
+            "abbreviatedOid": "a297c08"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T12:22:58Z",
+          "updatedAt": "2026-01-27T12:22:58Z",
+          "comments": [
+            {
+              "originalPosition": 3,
+              "body": "here, too",
+              "createdAt": "2026-01-27T12:22:58Z",
+              "updatedAt": "2026-01-27T12:22:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dqTpf",
+          "commit": {
+            "abbreviatedOid": "1da6cd6"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-28T19:54:27Z",
+          "updatedAt": "2026-01-28T19:54:27Z",
+          "comments": [
+            {
+              "originalPosition": 68,
+              "body": "Forgotten comment that this is for `simple(N)/6(N)` to work.",
+              "createdAt": "2026-01-28T19:54:27Z",
+              "updatedAt": "2026-01-28T19:54:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dqWaR",
+          "commit": {
+            "abbreviatedOid": "1da6cd6"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-28T19:56:30Z",
+          "updatedAt": "2026-01-28T19:56:31Z",
+          "comments": [
+            {
+              "originalPosition": 90,
+              "body": "`tag_content` ?",
+              "createdAt": "2026-01-28T19:56:30Z",
+              "updatedAt": "2026-01-28T19:56:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dqs3u",
+          "commit": {
+            "abbreviatedOid": "1da6cd6"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-28T20:14:25Z",
+          "updatedAt": "2026-01-28T20:14:26Z",
+          "comments": [
+            {
+              "originalPosition": 221,
+              "body": "Call here and below is without `outer_table_len` which has not default value in function description",
+              "createdAt": "2026-01-28T20:14:26Z",
+              "updatedAt": "2026-01-28T20:14:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dqxMm",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-28T20:18:13Z",
+          "updatedAt": "2026-01-28T20:18:13Z",
+          "comments": [
+            {
+              "originalPosition": 509,
+              "body": "Well, in newer version (`Tell ...`) it is not yet in rump when we do setup for `unpacker` manually; may be move lines?\r\n\r\nAh, or it is due to references allowed inside table setup also? May be add comment or discuss tomorrow...",
+              "createdAt": "2026-01-28T20:18:13Z",
+              "updatedAt": "2026-01-28T20:18:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dq2Q1",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-28T20:23:19Z",
+          "updatedAt": "2026-01-28T20:23:19Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "> That's maybe turning into bikeshedding, but I really prefer the `match` syntax instead of your switch-case example, arguing that it is even harder to grasp the context in further `when` statements below.\r\n> \r\n> If this gets too controversial, we could also simply use several if-else-ifs.\r\n\r\nWell, I made it somewhat redundant there: in SQL those `THEN` are delimiters for block before next `WHEN` so that you don't need braces or `begin/end`. So `then` may be omitted; as well as braces for single-line statements. That said, I still not understand your point about hard context and in what `match` syntax really differs from switch/case.\r\n\r\nHowever, we are not inventing real language here, a big opportunity to do this will be in CBOR-TPL (CBAPT/CBAR superset) and, especially, it's frontend languages :-)",
+              "createdAt": "2026-01-28T20:23:19Z",
+              "updatedAt": "2026-01-28T20:23:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dq4Ho",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-28T20:25:11Z",
+          "updatedAt": "2026-01-28T20:25:11Z",
+          "comments": [
+            {
+              "originalPosition": 481,
+              "body": "Yeah, that's better! It has some inconsistencies though, `function` vs `fn` :-)",
+              "createdAt": "2026-01-28T20:25:11Z",
+              "updatedAt": "2026-01-28T20:25:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7dq4wc",
+          "commit": {
+            "abbreviatedOid": "7578fa9"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-28T20:26:00Z",
+          "updatedAt": "2026-01-28T20:26:00Z",
+          "comments": [
+            {
+              "originalPosition": 138,
+              "body": "Why? Isn't that assignment?",
+              "createdAt": "2026-01-28T20:26:00Z",
+              "updatedAt": "2026-01-28T20:26:01Z"
             }
           ]
         }
