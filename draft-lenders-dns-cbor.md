@@ -994,7 +994,7 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
   return unpack_names(rump, unpacker)
 }
 
-fn unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
+function unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
   /* except explicit 28259 */
   if (typeof(rump) is CBORTag and tag-number of rump == 28259) {
     rump = tag-content of rump
@@ -1007,11 +1007,11 @@ fn unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
   return recursive_unpack_names(rump, unpacker, unpacker.packing_table.length)
 }
 
-fn is_splice_tag(obj: CBORObject): bool {
+function is_splice_tag(obj: CBORObject): bool {
   return (typeof(packed_idx) is CBORTag and tag-number of packed_idx == 1115)
 }
 
-fn recursive_unpack_names(
+function recursive_unpack_names(
     obj: CBORObject, unpacker: Unpacker, outer_table_len: Integer
 ): CBORObject {
   match typeof(obj) {
