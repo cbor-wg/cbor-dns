@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-29T01:11:26.214764+00:00",
+  "timestamp": "2026-02-01T01:22:54.242827+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -374,6 +374,22 @@
           "updatedAt": "2026-01-27T09:34:10Z"
         }
       ]
+    },
+    {
+      "number": 17,
+      "id": "I_kwDOIM0M7M7nJUtO",
+      "title": "`$ORIGIN` and (non-)absolute names (also `$TTL`)",
+      "url": "https://github.com/cbor-wg/cbor-dns/issues/17",
+      "state": "OPEN",
+      "author": "nuclight",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In #12 there was expressed need in zone files support. While exact format for those may be out of scope for current version of document, it was discovered, especially while in discussion in #14 of possible new EDN app-literals, that current version is under-worked about absolute (FQDN) and relative labels - e.g. such difference could be represented by hypothetical `dns'some.label'` vs `dns'some.label.'` - note the dot at end. That is, Section 3.1 in -15 version of draft states\n> The root domain `\".\"` is represented as an empty string `\"\"`\n\nbut later root domain's label, which in standard DNS ends each name in queries and responses, is silently omitted without clarifications. While intent for saving 1 byte per RR is easily guessed, this is still not 100% correct.\n\nHowever, there is simple way to \"fix\" it by really not changing nothing in main apart and at the same time gain (at least some) support for zone files. The solution (sketched in #12) is to augment CDDL: we just declare that by default `$ORIGIN` is `\"\"` and elided, that is, current format is special/particular case, where all labels are added `$ORIGIN` at end (after expansion from _V_) becoming absolute names for typical queries/responses. And we augment format with:\n```\norigin-defttl = (\n   domain-name .default \"\",\n   ? ttl\n)\n```\nadding `? origin-defttl` between `? flags`, and `? question-section,` (so it is usable in question also, see below).\n\nImportant: this also could be used not in zone files but usual responses where all names are under same domain - it will save one byte for `simple(N)` in each RR; while origin's label are not occupying rows in _V_ at all.\n\nP.S. In principle, zone files may be represented as simple as \"answer\" with `AXFR` in question section, but may be such definition is premature...",
+      "createdAt": "2026-01-31T00:36:04Z",
+      "updatedAt": "2026-01-31T00:37:55Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -1090,22 +1106,22 @@
     {
       "number": 14,
       "id": "PR_kwDOIM0M7M6-B8ST",
-      "title": "Provide dns-rrt, dns-cls, dns-opt, and dns-svp EDN literals",
+      "title": "Use e'' application extension in examples",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/14",
       "state": "OPEN",
       "author": "miri64",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types, classes, EDNS(0) option codes and SVCB SvcParamKeb but even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.",
+      "body": "~~This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types, classes, EDNS(0) option codes and SVCB SvcParamKeb but even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.~~\r\n\r\n[updated after extensive discussions about a more involved format]\r\n\r\nThis provides definitions for and uses the `e''` application extension to enhance the readability of RR types and classes in the examples.\r\n",
       "createdAt": "2026-01-19T15:11:57Z",
-      "updatedAt": "2026-01-27T20:42:10Z",
+      "updatedAt": "2026-01-30T21:04:03Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "edn-literals",
-      "headRefOid": "d51d93b8fc73857a97659e222eb794c539dc01fa",
+      "headRefOid": "45ec241122a4a8d92e881728fac51da1ac5f05d8",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -1208,6 +1224,90 @@
           "body": "> I also talked to @waehlisch now. He doesn't like the `dns-rr''` format either. Besides potentially confusing CBOR people by hiding structure, as @mguetschow pointed out, we also risk confusing DNS people. Yes, they are familiar with zone file formatting, but\r\n> \r\n>     1. This familiarity and the unfamiliarity with EDN may become a problem (\"What, those people want to put zone file data into DNS messages??!?\")\r\n\r\nWell, this is simply not true. The 1035's format is used not only in zone files but also in utilities exactly for DNS messages. Two examples (this is `drill` from `unbound` because on my local machine, but it modeled after more popular `dig` from BIND):\r\n\r\n```\r\n$ drill ANY github.com \r\n;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 38158\r\n;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0 \r\n;; QUESTION SECTION:\r\n;; github.com.  IN      ANY\r\n\r\n;; ANSWER SECTION:\r\ngithub.com.     3600    IN      HINFO   \"RFC8482\" \"\"\r\n\r\n;; AUTHORITY SECTION:\r\n\r\n;; ADDITIONAL SECTION:\r\n\r\n;; Query time: 159 msec\r\n;; SERVER: 127.0.0.1\r\n;; WHEN: Tue Jan 27 21:47:16 2026\r\n;; MSG SIZE  rcvd: 49\r\n$ drill github.com     \r\n;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1835\r\n;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0 \r\n;; QUESTION SECTION:\r\n;; github.com.  IN      A\r\n\r\n;; ANSWER SECTION:\r\ngithub.com.     60      IN      A       140.82.121.3\r\n\r\n;; AUTHORITY SECTION:\r\n\r\n;; ADDITIONAL SECTION:\r\n\r\n;; Query time: 47 msec\r\n;; SERVER: 127.0.0.1\r\n;; WHEN: Tue Jan 27 21:50:50 2026\r\n;; MSG SIZE  rcvd: 44\r\n```\r\n\r\nBTW this output suggests us to provide also EDN for flags/opcode/rcode.\r\n\r\n>     2. The fact that we omit/notate things like RRTYPE from that notation on elision might lead to further confusion (\"What, those people want to change the zone file format??!?\")\r\n> \r\n> So I think we are coming to a conclusion, that the `dns-rr` proposal is more confusing than helpful for the uninitiated reader, while with something like `[\"example\", \"com\", dns-rrt'A', ip'192.0.2.1']` it is much clearer _for this draft_ what DNS+CBOR wants to achieve.\r\n\r\nOK, point 2 is more serious, but alternative with\r\n`[\"example\", \"com\", dns-rrt'A', dns-cls'IN', ip'192.0.2.1']`\r\nstill looks ugly (lengthy, too much punctuation) and I doubt people will like it - because it would be more simple and readable to just use comments:\r\n`[\"example\", \"com\", 5 /CNAME/, 1 /IN/, ip'192.0.2.1']`\r\n\r\nGiven that main usage in RR head is for constants if types/classes, I think we can make following compromise:\r\n* name it `dns''` - as short as possible (`dns-svcb` and like are not affected)\r\n* when presenting from CBOR, tools ALWAYS generate EDN without hiding structure, on individual fields: `dns'A', dns'IN'` and only for type & class\r\n* human MAY write combined `dns'example.com 3000 IN NS'` for machine to parse for non-complicated cases - e.g. it would require distinct `[dns'iot.subdomain', simple(0), dns'CNAME IN', ...]` to not invent much syntax.\r\n\r\nThat is, being used mostly for constants and labels with dots, as single `[\"www\", ...]` is shorter/readable than `[dns'www', ...]` - and described in text as used for constants, with phrasing which can't give impression \"this is a new zone file syntax\". Just helpers.",
           "createdAt": "2026-01-27T20:42:10Z",
           "updatedAt": "2026-01-27T20:42:10Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "#### Reply to https://github.com/cbor-wg/cbor-dns/pull/14#issuecomment-3807305027\r\n\r\n> Well, we can move it to appendix with mark \"it is not normative yet, subject to future changes in EDN\" and describe it fully in next RFC together with zone files.\r\n\r\nOr just introduce integer representations in form of `dns-rrt` an `dns-cls` here to better illustrate the examples and provide possible future EDN extensions _in the future_ (i.e., in a separate document altogether)... Nothing that we propose with `dns-rrt` or `dns-cls` is preventing that and it is not like the namespace for EDN literals is limited. In fact, I think providing the ground work by importing these literals on their own can ease further migration to a more zone-file-like string format: The values would already be imported from the IANA registry to EDN, so a future extension would just need to reference that.\r\n\r\n> BTW, I'd want to include `$ORIGIN` (and may be even `$TTL` adding to _V_ even without `packed=1`) in this version, because labels are not absolute now, though full zone files should be postponed to separate document.\r\n\r\nWe are not talking about zone files here, just using their format for `dns-rr`, so not sure what you are trying to say.\r\n\r\n---\r\n\r\n#### Reply to https://github.com/cbor-wg/cbor-dns/pull/14#issuecomment-3807340914\r\n\r\n>> [...]\r\n>\r\n> Won't this need more complicated parser as now you are not passed just contents of app-string bit have to process whole message deducing it should be exactly simple(0) and not some other reference?.. Too complex, I think.\r\n>\r\n>> [...]\r\n> This could be something like dns-rr'iot.{0} 3600 [AAAA]' to denote index 0 in V but now this complicates syntax even more for human reader...\r\n\r\nNoted for future extension.\r\n\r\n---\r\n\r\n#### Reply to https://github.com/cbor-wg/cbor-dns/pull/14#issuecomment-3807436744\r\n\r\n> > I also talked to @waehlisch now. He doesn't like the `dns-rr''` format either. Besides potentially confusing CBOR people by hiding structure, as @mguetschow pointed out, we also risk confusing DNS people. Yes, they are familiar with zone file formatting, but\r\n> > ```\r\n> > 1. This familiarity and the unfamiliarity with EDN may become a problem (\"What, those people want to put zone file data into DNS messages??!?\")\r\n> > ```\r\n> \r\n> Well, this is simply not true. The 1035's format is used not only in zone files but also in utilities exactly for DNS messages. Two examples (this is `drill` from `unbound` because on my local machine, but it modeled after more popular `dig` from BIND):\r\n> [...]\r\n\r\nMisunderstanding _may and do_ happen.  Making things more complicated to discuss because of misunderstandings is something that should be avoided. We already need to explain to people that EDN _is not_ what is sent over the wire. When you then bunch several array elements into one string, hiding actual structure, you confuse people. The examples here are to provide context, not to make things neat. Yes, familiarity helps to make things comfortable for the reader, but if the reader does not understand _at a glance_ that `[dns-rr'example.org IN']` is actually `[\"example\", \"org\", 1]` and not `[\"example.org IN\"]` (which then actually translates to `0x83676578616D706C65636F726701` or `0x816E6578616D706C652E6F726720494E`, respectively) you are just asking for negative reviews which then lead to endless discussions that are simply not be necessary.\r\n\r\n> BTW this output suggests us to provide also EDN for flags/opcode/rcode.\r\n\r\nSee [original post](https://github.com/cbor-wg/cbor-dns/pull/14#issue-3830146143):\r\n\r\n> [!TIP]\r\n> [...] but even **Header Flags including Rcodes could be a point of extension**. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.\r\n\r\nReminder: We don't _need_ to provide a full extension here. We should also avoid feature creep to this document which already includes a lot of more batteries than anyone could ask for.\r\n\r\n> OK, point 2 is more serious, but alternative with `[\"example\", \"com\", dns-rrt'A', dns-cls'IN', ip'192.0.2.1']` still looks ugly (lengthy, too much punctuation) and I doubt people will like it - because it would be more simple and readable to just use comments: `[\"example\", \"com\", 5 /CNAME/, 1 /IN/, ip'192.0.2.1']`\r\n\r\nI find the latter example less readable, TBH... and it is basically the current state. If we would go that route, I would just close this PR and add those ugly comments ;-). But: We then wouldn't have these numbers already imported into EDN.\r\n\r\n> Given that main usage in RR head is for constants if types/classes, I think we can make following compromise:\r\n> \r\n> * name it `dns''` - as short as possible (`dns-svcb` and like are not affected)\r\n> * when presenting from CBOR, tools ALWAYS generate EDN without hiding structure, on individual fields: `dns'A', dns'IN'` and only for type & class\r\n\r\nThat would import from two registries and would make room for ambiguity.\r\n\r\n> * human MAY write combined `dns'example.com 3000 IN NS'` for machine to parse for non-complicated cases - e.g. it would require distinct `[dns'iot.subdomain', simple(0), dns'CNAME IN', ...]` to not invent much syntax.\r\n\r\nCase and point: Would `[dns'NS']` then resolve to `[\"NS\"]` (the domain name \"ns\", domain names are case insensitive after all) or `[2]` (the RRTYPE NS)? Is `dns'ANY'` a name \"any\", an rrtype value \"255\", or a class value \"255\"?\r\n\r\nThe \"MAY\" is confusing EDN literals are optional regardless.\r\n\r\n> That is, being used mostly for constants and labels with dots, as single `[\"www\", ...]` is shorter/readable than `[dns'www', ...]` [..]\r\n\r\nI also would prefer shorter app-extension identifiers ;-). See https://github.com/cbor-wg/cbor-dns/pull/14#discussion_r2712512085\r\n\r\n> [...] - and described in text as used for constants, with phrasing which can't give impression \"this is a new zone file syntax\". Just helpers.\r\n\r\nWe already had the case of people only looking at the examples and being confused how the mechanism actually works even though it was described in the text...\r\n\r\n---\r\n\r\n#### Conclusion\r\n\r\nMy proposal would be to stick with the current approach. This way, by importing those IANA values, we lay a foundation for possible future documents that makes things even neater. There is no conflict here, because the name space for EDN literals is unlimited (see https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals#section-6.1). I am not stuck on the names, if they are shorter, all the better for me. But they should be disjunct between different IANA registries to prevent ambiguity.",
+          "createdAt": "2026-01-29T10:50:39Z",
+          "updatedAt": "2026-01-29T10:50:39Z"
+        },
+        {
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Here is my 2 cent:\r\n\r\n[dns-rrtypes.cddl.txt](https://github.com/user-attachments/files/24938614/dns-rrtypes.cddl.txt)\r\n\r\nas produced by\r\n\r\n[dns-parameters.rb.txt](https://github.com/user-attachments/files/24938635/dns-parameters.rb.txt)\r\n",
+          "createdAt": "2026-01-29T13:44:01Z",
+          "updatedAt": "2026-01-29T13:44:01Z"
+        },
+        {
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Can't automate that as well with CLASS as that isn't as well structured as the RRTYPE registry, but that changes so little that this can be done manually, I think.",
+          "createdAt": "2026-01-29T13:44:49Z",
+          "updatedAt": "2026-01-29T13:45:57Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Here is my 2 cent:\r\n> \r\n> [dns-rrtypes.cddl.txt](https://github.com/user-attachments/files/24938614/dns-rrtypes.cddl.txt)\r\n> \r\n> as produced by\r\n> \r\n> [dns-parameters.rb.txt](https://github.com/user-attachments/files/24938635/dns-parameters.rb.txt)\r\n\r\nSo are you arguing to to use `e''` and import `dns-rrtypes.cddl.txt` (and a manual version of `CLASS`) into the draft? How will we update that list in the future then on a document level?",
+          "createdAt": "2026-01-29T14:16:36Z",
+          "updatedAt": "2026-01-29T14:17:27Z"
+        },
+        {
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "body": "\r\n> So are you arguing to to use `e''` and import `dns-rrtypes.cddl.txt` (and a manual version of `CLASS`) into the draft? \r\n\r\nI was trying to show how this could be done.\r\nNote that examples usually are not normative, so the support files needed to expand the examples don't need to be either.\r\n(Of course, implementers will use them anyway if they are convenient.)\r\n\r\n> How will we update that list in the future then on a document level?\r\n\r\nAs long as the examples do not change, the support files don't neet to be updated.  Shipping the extractor would make it easy for implementers to create updated revisions of the support files as they need them.\r\n\r\nAgain, my point is not to ask that we do it this way (although I do like e'RR_CNAME', including the phonetics :-), but just a demonstration that this approach is a candidate that can be done in an automation-friendly way.",
+          "createdAt": "2026-01-29T14:44:29Z",
+          "updatedAt": "2026-01-29T14:44:29Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> #### Reply to [#14 (comment)](https://github.com/cbor-wg/cbor-dns/pull/14#issuecomment-3807305027)\r\n> \r\n> > Well, we can move it to appendix with mark \"it is not normative yet, subject to future changes in EDN\" and describe it fully in next RFC together with zone files.\r\n> \r\n> Or just introduce integer representations in form of `dns-rrt` an `dns-cls` here to better illustrate the examples and provide possible future EDN extensions _in the future_ (i.e., in a separate document altogether)... Nothing that we propose with `dns-rrt` or `dns-cls` is preventing that and it is not like the namespace for EDN literals is limited. \r\n\r\nI am not fan of polluting namespace with things which will stay (because Standards Track) forever but will likely be unused by people.\r\n\r\n> In fact, I think providing the ground work by importing these literals on their own can ease further migration to a more zone-file-like string format: The values would already be imported from the IANA registry to EDN, so a future extension would just need to reference that.\r\n\r\nI don't understand what you mean by \"import\" here. We are not expecting to have anything else than already existing IANA registry.\r\n\r\n> > BTW, I'd want to include `$ORIGIN` (and may be even `$TTL` adding to _V_ even without `packed=1`) in this version, because labels are not absolute now, though full zone files should be postponed to separate document.\r\n> \r\n> We are not talking about zone files here, just using their format for `dns-rr`, so not sure what you are trying to say.\r\n> #### Reply to [#14 (comment)](https://github.com/cbor-wg/cbor-dns/pull/14#issuecomment-3807340914)\r\n\r\nThis is because it is tied with problem of non-absolute names currently, and with different parsing of `dns'one.two'` and `dns'one.two.` - ok, I'll create new issue with this.\r\n\r\n> > > I also talked to @waehlisch now. He doesn't like the `dns-rr''` format either. Besides potentially confusing CBOR people by hiding structure, as @mguetschow pointed out, we also risk confusing DNS people. Yes, they are familiar with zone file formatting, but\r\n> > > ```\r\n> > > 1. This familiarity and the unfamiliarity with EDN may become a problem (\"What, those people want to put zone file data into DNS messages??!?\")\r\n> > > ```\r\n> > Well, this is simply not true. The 1035's format is used not only in zone files but also in utilities exactly for DNS messages. Two examples (this is `drill` from `unbound` because on my local machine, but it modeled after more popular `dig` from BIND):\r\n> > [...]\r\n> \r\n> Misunderstanding _may and do_ happen. Making things more complicated to discuss because of misunderstandings is something that should be avoided. We already need to explain to people that EDN _is not_ what is sent over the wire.\r\n\r\nYes, educating people is good thing.\r\n\r\n>  When you then bunch several array elements into one string, hiding actual structure, you confuse people.\r\n\r\nThen don't do it in the first place - only do it secondarily, after more simple examples first and after explanation that such form is *also* possible, providing for each example the form it maps to, for clarity.\r\n\r\n> The examples here are to provide context, not to make things neat. \r\n\r\nThis is fundamental mistake. I'm talking from practice user side here. The point of app-literals in EDN is exactly to make people's life easier by providing handy to use tools. Otherwise, it is the question what trash those ivory-tower standard-makers waste tax-payers money for.\r\n\r\n> Yes, familiarity helps to make things comfortable for the reader, but if the reader does not understand _at a glance_ that `[dns-rr'example.org IN']` is actually `[\"example\", \"org\", 1]` and not `[\"example.org IN\"]` (which then actually translates to `0x83676578616D706C65636F726701` or `0x816E6578616D706C652E6F726720494E`, respectively) you are just asking for negative reviews which then lead to endless discussions that are simply not be necessary.\r\n\r\nThe solution to this is easy - all main part of document must not use new app-strings. Introduce them in Appendix when reader already knows what really is sent over the wire. Then there will be no \"at a glance\" problem because it will be introduced and explained after 101 are taught.\r\n\r\n> Reminder: We don't _need_ to provide a full extension here. We should also avoid feature creep to this document which already includes a lot of more batteries than anyone could ask for.\r\n\r\nWe don't really need these things in first version of document at all. Everything in main part of text is sufficiently describable by comments or prose.\r\n \r\n> > OK, point 2 is more serious, but alternative with `[\"example\", \"com\", dns-rrt'A', dns-cls'IN', ip'192.0.2.1']` still looks ugly (lengthy, too much punctuation) and I doubt people will like it - because it would be more simple and readable to just use comments: `[\"example\", \"com\", 5 /CNAME/, 1 /IN/, ip'192.0.2.1']`\r\n> \r\n> I find the latter example less readable, TBH... and it is basically the current state. If we would go that route, I would just close this PR and add those ugly comments ;-). But: We then wouldn't have these numbers already imported into EDN.\r\n\r\nI still don't understand what is import and why it can't be done in Appendix.\r\n\r\n> > Given that main usage in RR head is for constants if types/classes, I think we can make following compromise:\r\n> > \r\n> > * name it `dns''` - as short as possible (`dns-svcb` and like are not affected)\r\n> > * when presenting from CBOR, tools ALWAYS generate EDN without hiding structure, on individual fields: `dns'A', dns'IN'` and only for type & class\r\n> \r\n> That would import from two registries and would make room for ambiguity.\r\n\r\nNo, 1035 says \"Since type and class mnemonics are disjoint, the parse is unique\". I read this as there will be never class and type with same name.\r\n\r\n> > * human MAY write combined `dns'example.com 3000 IN NS'` for machine to parse for non-complicated cases - e.g. it would require distinct `[dns'iot.subdomain', simple(0), dns'CNAME IN', ...]` to not invent much syntax.\r\n> \r\n> Case and point: Would `[dns'NS']` then resolve to `[\"NS\"]` (the domain name \"ns\", domain names are case insensitive after all) or `[2]` (the RRTYPE NS)? Is `dns'ANY'` a name \"any\", an rrtype value \"255\", or a class value \"255\"?\r\n\r\nIANA registry lists NONE and ANY only for class, so it is unambiguous here. Rule for labels is that it must contain at least one dot to be parsed as name - class/type won't contain dots. Rationale was already in previous comment: if you need name consisting of only one label, you can just write it as tstr `\"NS\"` without app-string and be done.\r\n\r\n> The \"MAY\" is confusing EDN literals are optional regardless.\r\n\r\nOk. The intent is that it is only input from human form, not what machine does in CBOR->EDN path.\r\n\r\n> > That is, being used mostly for constants and labels with dots, as single `[\"www\", ...]` is shorter/readable than `[dns'www', ...]` [..]\r\n> \r\n> I also would prefer shorter app-extension identifiers ;-). See [#14 (comment)](https://github.com/cbor-wg/cbor-dns/pull/14#discussion_r2712512085)\r\n\r\nYep, this is from I started my entire talk in this PR, and why suggested `dns''` , indirectly continuing to that your rightful comment.\r\n\r\n> > [...] - and described in text as used for constants, with phrasing which can't give impression \"this is a new zone file syntax\". Just helpers.\r\n> \r\n> We already had the case of people only looking at the examples and being confused how the mechanism actually works even though it was described in the text...\r\n\r\nAgain solvable by separating main part examples from EDN-ish Appendix and it's examples.\r\n\r\n> #### Conclusion\r\n> \r\n> My proposal would be to stick with the current approach. This way, by importing those IANA values, we lay a foundation for possible future documents that makes things even neater. There is no conflict here, because the name space for EDN literals is unlimited (see https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals#section-6.1). I am not stuck on the names, if they are shorter, all the better for me. But they should be disjunct between different IANA registries to prevent ambiguity.\r\n\r\nI think above I've shown there is no \"two registries\" problem actually.",
+          "createdAt": "2026-01-29T22:30:26Z",
+          "updatedAt": "2026-01-29T22:30:26Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> > Here is my 2 cent:\r\n> > [dns-rrtypes.cddl.txt](https://github.com/user-attachments/files/24938614/dns-rrtypes.cddl.txt)\r\n> > as produced by\r\n> > [dns-parameters.rb.txt](https://github.com/user-attachments/files/24938635/dns-parameters.rb.txt)\r\n> \r\n> So are you arguing to to use `e''` and import `dns-rrtypes.cddl.txt` (and a manual version of `CLASS`) into the draft? How will we update that list in the future then on a document level?\r\n\r\nOh, so by \"import\" you've mean re-listing contents of IANA registries in a big `(A|NS|CNAME|...)` regexp? But this is absolutely wrong approach to go. You describe just base identifier syntax and then parser in code uses a table like Unix files `/etc/protocols` or `/etc/services` which are snapshots of corresponding IANA registries (those are in DNS-related standard C functions, BTW). Because it is not only documents updating problem, it's also code maintenance problem, if done other way.\r\n\r\nThat's why there were discussions about EDN in ML in 2025 about passing just raw app-string contents to application's parser, to make it work like \"plugin\" and not having to bloat ABNF by describing every extension. So application's parser is not obliged to be embedded in main EDN parser or use ABNF at all.",
+          "createdAt": "2026-01-29T22:39:42Z",
+          "updatedAt": "2026-01-29T22:39:42Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I am not fan of polluting namespace with things which will stay (because Standards Track) forever but will likely be unused by people.\r\n\r\nOk, then let's use `e''`. This is the solution that seems to be the one that everyone of us can live with, [it is least confusing,] we don't pollute the namespace (it exists already _and_ is by its very definition temporary), and it is easier to read than interlaced comments:\r\n\r\n```python\r\n[\"example\", \"com\", e'RR-A', e'C-IN', ip'192.0.2.1']\r\n```\r\n\r\nand, as proposed by @cabo, I will only add the types and classes used in the examples to the appendix. Any more complex nice-to-have should be put into a separate document.",
+          "createdAt": "2026-01-30T11:55:26Z",
+          "updatedAt": "2026-01-30T11:56:14Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> > I am not fan of polluting namespace with things which will stay (because Standards Track) forever but will likely be unused by people.\r\n> \r\n> Ok, then let's use `e''`. This is the solution that seems to be the one that everyone of us can live with, [it is least confusing,] we don't pollute the namespace (it exists already _and_ is by its very definition temporary), and it is easier to read than interlaced comments:\r\n> \r\n> ```python\r\n> [\"example\", \"com\", e'RR-A', e'C-IN', ip'192.0.2.1']\r\n> ```\r\n> \r\n> and, as proposed by @cabo, I will only add the types and classes used in the examples to the appendix. Any more complex nice-to-have should be put into a separate document.\r\n\r\nSeems to be good compromiss for *this* version, but as for version, immediately question arise - this is yet antoher draft, won't it postpone publishment yet even more after (currently required dependencies) drafts of EDN and -packed?\r\n\r\nWhile here, minor nitpick: `T-A` seems to be more consistent with `C-IN` (and due to temporary nature, also not expected to clash with anything).",
+          "createdAt": "2026-01-30T20:21:50Z",
+          "updatedAt": "2026-01-30T20:21:50Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Seems to be good compromiss for _this_ version, but as for version, immediately question arise - this is yet antoher draft, won't it postpone publishment yet even more after (currently required dependencies) drafts of EDN and -packed?\r\n\r\nYes, but different from our draft all of those are already adopted by the WG. So I expect them to progress faster. Also, as we have seen with `-packed`, this can provide valuable insights for the dependencies as well, so one should not shy away from using something in draft stage. And in the end they might just share a fate in the RFC editor queue.",
+          "createdAt": "2026-01-30T20:42:15Z",
+          "updatedAt": "2026-01-30T20:42:15Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > Seems to be good compromiss for _this_ version, but as for version, immediately question arise - this is yet antoher draft, won't it postpone publishment yet even more after (currently required dependencies) drafts of EDN and -packed?\r\n> \r\n> Yes, but different from our draft all of those are already adopted by the WG. So I expect them to progress faster. Also, as we have seen with `-packed`, this can provide valuable insights for the dependencies as well, so one should not shy away from using something in draft stage. And in the end they might just share a fate in the RFC editor queue.\r\n\r\nPlus, we are discussing this minor addition I wanted to add for better readability of the examples now also for more than one week, which also adds to publish postponement ;-). So let's go with the simplest and more important already established solution.",
+          "createdAt": "2026-01-30T20:44:11Z",
+          "updatedAt": "2026-01-30T20:44:11Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> > > Seems to be good compromiss for _this_ version, but as for version, immediately question arise - this is yet antoher draft, won't it postpone publishment yet even more after (currently required dependencies) drafts of EDN and -packed?\r\n> > \r\n> > \r\n> > Yes, but different from our draft all of those are already adopted by the WG. So I expect them to progress faster. Also, as we have seen with `-packed`, this can provide valuable insights for the dependencies as well, so one should not shy away from using something in draft stage. And in the end they might just share a fate in the RFC editor queue.\r\n\r\nHm, was that WGLC on them already?\r\n\r\n> Plus, we are discussing this minor addition I wanted to add for better readability of the examples now also for more than one week, which also adds to publish postponement ;-). So let's go with the simplest and more important already established solution.\r\n\r\nNo, we are not adding here because publish of DNS-CBOR requires to publish -packed and EDN as RFCs first, and these are waiting anyway in WG queue. But draft on `e''` will also have some time after publishing EDN to be RFC and thus will delay DNS-CBOR becoming RFC even more, isn't it?",
+          "createdAt": "2026-01-30T21:04:03Z",
+          "updatedAt": "2026-01-30T21:04:03Z"
         }
       ],
       "reviews": [
@@ -1818,6 +1918,86 @@
               "updatedAt": "2026-01-23T23:49:57Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7eNTLL",
+          "commit": {
+            "abbreviatedOid": "45ec241"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T12:26:38Z",
+          "updatedAt": "2026-01-30T12:26:38Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "`CNAME` is not used here, but in the examples of #16, so I already included it to not forget.",
+              "createdAt": "2026-01-30T12:26:38Z",
+              "updatedAt": "2026-01-30T12:26:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7eV2VE",
+          "commit": {
+            "abbreviatedOid": "45ec241"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T20:25:10Z",
+          "updatedAt": "2026-01-30T20:25:10Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "So you postpone app-extensions for RRDATA also?",
+              "createdAt": "2026-01-30T20:25:10Z",
+              "updatedAt": "2026-01-30T20:25:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7eWEEg",
+          "commit": {
+            "abbreviatedOid": "45ec241"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T20:39:14Z",
+          "updatedAt": "2026-01-30T20:39:14Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "Yes, it is not used in our examples at the moment. If, and only if, we introduce some SVCB or OPT examples we can add some values for `e''` as well.",
+              "createdAt": "2026-01-30T20:39:14Z",
+              "updatedAt": "2026-01-30T20:39:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7eWSuL",
+          "commit": {
+            "abbreviatedOid": "45ec241"
+          },
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T20:59:16Z",
+          "updatedAt": "2026-01-30T20:59:16Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "I mean, those are not just integers, they have syntax - options, cookie, etc... So are not `e''`.",
+              "createdAt": "2026-01-30T20:59:16Z",
+              "updatedAt": "2026-01-30T20:59:16Z"
+            }
+          ]
         }
       ]
     },
@@ -2012,18 +2192,26 @@
       "labels": [],
       "body": "This reworks the name compression as discussed during the last few meetings we had.\r\n\r\nNamely:\r\n\r\n- TBD28259 now appends, rather than prepends to existing packing tables to allow for single pass decoders with minimum state.\r\n-  Consequently, disallow inner table setup tags to TBD28259, as that would increase complexity of both decoders and encoders\r\n- Clarify implicit nature with `packed`\r\n- Use actual DNS examples\r\n- Add example decoder as pseudo-code\r\n- Additionally, add some considerations on maps within TBD28259 (see also #15)",
       "createdAt": "2026-01-22T21:30:42Z",
-      "updatedAt": "2026-01-28T20:26:00Z",
+      "updatedAt": "2026-01-29T16:17:14Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "tbd28259-order",
-      "headRefOid": "1da6cd609ca7728f32008955634f9a857e45eab6",
+      "headRefOid": "7ce663d38dbba7c55de8183f08fc3b6e83d726bf",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Also added some code for straight references with the 113 tag.",
+          "createdAt": "2026-01-29T11:31:41Z",
+          "updatedAt": "2026-01-29T11:31:41Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOIM0M7M7cUr0s",
@@ -3256,6 +3444,232 @@
               "body": "Why? Isn't that assignment?",
               "createdAt": "2026-01-28T20:26:00Z",
               "updatedAt": "2026-01-28T20:26:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d2sUZ",
+          "commit": {
+            "abbreviatedOid": "1da6cd6"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T11:19:55Z",
+          "updatedAt": "2026-01-29T11:19:55Z",
+          "comments": [
+            {
+              "originalPosition": 68,
+              "body": "Addressed in 35d621e",
+              "createdAt": "2026-01-29T11:19:55Z",
+              "updatedAt": "2026-01-29T11:19:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d2scf",
+          "commit": {
+            "abbreviatedOid": "1da6cd6"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T11:20:03Z",
+          "updatedAt": "2026-01-29T11:20:04Z",
+          "comments": [
+            {
+              "originalPosition": 221,
+              "body": "Addressed in 35d621e",
+              "createdAt": "2026-01-29T11:20:03Z",
+              "updatedAt": "2026-01-29T11:20:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d2sko",
+          "commit": {
+            "abbreviatedOid": "1da6cd6"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T11:20:09Z",
+          "updatedAt": "2026-01-29T11:20:09Z",
+          "comments": [
+            {
+              "originalPosition": 90,
+              "body": "Addressed in 35d621e",
+              "createdAt": "2026-01-29T11:20:09Z",
+              "updatedAt": "2026-01-29T11:20:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d3STV",
+          "commit": {
+            "abbreviatedOid": "7578fa9"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T11:57:43Z",
+          "updatedAt": "2026-01-29T11:57:43Z",
+          "comments": [
+            {
+              "originalPosition": 138,
+              "body": "> Why? Isn't that assignment?\r\n\r\nI decided to make inclusivity/exclusivity more explicit, so the iterator is now described as\r\n\r\n```\r\ni from idx == 0 /* read equals */ to i < end\r\n```",
+              "createdAt": "2026-01-29T11:57:43Z",
+              "updatedAt": "2026-01-29T11:57:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d3TWd",
+          "commit": {
+            "abbreviatedOid": "7578fa9"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T11:58:52Z",
+          "updatedAt": "2026-01-29T11:58:52Z",
+          "comments": [
+            {
+              "originalPosition": 138,
+              "body": "in math this would be basically be\r\n\r\n$i \\in [0, end)$",
+              "createdAt": "2026-01-29T11:58:52Z",
+              "updatedAt": "2026-01-29T11:58:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d3VCv",
+          "commit": {
+            "abbreviatedOid": "7aba320"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T12:00:44Z",
+          "updatedAt": "2026-01-29T12:00:44Z",
+          "comments": [
+            {
+              "originalPosition": 481,
+              "body": "Fixed in cc3d69e",
+              "createdAt": "2026-01-29T12:00:44Z",
+              "updatedAt": "2026-01-29T12:00:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d3ZpD",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T12:05:55Z",
+          "updatedAt": "2026-01-29T12:05:55Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "> However, we are not inventing real language here, a big opportunity to do this will be in CBOR-TPL (CBAPT/CBAR superset) and, especially, it's frontend languages :-)\r\n\r\nLet's _not_ invent languages here at all (beyond DNS+CBOR and maybe some EDN... ;-)). Iff a document I can refer to exists and there is any chance of that becoming normative within the development time of this draft, I'd happily refer to it and change the pseudo-code later. For now, let's stick with understandable pseudo-code.\r\n\r\nBTW, the reason, I don't want to use `switch` or `case` here is because `switch`-`case`-statements in most programming languages are open-ended (i.e. need an explicit `break` or similar to not fall-through to the next case), while Rust's `match`-statements (or any pattern matching schemes in languages such as Haskell) do not do that.",
+              "createdAt": "2026-01-29T12:05:55Z",
+              "updatedAt": "2026-01-29T12:05:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d3bTT",
+          "commit": {
+            "abbreviatedOid": "55ed1d8"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T12:07:26Z",
+          "updatedAt": "2026-01-29T12:07:26Z",
+          "comments": [
+            {
+              "originalPosition": 545,
+              "body": "> any pattern matching schemes in languages such as Haskell\r\n\r\nand before you get any ideas: No, I don't mean pattern matching in the sense of regexes or globs, just like they are used in basic Haskell (so matching to specific values, e.g.). ;-)",
+              "createdAt": "2026-01-29T12:07:26Z",
+              "updatedAt": "2026-01-29T12:07:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d615J",
+          "commit": {
+            "abbreviatedOid": "cc3d69e"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T14:46:00Z",
+          "updatedAt": "2026-01-29T14:54:11Z",
+          "comments": [
+            {
+              "originalPosition": 84,
+              "body": "Is this what you mean? I'd make it explicit.\n\n```diff\n-        elif (outer_table_len and unpacker.is_straight_reference(elem)) {\n+        elif (outer_table_len > 0 and unpacker.is_straight_reference(elem)) {\n```",
+              "createdAt": "2026-01-29T14:46:00Z",
+              "updatedAt": "2026-01-29T14:54:12Z"
+            },
+            {
+              "originalPosition": 83,
+              "body": "I'm not sure if I like the idea of explicitly supporting argument references in this pseudo-code, as nothing about it is dns+cbor specific, right? One might wonder,  why not also supporting inverted references?\n\nAlong the way, this introduces new syntax with `.get_arg` which is not needed anywhere else, is it?\n\nMaybe we could condense this branch by just saying \"handle argument references as per CBOR-packed, error if argument reference points outside of outer table\"",
+              "createdAt": "2026-01-29T14:54:04Z",
+              "updatedAt": "2026-01-29T14:54:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d82AL",
+          "commit": {
+            "abbreviatedOid": "cc3d69e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T16:16:34Z",
+          "updatedAt": "2026-01-29T16:16:34Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "I was just noticing, that while we step into 113, we do not really address it beyond shared refs in the pseudo-Code. Inverter refs are not really needed with dns+cbor due to name compression. ",
+              "createdAt": "2026-01-29T16:16:34Z",
+              "updatedAt": "2026-01-29T16:16:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7d82q7",
+          "commit": {
+            "abbreviatedOid": "cc3d69e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-29T16:17:07Z",
+          "updatedAt": "2026-01-29T16:17:07Z",
+          "comments": [
+            {
+              "originalPosition": 84,
+              "body": "```suggestion\r\n        elif (outer_table_len > 0 and unpacker.is_straight_reference(elem)) {\r\n```",
+              "createdAt": "2026-01-29T16:17:07Z",
+              "updatedAt": "2026-01-29T16:17:08Z"
             }
           ]
         }
