@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-01T01:22:54.242827+00:00",
+  "timestamp": "2026-02-03T01:15:24.976115+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -387,9 +387,24 @@
       "labels": [],
       "body": "In #12 there was expressed need in zone files support. While exact format for those may be out of scope for current version of document, it was discovered, especially while in discussion in #14 of possible new EDN app-literals, that current version is under-worked about absolute (FQDN) and relative labels - e.g. such difference could be represented by hypothetical `dns'some.label'` vs `dns'some.label.'` - note the dot at end. That is, Section 3.1 in -15 version of draft states\n> The root domain `\".\"` is represented as an empty string `\"\"`\n\nbut later root domain's label, which in standard DNS ends each name in queries and responses, is silently omitted without clarifications. While intent for saving 1 byte per RR is easily guessed, this is still not 100% correct.\n\nHowever, there is simple way to \"fix\" it by really not changing nothing in main apart and at the same time gain (at least some) support for zone files. The solution (sketched in #12) is to augment CDDL: we just declare that by default `$ORIGIN` is `\"\"` and elided, that is, current format is special/particular case, where all labels are added `$ORIGIN` at end (after expansion from _V_) becoming absolute names for typical queries/responses. And we augment format with:\n```\norigin-defttl = (\n   domain-name .default \"\",\n   ? ttl\n)\n```\nadding `? origin-defttl` between `? flags`, and `? question-section,` (so it is usable in question also, see below).\n\nImportant: this also could be used not in zone files but usual responses where all names are under same domain - it will save one byte for `simple(N)` in each RR; while origin's label are not occupying rows in _V_ at all.\n\nP.S. In principle, zone files may be represented as simple as \"answer\" with `AXFR` in question section, but may be such definition is premature...",
       "createdAt": "2026-01-31T00:36:04Z",
-      "updatedAt": "2026-01-31T00:37:55Z",
+      "updatedAt": "2026-02-02T23:41:36Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In general: I would say, if this is only important for zone files, we should wait until there is actually a format and if it will be the same as `rr` currently is.\n\n> but later root domain's label, which in standard DNS ends each name in queries and responses, is silently omitted without clarifications. While intent for saving 1 byte per RR is easily guessed, this is still not 100% correct.\n\nWhat do you mean by \"later\"? The root domain is AFAIK only important in RRs for special RRs such as OPT (where it is omitted) or SVCB (where there is [information on that](https://www.ietf.org/archive/id/draft-lenders-dns-cbor-15.html#section-3.2.1.4-4)). Can you please be specific? \n\n> adding `? origin-defttl` between `? flags`, and `? question-section,` (so it is usable in question also, see below).\n\nI am not quite sure I understand. This would put `origin-defttl` and thus a TTL on the main level, i.e. on the same level as the sections. The TTL, however, is part of a resource record or resource record set within those sections.\n\n```\n$$dns-rr = rr / #6.141(opt-rr) / bstr\n\n...\n\nrr = [\n  ? domain-name,\n  ttl: ttl,\n  type-spec-rdata,\n]\ntype-spec-rdata = (\n  ? type-spec,\n  rdata: bstr // ( $ip-addr ) // ( domain-name ) // ( rdata-set ),\n)\nrdata-set = ((\n  is-rrset: true,\n  rdata-set: [ +bstr ]\n) // (\n  is-rrset: true,\n  rdata-set: [ +[ domain-name ] ],\n))\n\n...\n\nanswer-section = [+ $$dns-rr]\nextra-sections = (\n  ? authority: [+ $$dns-rr],\n  additional: [+ $$dns-rr],\n)\n```\n\n> Important: this also could be used not in zone files but usual responses where all names are under same domain - it will save one byte for `simple(N)` in each RR; while origin's label are not occupying rows in _V_ at all.\n\nI'd argue eliding (i.e. not repeating)  the name in the question, which is potentially longer, is far more byte saving than eliding `\".\"` (2 bytes).",
+          "createdAt": "2026-02-02T11:48:24Z",
+          "updatedAt": "2026-02-02T11:48:24Z"
+        },
+        {
+          "author": "nuclight",
+          "authorAssociation": "NONE",
+          "body": "> In general: I would say, if this is only important for zone files, we should wait until there is actually a format and if it will be the same as `rr` currently is.\n> \n> > but later root domain's label, which in standard DNS ends each name in queries and responses, is silently omitted without clarifications. While intent for saving 1 byte per RR is easily guessed, this is still not 100% correct.\n> \n> What do you mean by \"later\"? \n\nLater by document text.\n\n> The root domain is AFAIK only important in RRs for special RRs such as OPT (where it is omitted) or SVCB (where there is [information on that](https://www.ietf.org/archive/id/draft-lenders-dns-cbor-15.html#section-3.2.1.4-4)). Can you please be specific?\n\nIn original DNS wire format, we always have root label to end sequence of domain-name labels. In zone master files, however, name could be absolute - with root's dot at end - or relative. When in some future we will support `dns'ns1.domain.com'` this makes ambiguity versus `dns'ns1.domain.com.'` - and people will find it confusing. But required presence of root label in wire format - and lack in DNS-CBOR - could be generalized for some benefits, see example below.\n\n> > adding `? origin-defttl` between `? flags`, and `? question-section,` (so it is usable in question also, see below).\n> \n> I am not quite sure I understand. This would put `origin-defttl` and thus a TTL on the main level, i.e. on the same level as the sections. The TTL, however, is part of a resource record or resource record set within those sections.\n\nThis is `$TTL` of master files, not RR's TTL. Well, we can omit it for now, just that I thought reserving this in CDDL for future use might be a good thing.\n\n> ```\n> ...\n> \n> answer-section = [+ $$dns-rr]\n> extra-sections = (\n>   ? authority: [+ $$dns-rr],\n>   additional: [+ $$dns-rr],\n> )\n> ```\n\nYep, it's only usable in responses, but better even before (repeated) question section.\n\n> > Important: this also could be used not in zone files but usual responses where all names are under same domain - it will save one byte for `simple(N)` in each RR; while origin's label are not occupying rows in _V_ at all.\n> \n> I'd argue eliding (i.e. not repeating) the name in the question, which is potentially longer, is far more byte saving than eliding `\".\"` (2 bytes).\n\nConsider the following example: client makes query for `hostel-a.campus.univ.edu.` and returned response contains several RRs which all will end in `campus.univ.edu.` - `mail`, `ns1`, `ns2`, `ns1.hostel-a`, `ns2.hostel-a`, `mail.hostel-a` and so on. Current form of name compression will:\n\n1) occupy three entries in _V_ for `campus.univ.edu.`\n2) every direct name under it will end in `simple(3)` - `\"mail\", simple(3)` and `\"ns1\", simple(3)` and `\"ns1\", simple(0)` etc.\n\nIf, instead, `campus.univ.edu.` would be specified on top level as `$ORIGIN`, then question would be just `[\"hostel-a\", dns'ANY']` and answer/authority could have just `\"mail\"` instead of `\"mail\", simple(3)` (`\"ns1\", simple(0)` unchanged) etc.\n*Just like every name was under root domain instead.*\nThis trick allows not only to support master files, but also to save several bytes in regular DNS responses consisting of multiple records under same subtree.",
+          "createdAt": "2026-02-02T23:41:36Z",
+          "updatedAt": "2026-02-02T23:41:36Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -1115,7 +1130,7 @@
       "labels": [],
       "body": "~~This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types, classes, EDNS(0) option codes and SVCB SvcParamKeb but even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.~~\r\n\r\n[updated after extensive discussions about a more involved format]\r\n\r\nThis provides definitions for and uses the `e''` application extension to enhance the readability of RR types and classes in the examples.\r\n",
       "createdAt": "2026-01-19T15:11:57Z",
-      "updatedAt": "2026-01-30T21:04:03Z",
+      "updatedAt": "2026-02-02T11:34:37Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
       "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
@@ -1308,6 +1323,20 @@
           "body": "> > > Seems to be good compromiss for _this_ version, but as for version, immediately question arise - this is yet antoher draft, won't it postpone publishment yet even more after (currently required dependencies) drafts of EDN and -packed?\r\n> > \r\n> > \r\n> > Yes, but different from our draft all of those are already adopted by the WG. So I expect them to progress faster. Also, as we have seen with `-packed`, this can provide valuable insights for the dependencies as well, so one should not shy away from using something in draft stage. And in the end they might just share a fate in the RFC editor queue.\r\n\r\nHm, was that WGLC on them already?\r\n\r\n> Plus, we are discussing this minor addition I wanted to add for better readability of the examples now also for more than one week, which also adds to publish postponement ;-). So let's go with the simplest and more important already established solution.\r\n\r\nNo, we are not adding here because publish of DNS-CBOR requires to publish -packed and EDN as RFCs first, and these are waiting anyway in WG queue. But draft on `e''` will also have some time after publishing EDN to be RFC and thus will delay DNS-CBOR becoming RFC even more, isn't it?",
           "createdAt": "2026-01-30T21:04:03Z",
           "updatedAt": "2026-01-30T21:04:03Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > > > Seems to be good compromiss for _this_ version, but as for version, immediately question arise - this is yet antoher draft, won't it postpone publishment yet even more after (currently required dependencies) drafts of EDN and -packed?\r\n> > > \r\n> > > \r\n> > > Yes, but different from our draft all of those are already adopted by the WG. So I expect them to progress faster. Also, as we have seen with `-packed`, this can provide valuable insights for the dependencies as well, so one should not shy away from using something in draft stage. And in the end they might just share a fate in the RFC editor queue.\r\n> \r\n> Hm, was that WGLC on them already?\r\n\r\nNo, but they are _adopted_ by the WG (as you can see by their name `draft-ietf-cbor-...`). This draft is not yet and is an individual draft on my name (`draft-lenders-...`).",
+          "createdAt": "2026-02-02T11:30:35Z",
+          "updatedAt": "2026-02-02T11:30:35Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> No, we are not adding here because publish of DNS-CBOR requires to publish -packed and EDN as RFCs first, and these are waiting anyway in WG queue. But draft on `e''` will also have some time after publishing EDN to be RFC and thus will delay DNS-CBOR becoming RFC even more, isn't it?\r\n\r\nWe will see... Currently the WG is discussing serialization exclusively, which is unusual in and of itself. Once it got unstuck on that, things might progress faster again. In CoRE we also had interdependent drafts. There there was just a common WGLC on them. Since `-edn-literal` and `-edn-e-ref` are mostly independent of `-packed` and `-dns-cbor` they might (and should) progress faster.",
+          "createdAt": "2026-02-02T11:34:37Z",
+          "updatedAt": "2026-02-02T11:34:37Z"
         }
       ],
       "reviews": [
@@ -1998,6 +2027,26 @@
               "updatedAt": "2026-01-30T20:59:16Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7e2ktq",
+          "commit": {
+            "abbreviatedOid": "45ec241"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-02-02T11:29:24Z",
+          "updatedAt": "2026-02-02T11:29:24Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "> I mean, those are not just integers, they have syntax - options, cookie, etc... So are not `e''`.\r\n\r\nNo, not like I have intended them. There they are just integers for OPT numbers and SvcParamKeys respectively.",
+              "createdAt": "2026-02-02T11:29:24Z",
+              "updatedAt": "2026-02-02T11:29:25Z"
+            }
+          ]
         }
       ]
     },
@@ -2192,13 +2241,13 @@
       "labels": [],
       "body": "This reworks the name compression as discussed during the last few meetings we had.\r\n\r\nNamely:\r\n\r\n- TBD28259 now appends, rather than prepends to existing packing tables to allow for single pass decoders with minimum state.\r\n-  Consequently, disallow inner table setup tags to TBD28259, as that would increase complexity of both decoders and encoders\r\n- Clarify implicit nature with `packed`\r\n- Use actual DNS examples\r\n- Add example decoder as pseudo-code\r\n- Additionally, add some considerations on maps within TBD28259 (see also #15)",
       "createdAt": "2026-01-22T21:30:42Z",
-      "updatedAt": "2026-01-29T16:17:14Z",
+      "updatedAt": "2026-02-02T16:16:39Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
-      "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
+      "baseRefOid": "59df39331efb6d25453e5d6fb50c579ae789db60",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "tbd28259-order",
-      "headRefOid": "7ce663d38dbba7c55de8183f08fc3b6e83d726bf",
+      "headRefOid": "203eefbd82a95f37e13ea5efb54ebeecd1faf0ae",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -2210,6 +2259,27 @@
           "body": "Also added some code for straight references with the 113 tag.",
           "createdAt": "2026-01-29T11:31:41Z",
           "updatedAt": "2026-01-29T11:31:41Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Can we proceed with this? Not sure, if we want to discuss a new version on Wednesday, but would be a good milestone to have `-16` by then.",
+          "createdAt": "2026-02-02T15:20:52Z",
+          "updatedAt": "2026-02-02T15:20:52Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> What's the status of moving the pseudocode into the appendix?\r\n\r\n98dcd6db376a5667ae214f37aa3bc17dcdc2111f moves all examples to the appendices now and 81425c4aab3e72950b72d5ab3cbb2477e2aea9b5 references these appendices in the main body.",
+          "createdAt": "2026-02-02T16:15:13Z",
+          "updatedAt": "2026-02-02T16:15:13Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "And squashed.",
+          "createdAt": "2026-02-02T16:16:39Z",
+          "updatedAt": "2026-02-02T16:16:39Z"
         }
       ],
       "reviews": [
@@ -3670,6 +3740,84 @@
               "body": "```suggestion\r\n        elif (outer_table_len > 0 and unpacker.is_straight_reference(elem)) {\r\n```",
               "createdAt": "2026-01-29T16:17:07Z",
               "updatedAt": "2026-01-29T16:17:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7e7ewK",
+          "commit": {
+            "abbreviatedOid": "cc3d69e"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-02-02T15:19:32Z",
+          "updatedAt": "2026-02-02T15:19:33Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "I reverted parts of 2442fab now, see 7c75d64.",
+              "createdAt": "2026-02-02T15:19:33Z",
+              "updatedAt": "2026-02-02T15:19:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7e77dV",
+          "commit": {
+            "abbreviatedOid": "7c75d64"
+          },
+          "author": "mguetschow",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "Just had another read-through and found some more minor nits.\n\nWhat's the status of moving the pseudocode into the appendix?",
+          "createdAt": "2026-02-02T15:38:50Z",
+          "updatedAt": "2026-02-02T15:56:53Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "```suggestion\nAny coherent sequence of text strings encountered within the rump of tag TBD28259 when reading it depth-first, as well as any of its non-empty suffixes, ordered by their appearance within the rump, are added to the table as arrays marked with the splice integration tag 1115 (see {{-cbor-packed, Section 5.1}}).\nIf a sequence for which a tagged array is already in _V_ is encountered, a shared item reference _i_ is added to the rump instead, splicing the content of the array within tag 1115 into the existing array (see {{-cbor-packed, Section 5.1}}) and that sequence as well as its non-empty suffixes are not added again to _V_.\n```\n\nI think it makes more sense to include the order in the first mention, not the second one.",
+              "createdAt": "2026-02-02T15:38:50Z",
+              "updatedAt": "2026-02-02T15:56:53Z"
+            },
+            {
+              "originalPosition": 599,
+              "body": "```suggestion\n          if (is_splice_tag(packed_obj) and\n              typeof(tag-content of packed_obj) is CBORTextString or\n              typeof(packed_obj) is CBORTextString) {\n```\n\nI think",
+              "createdAt": "2026-02-02T15:53:13Z",
+              "updatedAt": "2026-02-02T15:56:53Z"
+            },
+            {
+              "originalPosition": 605,
+              "body": "```suggestion\n                append elem to tag-content of unpacker.packing_table[i]\n```\n\nwe still have `.content` in several places",
+              "createdAt": "2026-02-02T15:54:13Z",
+              "updatedAt": "2026-02-02T15:56:53Z"
+            },
+            {
+              "originalPosition": 599,
+              "body": "Or could we even move that to the `is_splice_tag` function?",
+              "createdAt": "2026-02-02T15:54:54Z",
+              "updatedAt": "2026-02-02T15:56:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOIM0M7M7e8cPU",
+          "commit": {
+            "abbreviatedOid": "7c75d64"
+          },
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-02-02T15:59:41Z",
+          "updatedAt": "2026-02-02T15:59:41Z",
+          "comments": [
+            {
+              "originalPosition": 599,
+              "body": "No, the referenced will be an array of strings. I would rather put this into an `assume`.",
+              "createdAt": "2026-02-02T15:59:41Z",
+              "updatedAt": "2026-02-02T15:59:42Z"
             }
           ]
         }
