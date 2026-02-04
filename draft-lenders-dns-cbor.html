@@ -1765,7 +1765,7 @@ The type of SvcParamValue may be extended in future specifications.<a href="#sec
 If the array does not start with an unsigned integer, the SvcPriority is elided and defaults to 0, i.e., the record is in AliasMode (see <span><a href="https://rfc-editor.org/rfc/rfc9460#section-2.4.2" class="relref">Section 2.4.2</a> of [<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>).
 If the array starts with a unsigned integer, it is the SvcPriority.<a href="#section-3.2.1.4-3" class="pilcrow">¶</a></p>
 <p id="section-3.2.1.4-4">If the TargetName is present can be determined by checking if the record data array has a domain name after the SvcPriority, i.e., if the SvcPriority is elided the array would start with a domain name.
-If there is no domain name after the SvcPriority, the TargetName is elided and defaults to the sequence of text strings <code>""</code> (i.e. the root domain "." in the common name representation defined in <span><a href="https://rfc-editor.org/rfc/rfc1035#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>, see <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>) and <span><a href="https://rfc-editor.org/rfc/rfc9460#section-2.5" class="relref">Section 2.5</a> of [<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>.
+If there is no domain name after the SvcPriority, the TargetName is elided and defaults to the sequence of text strings <code>""</code> (i.e., the root domain "." in the common name representation defined in <span><a href="https://rfc-editor.org/rfc/rfc1035#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>, see <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>) and <span><a href="https://rfc-editor.org/rfc/rfc9460#section-2.5" class="relref">Section 2.5</a> of [<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>.
 If there is a domain name after the SvcPriority, the TargetName is not elided and in the domain name form specified in <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>.<a href="#section-3.2.1.4-4" class="pilcrow">¶</a></p>
 <p id="section-3.2.1.4-5">The definition for SVCB and HTTPS record data can be seen in <a href="#fig_dns-rdata-svcb" class="auto internal xref">Figure 8</a>.<a href="#section-3.2.1.4-5" class="pilcrow">¶</a></p>
 <span id="name-svcb-and-https-resource-rec"></span><div id="fig_dns-rdata-svcb">
@@ -2041,7 +2041,7 @@ Text-String-Suffix-Sequence-Packed-CBOR = #6.28259(rump)
 Any "application/dns+cbor" encoder and decoder <span class="bcp14">MUST</span> support tag TBD28259 for DNS queries and responses.
 It provides an implicit text string suffix sequence table for shared items <em>V</em>.
 This table <em>V</em> is appended to the existing table for shared items of any table setup tag enclosing tag TBD28259 (by default empty table).
-This implicit (i.e. not explicitly represented) table <em>V</em> is constructed as follows:
+This implicit (i.e., not explicitly represented) table <em>V</em> is constructed as follows:
 Any coherent sequence of text strings encountered within the rump of tag TBD28259 when reading it depth-first, as well as any of its non-empty suffixes, ordered by their appearance within the rump, are added to the table as arrays marked with the splice integration tag 1115 (see <span>[<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-packed-19#section-5.1" class="relref">Section 5.1</a></span>).
 If a sequence for which a tagged array is already in <em>V</em> is encountered, a shared item reference <em>i</em> is added to the rump instead, splicing the content of the array within tag 1115 into the existing array (see <span>[<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-packed-19#section-5.1" class="relref">Section 5.1</a></span>) and that sequence as well as its non-empty suffixes are not added again to <em>V</em>.
 The resulting rump should look like referencing the first instance of the <em>i</em>-th complete string sequence (depth first) in the sequence.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
@@ -2053,7 +2053,7 @@ The "application/dns+cbor" media type specified within this document avoids maps
 If any other CBOR object than an object defined by <code>dns-message</code> in <a href="#fig_dns-msg" class="auto internal xref">Figure 1</a> is compressed using TBD28259, map elements <span class="bcp14">MUST</span> be encoded in bytewise lexicographic order of their keys, as specified in <span><a href="https://rfc-editor.org/rfc/rfc8949#section-4.2.1" class="relref">Section 4.2.1</a> of [<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>, unless the definition of that particular object type provides a different predetermined order.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
 <p id="section-4.1-5">The "application/dns+cbor" media type comes with an optional parameter "packed".
 If it is not provided, the value of it is assumed to be 0.
-With the "application/dns+cbor;packed=0" media type (i.e. even with "application/dns+cbor"), the tag TBD28259 is implicit, i.e., it <span class="bcp14">SHOULD NOT</span> be sent.
+With the "application/dns+cbor;packed=0" media type (i.e., even with "application/dns+cbor"), the tag TBD28259 is implicit, i.e., it <span class="bcp14">SHOULD NOT</span> be sent.
 This avoids sending the 3 bytes of overhead generated by the presence of the tag.
 If the decoder encounters an object marked with "application/dns+cbor;packed=0" that is tagged TBD28259, it <span class="bcp14">MUST NOT</span> discard it and parse its content as if it were implicit.
 Otherwise, it might incur an additional message to be sent and media type negotiation might fail unnecessarily.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
@@ -2066,7 +2066,7 @@ Otherwise, it might incur an additional message to be sent and media type negoti
         <h3 id="name-further-dns-representation-">
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-further-dns-representation-" class="section-name selfRef">Further DNS Representation with Tag 113</a>
         </h3>
-<p id="section-4.2-1">The representation of DNS responses with packed value 1, i.e. "application/dns+cbor;packed=1", has the same semantics as for tag TBD113
+<p id="section-4.2-1">The representation of DNS responses with packed value 1, i.e., "application/dns+cbor;packed=1", has the same semantics as for tag TBD113
 (see <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-packed-19#section-3.1" class="relref">Section 3.1</a> of [<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>]</span>) compressing the name-compressed response as rump.
 The difference to <span>[<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>]</span> is that tag TBD113 is implicit with media type parameter "packed=1", see <a href="#fig_packed-dns-msg" class="auto internal xref">Figure 13</a>.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.2-2">Take the following definition:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
@@ -2590,7 +2590,7 @@ Circular references are not possible due to the construction algorithm of <em>V<
 </div>
 <p id="section-8.3-9">Note that the sequence "org", simple(0) is added at index 4 with leading "org", instead of referencing index 2 + index 1 (<code>simple(2), simple(1)</code>), as it is its own distinct suffix sequence.
 However, its suffix "example", "org" is not added to the table again, as it is already present at index 1.<a href="#section-8.3-9" class="pilcrow">¶</a></p>
-<p id="section-8.3-10">Assuming media type "application/dns+cbor;packed=0" (i.e. an implicit tag TBD28259), the packed representation of <em>o</em> would thus be:<a href="#section-8.3-10" class="pilcrow">¶</a></p>
+<p id="section-8.3-10">Assuming media type "application/dns+cbor;packed=0" (i.e., an implicit tag TBD28259), the packed representation of <em>o</em> would thus be:<a href="#section-8.3-10" class="pilcrow">¶</a></p>
 <span id="name-the-packed-representation-o"></span><div id="fig_name-compression-example-packed">
 <figure id="figure-20">
           <div class="lang-edn sourcecode" id="section-8.3-11.1">
