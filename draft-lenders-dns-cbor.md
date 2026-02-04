@@ -1752,6 +1752,22 @@ a name overhead of 1 byte to its CBOR type header.[^10]{: mlenders}
 
 # Change Log
 
+Since [draft-lenders-dns-cbor-15]
+---------------------------------
+- Add Vadim Goncharov as contributor
+- Add Mikolai Gütschow as co-author
+- Make options in OPT record a flat list of alternating key-value-pairs
+- Use e'' application extension in examples for better readability of RR types and clases
+- Pass on name compression
+  - TBD28259 now appends, rather than prepends to existing packing tables to allow for single pass
+    decoders with minimum state.
+  - Consequently, disallow inner table setup tags to TBD28259, as that would increase complexity of
+    both decoders and encoders
+  - Add considerations on maps within TBD28259 (see also #15)
+  - Clarify implicit nature with `packed`
+  - Provide actual DNS examples
+  - Add example decoder as pseudo-code
+
 Since [draft-lenders-dns-cbor-14]
 ---------------------------------
 - Correction and nits
@@ -1855,6 +1871,7 @@ Since [draft-lenders-dns-cbor-00]
 - Name and Address compression utilizing CBOR-packed
 - Minor fixes to CBOR EDN and CDDL
 
+[draft-lenders-dns-cbor-15]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-15
 [draft-lenders-dns-cbor-14]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-14
 [draft-lenders-dns-cbor-13]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-13
 [draft-lenders-dns-cbor-12]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-12
