@@ -123,25 +123,26 @@ Internet-Draft                  dns+cbor                   February 2026
        8.5.1.  Example Decoder . . . . . . . . . . . . . . . . . . .  37
    9.  Comparison to Classic DNS Wire Format . . . . . . . . . . . .  41
    10. Change Log  . . . . . . . . . . . . . . . . . . . . . . . . .  44
-     10.1.  Since draft-lenders-dns-cbor-14  . . . . . . . . . . . .  44
-     10.2.  Since draft-lenders-dns-cbor-13  . . . . . . . . . . . .  44
-     10.3.  Since draft-lenders-dns-cbor-12  . . . . . . . . . . . .  44
-     10.4.  Since draft-lenders-dns-cbor-11  . . . . . . . . . . . .  44
-     10.5.  Since draft-lenders-dns-cbor-10  . . . . . . . . . . . .  45
-     10.6.  Since draft-lenders-dns-cbor-09  . . . . . . . . . . . .  45
-     10.7.  Since draft-lenders-dns-cbor-08  . . . . . . . . . . . .  45
-     10.8.  Since draft-lenders-dns-cbor-07  . . . . . . . . . . . .  46
-     10.9.  Since draft-lenders-dns-cbor-06  . . . . . . . . . . . .  46
-     10.10. Since draft-lenders-dns-cbor-05  . . . . . . . . . . . .  46
-     10.11. Since draft-lenders-dns-cbor-04  . . . . . . . . . . . .  46
-     10.12. Since draft-lenders-dns-cbor-03  . . . . . . . . . . . .  46
-     10.13. Since draft-lenders-dns-cbor-02  . . . . . . . . . . . .  47
-     10.14. Since draft-lenders-dns-cbor-01  . . . . . . . . . . . .  47
-     10.15. Since draft-lenders-dns-cbor-00  . . . . . . . . . . . .  47
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  47
-   References  . . . . . . . . . . . . . . . . . . . . . . . . . . .  47
-     Normative References  . . . . . . . . . . . . . . . . . . . . .  47
-     Informative References  . . . . . . . . . . . . . . . . . . . .  49
+     10.1.  Since draft-lenders-dns-cbor-15  . . . . . . . . . . . .  44
+     10.2.  Since draft-lenders-dns-cbor-14  . . . . . . . . . . . .  44
+     10.3.  Since draft-lenders-dns-cbor-13  . . . . . . . . . . . .  45
+     10.4.  Since draft-lenders-dns-cbor-12  . . . . . . . . . . . .  45
+     10.5.  Since draft-lenders-dns-cbor-11  . . . . . . . . . . . .  45
+     10.6.  Since draft-lenders-dns-cbor-10  . . . . . . . . . . . .  45
+     10.7.  Since draft-lenders-dns-cbor-09  . . . . . . . . . . . .  45
+     10.8.  Since draft-lenders-dns-cbor-08  . . . . . . . . . . . .  46
+     10.9.  Since draft-lenders-dns-cbor-07  . . . . . . . . . . . .  46
+     10.10. Since draft-lenders-dns-cbor-06  . . . . . . . . . . . .  46
+     10.11. Since draft-lenders-dns-cbor-05  . . . . . . . . . . . .  47
+     10.12. Since draft-lenders-dns-cbor-04  . . . . . . . . . . . .  47
+     10.13. Since draft-lenders-dns-cbor-03  . . . . . . . . . . . .  47
+     10.14. Since draft-lenders-dns-cbor-02  . . . . . . . . . . . .  47
+     10.15. Since draft-lenders-dns-cbor-01  . . . . . . . . . . . .  47
+     10.16. Since draft-lenders-dns-cbor-00  . . . . . . . . . . . .  48
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  48
+   References  . . . . . . . . . . . . . . . . . . . . . . . . . . .  48
+     Normative References  . . . . . . . . . . . . . . . . . . . . .  48
+     Informative References  . . . . . . . . . . . . . . . . . . . .  50
    Contributors  . . . . . . . . . . . . . . . . . . . . . . . . . .  51
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  51
 
@@ -159,7 +160,6 @@ Internet-Draft                  dns+cbor                   February 2026
    be avoided in constrained networks.  Fragmentation combined with high
    packet loss multiplies the likelihood of loss.  Hence, a compression
    format that reduces fragmentation of DNS messages is beneficial.
-
 
 
 
@@ -2412,7 +2412,36 @@ Internet-Draft                  dns+cbor                   February 2026
 
 10.  Change Log
 
-10.1.  Since draft-lenders-dns-cbor-14
+10.1.  Since draft-lenders-dns-cbor-15
+       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-15)
+
+   *  Add Vadim Goncharov as contributor
+
+   *  Add Mikolai Gütschow as co-author
+
+   *  Make options in OPT record a flat list of alternating key-value-
+      pairs
+
+   *  Use e'' application extension in examples for better readability
+      of RR types and clases
+
+   *  Pass on name compression
+
+      -  TBD28259 now appends, rather than prepends to existing packing
+         tables to allow for single pass decoders with minimum state.
+
+      -  Consequently, disallow inner table setup tags to TBD28259, as
+         that would increase complexity of both decoders and encoders
+
+      -  Add considerations on maps within TBD28259 (see also #15)
+
+      -  Clarify implicit nature with packed
+
+      -  Provide actual DNS examples
+
+      -  Add example decoder as pseudo-code
+
+10.2.  Since draft-lenders-dns-cbor-14
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-14)
 
    *  Correction and nits
@@ -2430,7 +2459,14 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Remove TBD reference (it never came to be)
 
-10.2.  Since draft-lenders-dns-cbor-13
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 44]
+
+Internet-Draft                  dns+cbor                   February 2026
+
+
+10.3.  Since draft-lenders-dns-cbor-13
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-13)
 
    *  Make use of splicing integration tag 1115
@@ -2441,14 +2477,14 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Provide extension point for IP addresses
 
-10.3.  Since draft-lenders-dns-cbor-12
+10.4.  Since draft-lenders-dns-cbor-12
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-12)
 
    *  Fix bug in packed examples
 
    *  Improve compression examples for clarity
 
-10.4.  Since draft-lenders-dns-cbor-11
+10.5.  Since draft-lenders-dns-cbor-11
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-11)
 
    *  Update repo links to cbor-wg org in draft
@@ -2459,16 +2495,9 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Remove commented-out parts
 
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 44]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
    *  Make name compression be based on Packed CBOR
 
-10.5.  Since draft-lenders-dns-cbor-10
+10.6.  Since draft-lenders-dns-cbor-10
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-10)
 
    *  Address IANA #1392416 early review
@@ -2477,7 +2506,7 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Update implementation status
 
-10.6.  Since draft-lenders-dns-cbor-09
+10.7.  Since draft-lenders-dns-cbor-09
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-09)
 
    *  Add recommendation on label encoding
@@ -2485,6 +2514,13 @@ Internet-Draft                  dns+cbor                   February 2026
    *  Provide extension points
 
       -  Mark dns-rr specifically as extension point
+
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 45]
+
+Internet-Draft                  dns+cbor                   February 2026
+
 
       -  Provide extension points for parameter values (options and svc-
          params)
@@ -2497,7 +2533,7 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Fix nits and typos
 
-10.7.  Since draft-lenders-dns-cbor-08
+10.8.  Since draft-lenders-dns-cbor-08
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-08)
 
    *  Clarify why question section was designed the way it is
@@ -2515,30 +2551,34 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Make EDNS options a map
 
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 45]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
    *  Update examples and comparison table in appendices
 
    *  Update implementation section
 
-10.8.  Since draft-lenders-dns-cbor-07
+10.9.  Since draft-lenders-dns-cbor-07
        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-07)
 
    *  Add Section 9 with comparison to classic DNS wire format
 
    *  "wire format" -> "classic DNS wire format"
 
-10.9.  Since draft-lenders-dns-cbor-06
-       (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-06)
+10.10.  Since draft-lenders-dns-cbor-06
+        (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-
+        06)
 
    *  Fixes wording and spelling mistakes
 
-10.10.  Since draft-lenders-dns-cbor-05
+
+
+
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 46]
+
+Internet-Draft                  dns+cbor                   February 2026
+
+
+10.11.  Since draft-lenders-dns-cbor-05
         (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-
         05)
 
@@ -2550,7 +2590,7 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Use canonical name for CBOR-packed
 
-10.11.  Since draft-lenders-dns-cbor-04
+10.12.  Since draft-lenders-dns-cbor-04
         (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-
         04)
 
@@ -2560,7 +2600,7 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Add note on representation of more structured rdata
 
-10.12.  Since draft-lenders-dns-cbor-03
+10.13.  Since draft-lenders-dns-cbor-03
         (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-
         03)
 
@@ -2570,21 +2610,13 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Remove DNS transaction IDs
 
-
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 46]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
-10.13.  Since draft-lenders-dns-cbor-02
+10.14.  Since draft-lenders-dns-cbor-02
         (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-
         02)
 
    *  Add Discussion section and note on compression
 
-10.14.  Since draft-lenders-dns-cbor-01
+10.15.  Since draft-lenders-dns-cbor-01
         (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-
         01)
 
@@ -2595,7 +2627,14 @@ Internet-Draft                  dns+cbor                   February 2026
 
    *  Clarify fallback to wire-format
 
-10.15.  Since draft-lenders-dns-cbor-00
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 47]
+
+Internet-Draft                  dns+cbor                   February 2026
+
+
+10.16.  Since draft-lenders-dns-cbor-00
         (https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-
         00)
 
@@ -2622,18 +2661,6 @@ Normative References
               <https://datatracker.ietf.org/doc/html/draft-ietf-cbor-
               edn-e-ref-02>.
 
-
-
-
-
-
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 47]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
    [I-D.ietf-cbor-edn-literals]
               Bormann, C., "CBOR Extended Diagnostic Notation (EDN)",
               Work in Progress, Internet-Draft, draft-ietf-cbor-edn-
@@ -2654,6 +2681,14 @@ Internet-Draft                  dns+cbor                   February 2026
    [RFC1035]  Mockapetris, P., "Domain names - implementation and
               specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
               November 1987, <https://www.rfc-editor.org/rfc/rfc1035>.
+
+
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 48]
+
+Internet-Draft                  dns+cbor                   February 2026
+
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -2680,16 +2715,6 @@ Internet-Draft                  dns+cbor                   February 2026
               RFC 6838, DOI 10.17487/RFC6838, January 2013,
               <https://www.rfc-editor.org/rfc/rfc6838>.
 
-
-
-
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 48]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
    [RFC6891]  Damas, J., Graff, M., and P. Vixie, "Extension Mechanisms
               for DNS (EDNS(0))", STD 75, RFC 6891,
               DOI 10.17487/RFC6891, April 2013,
@@ -2709,6 +2734,17 @@ Internet-Draft                  dns+cbor                   February 2026
               Express Concise Binary Object Representation (CBOR) and
               JSON Data Structures", RFC 8610, DOI 10.17487/RFC8610,
               June 2019, <https://www.rfc-editor.org/rfc/rfc8610>.
+
+
+
+
+
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 49]
+
+Internet-Draft                  dns+cbor                   February 2026
+
 
    [RFC8949]  Bormann, C. and P. Hoffman, "Concise Binary Object
               Representation (CBOR)", STD 94, RFC 8949,
@@ -2739,13 +2775,6 @@ Informative References
               DOI 10.17487/RFC6282, September 2011,
               <https://www.rfc-editor.org/rfc/rfc6282>.
 
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 49]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
    [RFC6762]  Cheshire, S. and M. Krochmal, "Multicast DNS", RFC 6762,
               DOI 10.17487/RFC6762, February 2013,
               <https://www.rfc-editor.org/rfc/rfc6762>.
@@ -2763,6 +2792,15 @@ Internet-Draft                  dns+cbor                   February 2026
    [RFC8484]  Hoffman, P. and P. McManus, "DNS Queries over HTTPS
               (DoH)", RFC 8484, DOI 10.17487/RFC8484, October 2018,
               <https://www.rfc-editor.org/rfc/rfc8484>.
+
+
+
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 50]
+
+Internet-Draft                  dns+cbor                   February 2026
+
 
    [RFC8499]  Hoffman, P., Sullivan, A., and K. Fujiwara, "DNS
               Terminology", RFC 8499, DOI 10.17487/RFC8499, January
@@ -2791,17 +2829,6 @@ Internet-Draft                  dns+cbor                   February 2026
               RFC 8945, DOI 10.17487/RFC8945, November 2020,
               <https://www.rfc-editor.org/rfc/rfc8945>.
 
-
-
-
-
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 50]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
    [RFC9110]  Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
               Ed., "HTTP Semantics", STD 97, RFC 9110,
               DOI 10.17487/RFC9110, June 2022,
@@ -2818,6 +2845,18 @@ Contributors
 
 
 Authors' Addresses
+
+
+
+
+
+
+
+
+Lenders, et al.           Expires 8 August 2026                [Page 51]
+
+Internet-Draft                  dns+cbor                   February 2026
+
 
    Martine Sophie Lenders
    TUD Dresden University of Technology
@@ -2849,51 +2888,12 @@ Authors' Addresses
    Email: t.schmidt@haw-hamburg.de
 
 
-
-
-
-
-Lenders, et al.           Expires 8 August 2026                [Page 51]
-
-Internet-Draft                  dns+cbor                   February 2026
-
-
    Matthias Wählisch
    TUD Dresden University of Technology & Barkhausen Institut
    Helmholtzstr. 10
    D-01069 Dresden
    Germany
    Email: m.waehlisch@tu-dresden.de
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
