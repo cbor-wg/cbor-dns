@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-03T01:15:24.976115+00:00",
+  "timestamp": "2026-02-05T01:11:46.678673+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -387,7 +387,7 @@
       "labels": [],
       "body": "In #12 there was expressed need in zone files support. While exact format for those may be out of scope for current version of document, it was discovered, especially while in discussion in #14 of possible new EDN app-literals, that current version is under-worked about absolute (FQDN) and relative labels - e.g. such difference could be represented by hypothetical `dns'some.label'` vs `dns'some.label.'` - note the dot at end. That is, Section 3.1 in -15 version of draft states\n> The root domain `\".\"` is represented as an empty string `\"\"`\n\nbut later root domain's label, which in standard DNS ends each name in queries and responses, is silently omitted without clarifications. While intent for saving 1 byte per RR is easily guessed, this is still not 100% correct.\n\nHowever, there is simple way to \"fix\" it by really not changing nothing in main apart and at the same time gain (at least some) support for zone files. The solution (sketched in #12) is to augment CDDL: we just declare that by default `$ORIGIN` is `\"\"` and elided, that is, current format is special/particular case, where all labels are added `$ORIGIN` at end (after expansion from _V_) becoming absolute names for typical queries/responses. And we augment format with:\n```\norigin-defttl = (\n   domain-name .default \"\",\n   ? ttl\n)\n```\nadding `? origin-defttl` between `? flags`, and `? question-section,` (so it is usable in question also, see below).\n\nImportant: this also could be used not in zone files but usual responses where all names are under same domain - it will save one byte for `simple(N)` in each RR; while origin's label are not occupying rows in _V_ at all.\n\nP.S. In principle, zone files may be represented as simple as \"answer\" with `AXFR` in question section, but may be such definition is premature...",
       "createdAt": "2026-01-31T00:36:04Z",
-      "updatedAt": "2026-02-02T23:41:36Z",
+      "updatedAt": "2026-02-03T10:17:48Z",
       "closedAt": null,
       "comments": [
         {
@@ -403,6 +403,13 @@
           "body": "> In general: I would say, if this is only important for zone files, we should wait until there is actually a format and if it will be the same as `rr` currently is.\n> \n> > but later root domain's label, which in standard DNS ends each name in queries and responses, is silently omitted without clarifications. While intent for saving 1 byte per RR is easily guessed, this is still not 100% correct.\n> \n> What do you mean by \"later\"? \n\nLater by document text.\n\n> The root domain is AFAIK only important in RRs for special RRs such as OPT (where it is omitted) or SVCB (where there is [information on that](https://www.ietf.org/archive/id/draft-lenders-dns-cbor-15.html#section-3.2.1.4-4)). Can you please be specific?\n\nIn original DNS wire format, we always have root label to end sequence of domain-name labels. In zone master files, however, name could be absolute - with root's dot at end - or relative. When in some future we will support `dns'ns1.domain.com'` this makes ambiguity versus `dns'ns1.domain.com.'` - and people will find it confusing. But required presence of root label in wire format - and lack in DNS-CBOR - could be generalized for some benefits, see example below.\n\n> > adding `? origin-defttl` between `? flags`, and `? question-section,` (so it is usable in question also, see below).\n> \n> I am not quite sure I understand. This would put `origin-defttl` and thus a TTL on the main level, i.e. on the same level as the sections. The TTL, however, is part of a resource record or resource record set within those sections.\n\nThis is `$TTL` of master files, not RR's TTL. Well, we can omit it for now, just that I thought reserving this in CDDL for future use might be a good thing.\n\n> ```\n> ...\n> \n> answer-section = [+ $$dns-rr]\n> extra-sections = (\n>   ? authority: [+ $$dns-rr],\n>   additional: [+ $$dns-rr],\n> )\n> ```\n\nYep, it's only usable in responses, but better even before (repeated) question section.\n\n> > Important: this also could be used not in zone files but usual responses where all names are under same domain - it will save one byte for `simple(N)` in each RR; while origin's label are not occupying rows in _V_ at all.\n> \n> I'd argue eliding (i.e. not repeating) the name in the question, which is potentially longer, is far more byte saving than eliding `\".\"` (2 bytes).\n\nConsider the following example: client makes query for `hostel-a.campus.univ.edu.` and returned response contains several RRs which all will end in `campus.univ.edu.` - `mail`, `ns1`, `ns2`, `ns1.hostel-a`, `ns2.hostel-a`, `mail.hostel-a` and so on. Current form of name compression will:\n\n1) occupy three entries in _V_ for `campus.univ.edu.`\n2) every direct name under it will end in `simple(3)` - `\"mail\", simple(3)` and `\"ns1\", simple(3)` and `\"ns1\", simple(0)` etc.\n\nIf, instead, `campus.univ.edu.` would be specified on top level as `$ORIGIN`, then question would be just `[\"hostel-a\", dns'ANY']` and answer/authority could have just `\"mail\"` instead of `\"mail\", simple(3)` (`\"ns1\", simple(0)` unchanged) etc.\n*Just like every name was under root domain instead.*\nThis trick allows not only to support master files, but also to save several bytes in regular DNS responses consisting of multiple records under same subtree.",
           "createdAt": "2026-02-02T23:41:36Z",
           "updatedAt": "2026-02-02T23:41:36Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> In original DNS wire format, we always have root label to end sequence of domain-name labels.\n\nThat's one way to read the `\\0`. The other is that it is just a marker to end the sequence of name labels.\n\n> When in some future we will support `dns'ns1.domain.com'` this makes ambiguity versus `dns'ns1.domain.com.'` - and people will find it confusing.\n\nI think adding relative domain names to a format (DNS messages) that did not previously had it is confusing. So why should we support a relative `ns1.domain.com`?\n\nBTW, I welcome this discussion, because I had my doubts if it makes sense to integrate zone files into the format. This discussion (and potentially inner packing tables with `AXFR` records) seem to confirm my doubts.\n\n> [!NOTE]\n> > 2\\. every direct name under it will end in `simple(3)` - `\"mail\", simple(3)` and `\"ns1\", simple(3)` and `\"ns1\", simple(0)` etc.\n> \n> Not discussing the concept here, rather than your understanding of name compression (that's why I marked it as a Note annotation): why `simple(3)`? If the names appear in the order you lined out in\n> \n> > Consider the following example: client makes query for `hostel-a.campus.univ.edu.` and returned response contains several RRs which all will end in `campus.univ.edu.` - `mail`, `ns1`, `ns2`, `ns1.hostel-a`, `ns2.hostel-a`, `mail.hostel-a` and so on. \n> \n> _V_ will look like\n> \n> ```py\n> [\n>   /0:/ 1115([\"hostel-a\", \"campus\", \"univ\", \"edu\"]),\n>   /1:/ 1115([\"campus\", \"univ\", \"edu\"]),\n>   /2:/ 1115([\"univ\", \"edu\"]),\n>   /3:/ 1115([\"edu\"]),\n>   /4:/ 1115([\"mail\", single(1)]),\n>   /5:/ 1115([\"ns1\", single(1)]),\n>   /6:/ 1115([\"ns2\", single(1)]),\n>   /7:/ 1115([\"ns1\", single(0)]),\n>   /8:/ 1115([\"ns2\", single(0)]),\n>   /9:/ 1115([\"mail\", single(0)]),\n> ]\n> ```\n> \n> So it should be `simple(1)`. `simple(3)` would go to `edu.`.\n> ",
+          "createdAt": "2026-02-03T10:17:48Z",
+          "updatedAt": "2026-02-03T10:17:48Z"
         }
       ]
     }
@@ -1123,24 +1130,26 @@
       "id": "PR_kwDOIM0M7M6-B8ST",
       "title": "Use e'' application extension in examples",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/14",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "miri64",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "~~This provides a (draft for now) for an EDN app-specific extension for DNS+CBOR. So far, I only introduced resource record types, classes, EDNS(0) option codes and SVCB SvcParamKeb but even Header Flags including Rcodes could be a point of extension. But let's discuss by example first, if this is in scope. If so, I will also provide an ABNF.~~\r\n\r\n[updated after extensive discussions about a more involved format]\r\n\r\nThis provides definitions for and uses the `e''` application extension to enhance the readability of RR types and classes in the examples.\r\n",
       "createdAt": "2026-01-19T15:11:57Z",
-      "updatedAt": "2026-02-02T11:34:37Z",
+      "updatedAt": "2026-02-04T11:46:43Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
-      "baseRefOid": "dc6fa1b7571473e41106327eca9f0b13ee83b088",
+      "baseRefOid": "59df39331efb6d25453e5d6fb50c579ae789db60",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "edn-literals",
-      "headRefOid": "45ec241122a4a8d92e881728fac51da1ac5f05d8",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "f4aaebee8da236c5fc4e4d74324dfbe1fd123be4",
+      "closedAt": "2026-02-04T11:46:43Z",
+      "mergedAt": "2026-02-04T11:46:43Z",
+      "mergedBy": "miri64",
+      "mergeCommit": {
+        "oid": "522aa6c432e7337edb27607a88edf305cd3d0b12"
+      },
       "comments": [
         {
           "author": "miri64",
@@ -1193,7 +1202,7 @@
         },
         {
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "I understand the goal of matching a well-known visual representation for humans, for example when inspecting actual dns+cbor data. But I honestly dislike the idea of using that in the EDN representations in this draft, as it hides the actual array structure, which the examples are meant to showcase.",
           "createdAt": "2026-01-27T09:42:39Z",
           "updatedAt": "2026-01-27T09:42:39Z"
@@ -1337,6 +1346,13 @@
           "body": "> No, we are not adding here because publish of DNS-CBOR requires to publish -packed and EDN as RFCs first, and these are waiting anyway in WG queue. But draft on `e''` will also have some time after publishing EDN to be RFC and thus will delay DNS-CBOR becoming RFC even more, isn't it?\r\n\r\nWe will see... Currently the WG is discussing serialization exclusively, which is unusual in and of itself. Once it got unstuck on that, things might progress faster again. In CoRE we also had interdependent drafts. There there was just a common WGLC on them. Since `-edn-literal` and `-edn-e-ref` are mostly independent of `-packed` and `-dns-cbor` they might (and should) progress faster.",
           "createdAt": "2026-02-02T11:34:37Z",
           "updatedAt": "2026-02-02T11:34:37Z"
+        },
+        {
+          "author": "cabo",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Here is my 2 cent:\r\n> \r\n> [dns-rrtypes.cddl.txt](https://github.com/user-attachments/files/24938614/dns-rrtypes.cddl.txt)\r\n> \r\n> as produced by\r\n> \r\n> [dns-parameters.rb.txt](https://github.com/user-attachments/files/24938635/dns-parameters.rb.txt)\r\n\r\nBy the way, there now also is a rubygem that can build the RRtype CDDL from IANA:\r\n\r\n```\r\ngem install iana-registry\r\ndns-parameters.rb > rrtypes.cddl\r\n```\r\n\r\nComments (what else should we generate?) welcome.",
+          "createdAt": "2026-02-03T19:39:18Z",
+          "updatedAt": "2026-02-03T19:39:18Z"
         }
       ],
       "reviews": [
@@ -1346,7 +1362,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-19T17:07:09Z",
@@ -1554,7 +1570,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-21T17:44:38Z",
@@ -1574,7 +1590,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-22T16:18:27Z",
@@ -1594,7 +1610,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-22T16:18:56Z",
@@ -1614,7 +1630,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-22T16:19:33Z",
@@ -1654,7 +1670,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-22T16:20:59Z",
@@ -1674,7 +1690,7 @@
             "abbreviatedOid": "61a175b"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-22T16:22:18Z",
@@ -1714,7 +1730,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T09:37:27Z",
@@ -1754,7 +1770,7 @@
             "abbreviatedOid": "e56f73e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T13:26:49Z",
@@ -2234,24 +2250,26 @@
       "id": "PR_kwDOIM0M7M6-y9dm",
       "title": "Pass on name compression",
       "url": "https://github.com/cbor-wg/cbor-dns/pull/16",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "miri64",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This reworks the name compression as discussed during the last few meetings we had.\r\n\r\nNamely:\r\n\r\n- TBD28259 now appends, rather than prepends to existing packing tables to allow for single pass decoders with minimum state.\r\n-  Consequently, disallow inner table setup tags to TBD28259, as that would increase complexity of both decoders and encoders\r\n- Clarify implicit nature with `packed`\r\n- Use actual DNS examples\r\n- Add example decoder as pseudo-code\r\n- Additionally, add some considerations on maps within TBD28259 (see also #15)",
       "createdAt": "2026-01-22T21:30:42Z",
-      "updatedAt": "2026-02-02T16:16:39Z",
+      "updatedAt": "2026-02-04T11:52:44Z",
       "baseRepository": "cbor-wg/cbor-dns",
       "baseRefName": "main",
-      "baseRefOid": "59df39331efb6d25453e5d6fb50c579ae789db60",
+      "baseRefOid": "522aa6c432e7337edb27607a88edf305cd3d0b12",
       "headRepository": "miri64/cbor-dns",
       "headRefName": "tbd28259-order",
-      "headRefOid": "203eefbd82a95f37e13ea5efb54ebeecd1faf0ae",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "c93675d3f4f3c592b30d9b462b826f41ae82e02a",
+      "closedAt": "2026-02-04T11:52:40Z",
+      "mergedAt": "2026-02-04T11:52:40Z",
+      "mergedBy": "miri64",
+      "mergeCommit": {
+        "oid": "8c8ca76f58944a14ffd753fa2ed29f56357b5f9e"
+      },
       "comments": [
         {
           "author": "miri64",
@@ -2280,6 +2298,13 @@
           "body": "And squashed.",
           "createdAt": "2026-02-02T16:16:39Z",
           "updatedAt": "2026-02-02T16:16:39Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased to current main and using `e''` EDN in examples now.",
+          "createdAt": "2026-02-04T11:52:22Z",
+          "updatedAt": "2026-02-04T11:52:22Z"
         }
       ],
       "reviews": [
@@ -2289,7 +2314,7 @@
             "abbreviatedOid": "7aba320"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "Thanks, this is a huge step forward. Some nits and a few major points below.",
           "createdAt": "2026-01-23T08:46:08Z",
@@ -2547,7 +2572,7 @@
             "abbreviatedOid": "7aba320"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T09:57:35Z",
@@ -2567,7 +2592,7 @@
             "abbreviatedOid": "7aba320"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T10:03:21Z",
@@ -2587,7 +2612,7 @@
             "abbreviatedOid": "7aba320"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T10:04:57Z",
@@ -2767,7 +2792,7 @@
             "abbreviatedOid": "7aba320"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T13:10:21Z",
@@ -2787,7 +2812,7 @@
             "abbreviatedOid": "7aba320"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T13:11:20Z",
@@ -2807,7 +2832,7 @@
             "abbreviatedOid": "55ed1d8"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T13:14:38Z",
@@ -2847,7 +2872,7 @@
             "abbreviatedOid": "55ed1d8"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-23T14:43:44Z",
@@ -2929,7 +2954,7 @@
             "abbreviatedOid": "55ed1d8"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-26T12:44:06Z",
@@ -2949,7 +2974,7 @@
             "abbreviatedOid": "55ed1d8"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-26T12:45:11Z",
@@ -2969,7 +2994,7 @@
             "abbreviatedOid": "55ed1d8"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-26T12:46:26Z",
@@ -3169,7 +3194,7 @@
             "abbreviatedOid": "55ed1d8"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-27T09:27:42Z",
@@ -3189,7 +3214,7 @@
             "abbreviatedOid": "55ed1d8"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-27T09:28:36Z",
@@ -3319,7 +3344,7 @@
             "abbreviatedOid": "7578fa9"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-27T12:11:17Z",
@@ -3363,7 +3388,7 @@
             "abbreviatedOid": "a297c08"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-27T12:22:58Z",
@@ -3683,7 +3708,7 @@
             "abbreviatedOid": "cc3d69e"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-01-29T14:46:00Z",
@@ -3769,7 +3794,7 @@
             "abbreviatedOid": "7c75d64"
           },
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "Just had another read-through and found some more minor nits.\n\nWhat's the status of moving the pseudocode into the appendix?",
           "createdAt": "2026-02-02T15:38:50Z",
