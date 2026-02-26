@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-05T01:11:46.678673+00:00",
+  "timestamp": "2026-02-26T01:12:15.078401+00:00",
   "repo": "cbor-wg/cbor-dns",
   "labels": [
     {
@@ -321,15 +321,15 @@
       "id": "I_kwDOIM0M7M7dtFED",
       "title": "Change nesting of 113 and TBD28259 to avoid need of tag content equivalence",
       "url": "https://github.com/cbor-wg/cbor-dns/issues/13",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mguetschow",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Figure 17 currently reads\n\n```\n   TBD113(\n     TBD28259(\n       [\n         [\"org\", 42],\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       ]\n     )\n   )\n```\n\nI think it should rather be\n\n```\n   TBD113(\n     [\n       [\"org\", 42],\n       TBD28259(\n         [\n           \"www\", \"example\", simple(5) / expands to \"org\" /,\n           [\"svc\", simple(0) / expands to \"www\", \"example\", \"org\" /],\n           simple(5),  / expands to \"org\" /\n           simple(1),  / expands to \"www\", \"example\", \"org\" /\n           simple(6),  / expands to 42 /\n           simple(3),  / expands to \"svc\", \"www\", \"example\", \"org\" /\n           simple(6)   / expands to 42 /\n         ]\n       )\n     ]\n   )\n```\n\nThis would avoid the need for defining [tag equivalence](https://www.ietf.org/archive/id/draft-ietf-cbor-packed-17.html#name-tag-equivalence) of TBD28259 (in some circumstances) with the 2-element array expected by 113, or a change to the semantics of 113.\n\nThe overall number of bytes is unchanged, but some explanatory wording is needed, especially when TBD28259 is implicitly injected by the media type (\"as enclosing the rump of the outer-most item which should be tag 113\").",
       "createdAt": "2025-12-11T14:14:35Z",
-      "updatedAt": "2026-01-27T09:34:10Z",
-      "closedAt": null,
+      "updatedAt": "2026-02-24T14:20:45Z",
+      "closedAt": "2026-02-24T14:20:45Z",
       "comments": [
         {
           "author": "nuclight",
@@ -340,7 +340,7 @@
         },
         {
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "> As discussed in today's meeting, we probably should change the definition of TBD28259 and/or register yet another tag when nesting is allowed, so that for the common case tag TBD113 is not needed at all and thus reason for this ticket's problem is eliminated.\n\nI think there is a slight confusion here: The goal of this ticket is fixing the order of the (implicit, aka not-sent-on-the-wire) TBD28259 and TBD113 in case `packed=1`. So TBD113 is \"needed\" as an (implicit) outer table setup.\n\nBut we indeed discussed disallowing nested (_inner_, and thereby explicit) occurrences of TBD113/TBD1113 inside TBD28259.",
           "createdAt": "2026-01-16T09:31:57Z",
           "updatedAt": "2026-01-16T09:31:57Z"
@@ -354,7 +354,7 @@
         },
         {
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "Is the description in https://github.com/cbor-wg/cbor-dns/pull/16/changes#diff-c1ee54122d8c0f166af4524c64e92b0795cd43782536a16364a57a948d8cc838R795-R823 clear enough? Merging that PR could then close this issue.",
           "createdAt": "2026-01-26T13:08:58Z",
           "updatedAt": "2026-01-26T13:08:58Z"
@@ -368,10 +368,17 @@
         },
         {
           "author": "mguetschow",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "> I thought we discussed changing TBD28259 definition to be that _instead_ of using TBD113\n\nYes, TBD113 (same as TBD28259) SHOULD be omitted on the wire. But @miri64 didn't want to disallow explicitly sending it even if it adds unnecessary byte overhead to avoid extra round-trips. That's why an encoder MUST NOT discard the payload for `packed=1` even if either or both of TBD28259 and TBD113 are explicitly present.",
           "createdAt": "2026-01-27T09:34:10Z",
           "updatedAt": "2026-01-27T09:34:10Z"
+        },
+        {
+          "author": "miri64",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closed by #16.",
+          "createdAt": "2026-02-24T14:20:43Z",
+          "updatedAt": "2026-02-24T14:20:43Z"
         }
       ]
     },
