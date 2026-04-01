@@ -15,24 +15,24 @@
 the Concise Binary Object Representation  .
 The primary purpose is to keep DNS messages small in constrained networks. 
     " name="description">
-<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="xml2rfc 3.32.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="CBOR" name="keyword">
 <meta content="DNS" name="keyword">
 <meta content="draft-lenders-dns-cbor-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.31.0
+  xml2rfc 3.32.0
     Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.0.2
-    platformdirs 4.5.1
+    platformdirs 4.9.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.32.5
-    wcwidth 0.3.0
+    wcwidth 0.6.0
 -->
 <link href="draft-lenders-dns-cbor.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -173,7 +173,7 @@ The primary purpose is to keep DNS messages small in constrained networks.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Oxygen Mono';
@@ -181,7 +181,8 @@ The primary purpose is to keep DNS messages small in constrained networks.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 }
 
 @font-face {
@@ -1052,11 +1053,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">dns+cbor</td>
-<td class="right">February 2026</td>
+<td class="right">April 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Lenders, et al.</td>
-<td class="center">Expires 8 August 2026</td>
+<td class="center">Expires 3 October 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1069,12 +1070,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-lenders-dns-cbor-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-02-04" class="published">4 February 2026</time>
+<time datetime="2026-04-01" class="published">1 April 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-08-08">8 August 2026</time></dd>
+<dd class="expires"><time datetime="2026-10-03">3 October 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1142,7 +1143,7 @@ The primary purpose is to keep DNS messages small in constrained networks.<a hre
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 August 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1372,7 +1373,7 @@ The primary purpose is to keep DNS messages small in constrained networks.<a hre
       </h2>
 <p id="section-1-1">In constrained networks <span>[<a href="#RFC7228" class="cite xref">RFC7228</a>]</span>, the link layer may restrict the payload sizes of frames to
 only a few hundreds bytes.  Encrypted DNS resolution, such as DNS over HTTPS (DoH) <span>[<a href="#RFC8484" class="cite xref">RFC8484</a>]</span> or
-DNS over CoAP (DoC) <span>[<a href="#I-D.ietf-core-dns-over-coap" class="cite xref">I-D.ietf-core-dns-over-coap</a>]</span>, may lead to DNS message sizes that exceed this limit, even when
+DNS over CoAP (DoC) <span>[<a href="#RFC9953" class="cite xref">RFC9953</a>]</span>, may lead to DNS message sizes that exceed this limit, even when
 implementing header compression such as 6LoWPAN IPHC <span>[<a href="#RFC6282" class="cite xref">RFC6282</a>]</span> or SCHC <span>[<a href="#RFC8724" class="cite xref">RFC8724</a>]</span>,
 <span>[<a href="#RFC8824" class="cite xref">RFC8824</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">Although adoption layers such as 6LoWPAN <span>[<a href="#RFC4944" class="cite xref">RFC4944</a>]</span> or SCHC <span>[<a href="#RFC8724" class="cite xref">RFC8724</a>]</span> offer fragmentation to
@@ -1883,7 +1884,7 @@ $$odata = bstr
 <p id="section-3.3-3">If the first item is a boolean and when true, it tells the responding resolver that it <span class="bcp14">MUST</span> include the question section in its response. If that boolean is not present, it is assumed to be false.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
 <p id="section-3.3-4">If the first item of the query is an array, it is the question section, if it is an unsigned integer, it is as flag field and maps to the header flags in <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> and the "DNS Header Flags" IANA registry including the QR flag and the Opcode.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
 <p id="section-3.3-5">If the flags are elided, the value 0 is assumed.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
-<p id="section-3.3-6">This specification assumes that the DNS messages are sent over a transfer protocol that can map the queries to their responses, e.g., DNS over HTTPS <span>[<a href="#RFC8484" class="cite xref">RFC8484</a>]</span> or DNS over CoAP <span>[<a href="#I-D.ietf-core-dns-over-coap" class="cite xref">I-D.ietf-core-dns-over-coap</a>]</span>.
+<p id="section-3.3-6">This specification assumes that the DNS messages are sent over a transfer protocol that can map the queries to their responses, e.g., DNS over HTTPS <span>[<a href="#RFC8484" class="cite xref">RFC8484</a>]</span> or DNS over CoAP <span>[<a href="#RFC9953" class="cite xref">RFC9953</a>]</span>.
 As a consequence, the DNS transaction ID is always elided and the value 0 is assumed.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
 <p id="section-3.3-7">A question record within the question section is encoded as a CBOR array containing the following entries:<a href="#section-3.3-7" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3.3-8">
@@ -3783,11 +3784,11 @@ both decoders and encoders<a href="#section-10.1-1.5.2.2.1" class="pilcrow">¶</
 <dl class="references">
 <dt id="I-D.ietf-cbor-edn-e-ref">[I-D.ietf-cbor-edn-e-ref]</dt>
         <dd>
-<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"External References to Values in CBOR Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-e-ref-02</span>, <time datetime="2025-07-02" class="refDate">2 July 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-e-ref-02">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-e-ref-02</a>&gt;</span>. </dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"External References to Values in CBOR Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-e-ref-03</span>, <time datetime="2026-03-01" class="refDate">1 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-e-ref-03">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-e-ref-03</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-cbor-edn-literals">[I-D.ietf-cbor-edn-literals]</dt>
         <dd>
-<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Extended Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-literals-19</span>, <time datetime="2025-10-16" class="refDate">16 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-19">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-19</a>&gt;</span>. </dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Extended Diagnostic Notation (EDN)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-edn-literals-21</span>, <time datetime="2026-03-30" class="refDate">30 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-21">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-edn-literals-21</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-cbor-packed">[I-D.ietf-cbor-packed]</dt>
         <dd>
@@ -3854,10 +3855,6 @@ both decoders and encoders<a href="#section-10.1-1.5.2.2.1" class="pilcrow">¶</
 <a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
-<dt id="I-D.ietf-core-dns-over-coap">[I-D.ietf-core-dns-over-coap]</dt>
-        <dd>
-<span class="refAuthor">Lenders, M. S.</span>, <span class="refAuthor">Amsüss, C.</span>, <span class="refAuthor">Gündoğan, C.</span>, <span class="refAuthor">Schmidt, T. C.</span>, and <span class="refAuthor">M. Wählisch</span>, <span class="refTitle">"DNS over CoAP (DoC)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-core-dns-over-coap-20</span>, <time datetime="2025-09-16" class="refDate">16 September 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-core-dns-over-coap-20">https://datatracker.ietf.org/doc/html/draft-ietf-core-dns-over-coap-20</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="RFC4944">[RFC4944]</dt>
         <dd>
 <span class="refAuthor">Montenegro, G.</span>, <span class="refAuthor">Kushalnagar, N.</span>, <span class="refAuthor">Hui, J.</span>, and <span class="refAuthor">D. Culler</span>, <span class="refTitle">"Transmission of IPv6 Packets over IEEE 802.15.4 Networks"</span>, <span class="seriesInfo">RFC 4944</span>, <span class="seriesInfo">DOI 10.17487/RFC4944</span>, <time datetime="2007-09" class="refDate">September 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4944">https://www.rfc-editor.org/rfc/rfc4944</a>&gt;</span>. </dd>
@@ -3907,8 +3904,12 @@ both decoders and encoders<a href="#section-10.1-1.5.2.2.1" class="pilcrow">¶</
 <span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Semantics"</span>, <span class="seriesInfo">STD 97</span>, <span class="seriesInfo">RFC 9110</span>, <span class="seriesInfo">DOI 10.17487/RFC9110</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9110">https://www.rfc-editor.org/rfc/rfc9110</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9619">[RFC9619]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Bellis, R.</span> and <span class="refAuthor">J. Abley</span>, <span class="refTitle">"In the DNS, QDCOUNT Is (Usually) One"</span>, <span class="seriesInfo">RFC 9619</span>, <span class="seriesInfo">DOI 10.17487/RFC9619</span>, <time datetime="2024-07" class="refDate">July 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9619">https://www.rfc-editor.org/rfc/rfc9619</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9953">[RFC9953]</dt>
+      <dd>
+<span class="refAuthor">Lenders, M. S.</span>, <span class="refAuthor">Amsüss, C.</span>, <span class="refAuthor">Gündoğan, C.</span>, <span class="refAuthor">Schmidt, T. C.</span>, and <span class="refAuthor">M. Wählisch</span>, <span class="refTitle">"DNS over CoAP (DoC)"</span>, <span class="seriesInfo">RFC 9953</span>, <span class="seriesInfo">DOI 10.17487/RFC9953</span>, <time datetime="2026-03" class="refDate">March 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9953">https://www.rfc-editor.org/rfc/rfc9953</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
