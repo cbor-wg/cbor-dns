@@ -89,7 +89,7 @@ informative:
   RFC8824: coap-schc
   RFC9110: http-semantics
   RFC9619: qdcount-1
-  I-D.ietf-core-dns-over-coap: doc
+  RFC9953: doc
 
 
 --- abstract
