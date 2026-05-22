@@ -227,7 +227,7 @@ $$dns-rr = rr / #6.141(opt-rr) / bstr
 
 Standard DNS resource records are encoded as CBOR arrays containing 2 or more entries in the following order:
 
-1. An optional name (as text string, see {{sec:domain-names}}),
+1. An optional name (as domain name, see {{sec:domain-names}}),
 2. A TTL (as unsigned integer),
 3. An optional record type (as unsigned integer),
 4. An optional record class (as unsigned integer), and lastly
