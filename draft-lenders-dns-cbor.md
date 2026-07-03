@@ -171,7 +171,7 @@ If, for any reason, a DNS message cannot be represented in the CBOR format speci
 
 ## Domain Name Representation {#sec:domain-names}
 
-Domain names are represented by a sequence of one or more (unicode) text strings.
+Domain names are represented by a sequence of one or more (Unicode) text strings.
 For instance, "example.org" would be represented as `"example","org"` in CBOR diagnostic notation.
 The root domain "." is represented as an empty string `""`.
 The absence of any label means the name is elided.
@@ -398,7 +398,7 @@ The record data of RRs with `record-type` = 64 (SVCB) and `record-type` = 65 (HT
 
 If the SvcPriority is present can be determined by checking if the record data array starts with an unsigned integer or not.
 If the array does not start with an unsigned integer, the SvcPriority is elided and defaults to 0, i.e., the record is in AliasMode (see {{Section 2.4.2 of -svcb}}).
-If the array starts with a unsigned integer, it is the SvcPriority.
+If the array starts with an unsigned integer, it is the SvcPriority.
 
 If the TargetName is present can be determined by checking if the record data array has a domain name after the SvcPriority, i.e., if the SvcPriority is elided the array would start with a domain name.
 If there is no domain name after the SvcPriority, the TargetName is elided and defaults to the sequence of text strings `""` (i.e., the root domain "." in the common name representation defined in {{Section 2.3.1 of -dns}}, see {{sec:domain-names}}) and {{Section 2.5 of -svcb}}.
@@ -1100,7 +1100,7 @@ In binary the packed representation of _o_ would be:
 The responses to the examples provided in {{sec:query-examples}} are shown
 below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}})
 with `e''` application extension {{-edn-e-ref}},
-most notably the "ip" extension to represent binary IP addresses as a IP address app-string literal.
+most notably the "ip" extension to represent binary IP addresses as an IP address app-string literal.
 
 To represent an `AAAA` record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
 response to `[["example", "org"]]` could be
