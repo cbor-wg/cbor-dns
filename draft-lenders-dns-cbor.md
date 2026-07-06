@@ -79,11 +79,11 @@ normative:
   IANA.cbor-tags: tags
 
 informative:
+  BCP219: dns-terms
   RFC4944: 6lowpan
   RFC6282: iphc
   RFC7228: constr-terms
   RFC8484: doh
-  RFC8499: dns-terms
   RFC8618: cdns
   RFC8724: schc
   RFC8824: coap-schc
