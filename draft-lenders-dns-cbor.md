@@ -1347,8 +1347,8 @@ Note the use of name compression (see {{sec:name-compression}}) in this example.
         simple(2) / expands to "www", "example", "org" /
       ],
       [
-        simple(1) / expands to 3600,
-        simple(5) / expands to "svc", "www", "example", "org" /
+        simple(1) / expands to 3600 /,
+        simple(5) / expands to "svc", "www", "example", "org" /,
         ip'2001:db8::1'
       ]
     ],
@@ -1570,7 +1570,7 @@ function recursive_unpack_names(
             /* name suffix is spliced in */
             assume that (
               typeof(tag-content of packed_obj) is CBORArray containing
-              only CBORTextString and references to CBORTextSTring
+              only CBORTextString and references to CBORTextString
             )
             result = result concat tag-content of packed_obj
           }
