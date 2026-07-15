@@ -742,8 +742,10 @@ Last update of this information:
 
 # Security Considerations
 
-TODO Security
-
+The security considerations of {{-cbor}} and {{-cbor-packed}} also apply for this document.
+For original binary wire format DNS data encoded as byte strings, such as RRs, RDATA,
+SvcParamValues, or EDNS OPT data, a parser MUST ensure that any encoded lengths within that byte
+string do not overflow the bounds of the byte string or fail otherwise.
 
 # IANA Considerations
 
