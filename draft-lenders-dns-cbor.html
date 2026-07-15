@@ -1056,7 +1056,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Lenders, et al.</td>
-<td class="center">Expires 14 January 2027</td>
+<td class="center">Expires 16 January 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1069,12 +1069,12 @@ svg {
 <dd class="internet-draft">draft-lenders-dns-cbor-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-07-13" class="published">13 July 2026</time>
+<time datetime="2026-07-15" class="published">15 July 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-01-14">14 January 2027</time></dd>
+<dd class="expires"><time datetime="2027-01-16">16 January 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1142,7 +1142,7 @@ The primary purpose is to keep DNS messages small in constrained networks.<a hre
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 16 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1383,7 +1383,7 @@ comply with small MTUs, fragmentation should be avoided in constrained networks.
 Fragmentation combined with high packet loss multiplies the likelihood of loss.
 Hence, a compression format that reduces fragmentation of DNS messages is beneficial.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This document specifies a compact data format for DNS messages using Concise Binary Object Representation (CBOR) <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> encoding. Additionally,  unnecessary or redundant information are stripped off DNS messages.  To use the outcome of this specification in DoH and DoC,
-this document also specifies a Media Type header for DoH and a Content-Format option for DoC.<a href="#section-1-3" class="pilcrow">¶</a></p>
+this document also specifies a Media Type header value for DoH and a Content-Format option value for DoC.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">Note, that there is another format that expresses DNS messages in CBOR, C-DNS <span>[<a href="#RFC8618" class="cite xref">RFC8618</a>]</span>.
 C-DNS is primarily a file format to minimize traces of multiple DNS messages and uses the fact that there are multiple messages to do its compression.
 Common values such as names or addresses are collected in separate tables which are referenced from the messages, comparable to Packed CBOR <span>[<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>]</span>.
@@ -1417,7 +1417,7 @@ This is achieved applying the following objectives:<a href="#section-1-5" class=
       </h2>
 <p id="section-2-1">CBOR types (unsigned integer, byte string, text string, arrays, etc.) are used as defined in
 <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">The terms "DNS server", "DNS client", and "(DNS) resolver" are used as defined in <span>[<a href="#RFC8499" class="cite xref">RFC8499</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-2">The terms "DNS server", "DNS client", and "(DNS) resolver" are used as defined in <span>[<a href="#BCP219" class="cite xref">BCP219</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
 <p id="section-2-3">A DNS query is a message that queries DNS information from an upstream DNS resolver.
 The reply to that is a DNS response.<a href="#section-2-3" class="pilcrow">¶</a></p>
 <p id="section-2-4">The DNS message format specified in <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> for DNS over UDP we call "classic DNS format" throughout this document or refer to it by its media type "application/dns-message" as specified in <span>[<a href="#RFC8484" class="cite xref">RFC8484</a>]</span>.<a href="#section-2-4" class="pilcrow">¶</a></p>
@@ -1427,7 +1427,7 @@ The reply to that is a DNS response.<a href="#section-2-3" class="pilcrow">¶</a
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-6" class="pilcrow">¶</a></p>
 <p id="section-2-7">To define the representation of binary objects we use the Concise Data Definition Language (CDDL) <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>.
-For examples, we use the CBOR Extended Diagnostic Notation <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> with the <code>e''</code> application extension <span>[<a href="#I-D.ietf-cbor-edn-e-ref" class="cite xref">I-D.ietf-cbor-edn-e-ref</a>]</span>.<a href="#section-2-7" class="pilcrow">¶</a></p>
+For examples, we use the CBOR Extended Diagnostic Notation <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> with the <code>e''</code> application extension for external references to values <span>[<a href="#I-D.ietf-cbor-edn-e-ref" class="cite xref">I-D.ietf-cbor-edn-e-ref</a>]</span>.<a href="#section-2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="cbor-representations-applicationdnscbor">
@@ -1435,7 +1435,8 @@ For examples, we use the CBOR Extended Diagnostic Notation <span>[<a href="#I-D.
       <h2 id="name-cbor-representations-applic">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-cbor-representations-applic" class="section-name selfRef">CBOR Representations (application/dns+cbor)</a>
       </h2>
-<p id="section-3-1">DNS messages in "application/dns+cbor" are represented as CBOR arrays to minimize overhead.
+<p id="section-3-1">DNS messages in "application/dns+cbor" are represented as CBOR arrays to minimize overhead compared
+to, e.g., maps.
 All CBOR items used in this specification are of definite length.
 CBOR arrays that do not follow the length definitions of this or of follow-up specifications, <span class="bcp14">MUST</span> be silently ignored.
 CBOR arrays that exceed the message size provided by the transport, <span class="bcp14">MUST</span> be silently ignored.
@@ -1451,13 +1452,14 @@ dns-message = dns-query / dns-response
 <a href="#name-this-document-defines-both-" class="selfRef">This document defines both DNS Queries and Responses in CDDL</a>
         </figcaption></figure>
 </div>
-<p id="section-3-3">If, for any reason, a DNS message cannot be represented in the CBOR format specified in this document, or if unreasonable overhead is introduced, a fallback to another DNS message format, e.g., the classic DNS format specified in <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>, <span class="bcp14">MUST</span> always be possible.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-3">If, for any reason, a DNS message cannot be represented in the CBOR format specified in this document, or if unreasonable overhead is introduced, a fallback to another DNS message format, e.g., the classic DNS format specified in <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>, <span class="bcp14">MUST</span> always be possible.
+The DNS transport <span class="bcp14">MUST</span> support a mechanism to distinguish different formats, e.g., the Media Type header with DoH.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="sec_domain-names">
 <section id="section-3.1">
         <h3 id="name-domain-name-representation">
 <a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-domain-name-representation" class="section-name selfRef">Domain Name Representation</a>
         </h3>
-<p id="section-3.1-1">Domain names are represented by a sequence of one or more (Unicode) text strings.
+<p id="section-3.1-1">Domain names are represented by a sequence of one or more (Unicode) text strings, using one string per label.
 For instance, "example.org" would be represented as <code>"example","org"</code> in CBOR diagnostic notation.
 The root domain "." is represented as an empty string <code>""</code>.
 The absence of any label means the name is elided.
@@ -1501,7 +1503,7 @@ label = tstr
 and EDNS option pseudo-RRs (see <span>[<a href="#RFC6891" class="cite xref">RFC6891</a>]</span>.
 If for any reason, a resource record cannot be represented in the given formats, they can be
 represented in their binary wire-format form as a byte string.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">Further special records, e.g., TSIG <span>[<a href="#RFC8945" class="cite xref">RFC8945</a>]</span>, can be defined in follow-up specifications using the <code>$$structured-ts-rd</code>
+<p id="section-3.2-2">Further dedicated representations of standard resource records, e.g., for TSIG <span>[<a href="#RFC8945" class="cite xref">RFC8945</a>]</span>, can be defined in follow-up specifications using the <code>$$structured-ts-rd</code>
 extension point (see <a href="#fig_dns-standard-rr" class="auto internal xref">Figure 4</a>) and are out of scope of this document.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
 <p id="section-3.2-3">The representation of a DNS resource records is defined in <a href="#fig_dns-rr" class="auto internal xref">Figure 3</a>.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
 <span id="name-dns-resource-record-definit"></span><div id="fig_dns-rr">
@@ -1549,7 +1551,8 @@ The query may be derived from the context of the transfer protocol.<a href="#sec
 If record class is elided, the record class from the question is assumed.
 When a record class is required to be expressed, the record type <span class="bcp14">MUST</span> also be provided.<a href="#section-3.2.1-4" class="pilcrow">¶</a></p>
 <p id="section-3.2.1-5">The byte string format of the record data as a byte string follows the classic DNS format as specified in <span><a href="https://rfc-editor.org/rfc/rfc1035#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> (or other specifications of the respective record type).
-Note that the CBOR format does not include the RDLENGTH field from the classic format as this value is encoded in the length field of the CBOR header of the byte string.<a href="#section-3.2.1-5" class="pilcrow">¶</a></p>
+Note that the CBOR format does not include the RDLENGTH field from the classic format as this value is encoded in the length field of the CBOR header of the byte string.
+A parser of the format specified in this document <span class="bcp14">MUST</span> ensure that encoded lengths within this binary record do not overflow the bounds of the byte string or fail otherwise.<a href="#section-3.2.1-5" class="pilcrow">¶</a></p>
 <p id="section-3.2.1-6">If the record data represents a domain name (e.g., for CNAME or PTR records), the record data <span class="bcp14">MAY</span> be represented as domain name as specified in <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>.
 This way of representing the record data means that name compression (see <a href="#sec_name-compression" class="auto internal xref">Section 4.1</a>) can also be used on it.<a href="#section-3.2.1-6" class="pilcrow">¶</a></p>
 <p id="section-3.2.1-7">Depending on the record type, the record data may also be expressed as an array.
@@ -1764,11 +1767,11 @@ srv = [
 The type of SvcParamValue may be extended in future specifications.<a href="#section-3.2.1.4-2.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<p id="section-3.2.1.4-3">If the SvcPriority is present can be determined by checking if the record data array starts with an unsigned integer or not.
+<p id="section-3.2.1.4-3">It can be determined if the SvcPriority is present by checking if the record data array starts with an unsigned integer or not.
 If the array does not start with an unsigned integer, the SvcPriority is elided and defaults to 0, i.e., the record is in AliasMode (see <span><a href="https://rfc-editor.org/rfc/rfc9460#section-2.4.2" class="relref">Section 2.4.2</a> of [<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>).
 If the array starts with an unsigned integer, it is the SvcPriority.<a href="#section-3.2.1.4-3" class="pilcrow">¶</a></p>
-<p id="section-3.2.1.4-4">If the TargetName is present can be determined by checking if the record data array has a domain name after the SvcPriority, i.e., if the SvcPriority is elided the array would start with a domain name.
-If there is no domain name after the SvcPriority, the TargetName is elided and defaults to the sequence of text strings <code>""</code> (i.e., the root domain "." in the common name representation defined in <span><a href="https://rfc-editor.org/rfc/rfc1035#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>, see <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>) and <span><a href="https://rfc-editor.org/rfc/rfc9460#section-2.5" class="relref">Section 2.5</a> of [<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>.
+<p id="section-3.2.1.4-4">It can be determined if the TargetName is present by checking if the record data array has a domain name after the SvcPriority, i.e., if the SvcPriority is elided the array would start with a domain name.
+If there is no domain name after the SvcPriority, the TargetName is elided and defaults to the sequence of text strings <code>""</code> (i.e., the root domain "." in the common name representation defined in <span><a href="https://rfc-editor.org/rfc/rfc1035#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>, see <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a> and <span><a href="https://rfc-editor.org/rfc/rfc9460#section-2.5" class="relref">Section 2.5</a> of [<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>).
 If there is a domain name after the SvcPriority, the TargetName is not elided and in the domain name form specified in <a href="#sec_domain-names" class="auto internal xref">Section 3.1</a>.<a href="#section-3.2.1.4-4" class="pilcrow">¶</a></p>
 <p id="section-3.2.1.4-5">The definition for SVCB and HTTPS record data can be seen in <a href="#fig_dns-rdata-svcb" class="auto internal xref">Figure 8</a>.<a href="#section-3.2.1.4-5" class="pilcrow">¶</a></p>
 <span id="name-svcb-and-https-resource-rec"></span><div id="fig_dns-rdata-svcb">
@@ -1884,7 +1887,7 @@ $$odata = bstr
 </li>
         </ol>
 <p id="section-3.3-3">If the first item is a boolean and when true, it tells the responding resolver that it <span class="bcp14">MUST</span> include the question section in its response. If that boolean is not present, it is assumed to be false.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
-<p id="section-3.3-4">If the first item of the query is an array, it is the question section, if it is an unsigned integer, it is as flag field and maps to the header flags in <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> and the "DNS Header Flags" IANA registry including the QR flag and the Opcode.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<p id="section-3.3-4">If the first item of the query is an array, it is the question section, if it is an unsigned integer, it is as flag field and maps to the header flags in <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> and the "DNS Header Flags" IANA registry including the QR flag and the OPCODE.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
 <p id="section-3.3-5">If the flags are elided, the value 0 is assumed.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
 <p id="section-3.3-6">This specification assumes that the DNS messages are sent over a transfer protocol that can map the queries to their responses, e.g., DNS over HTTPS <span>[<a href="#RFC8484" class="cite xref">RFC8484</a>]</span> or DNS over CoAP <span>[<a href="#RFC9953" class="cite xref">RFC9953</a>]</span>.
 As a consequence, the DNS transaction ID is always elided and the value 0 is assumed.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
@@ -1912,8 +1915,8 @@ This way it is ensured that the parser can distinguish each question by looking 
 <p id="section-3.3-12">If one extra array is in the query, it encodes the additional section of the query as an array of DNS resource records (see <a href="#sec_rr" class="auto internal xref">Section 3.2</a>).
 If two extra arrays are in the query, they encode, in that order, the authority and additional sections of the query each as an array of DNS resource records (see <a href="#sec_rr" class="auto internal xref">Section 3.2</a>).
 If three extra arrays are in the query, they encode, in that order, the answer section, the authority, and additional sections of the query each as an array of DNS resource records (see <a href="#sec_rr" class="auto internal xref">Section 3.2</a>).<a href="#section-3.3-12" class="pilcrow">¶</a></p>
-<p id="section-3.3-13">As such, the highest precedence in elision is given to the answer section, as it only occurs with mDNS to signify Known Answers <span>[<a href="#RFC6762" class="cite xref">RFC6762</a>]</span>.
-The lowest precedence is given to the additional section, as it may contain EDNS OPT Pseudo-RRs, which are common in queries (see <a href="#sec_edns" class="auto internal xref">Section 3.2.2</a>).<a href="#section-3.3-13" class="pilcrow">¶</a></p>
+<p id="section-3.3-13">As such, the highest precedence of elision is given to the answer section, as it only occurs with mDNS to signify Known Answers <span>[<a href="#RFC6762" class="cite xref">RFC6762</a>]</span>.
+The lowest precedence of elision is given to the additional section, as it may contain EDNS OPT Pseudo-RRs, which are common in queries (see <a href="#sec_edns" class="auto internal xref">Section 3.2.2</a>).<a href="#section-3.3-13" class="pilcrow">¶</a></p>
 <p id="section-3.3-14">The representation of a DNS query is defined in <a href="#fig_dns-query" class="auto internal xref">Figure 10</a>.<a href="#section-3.3-14" class="pilcrow">¶</a></p>
 <span id="name-dns-query-definition"></span><div id="fig_dns-query">
 <figure id="figure-10">
@@ -1985,15 +1988,15 @@ QR flag).<a href="#section-3.4-4" class="pilcrow">¶</a></p>
 <p id="section-3.4-5">If the response includes only one array, then the DNS answer section represents an
 array of one or more DNS Resource Records (see <a href="#sec_rr" class="auto internal xref">Section 3.2</a>).<a href="#section-3.4-5" class="pilcrow">¶</a></p>
 <p id="section-3.4-6">If the response includes more than 2 arrays, the first entry may be the question section, identified
-by not being an array of arrays. It <span class="bcp14">MUST</span> be included, if the client requested it using the boolean
-field in the query. If it is present, it is followed by the answer section. The question section is
+by just being a flat array and not an array of arrays. It <span class="bcp14">MUST</span> be included, if the client requested it using the boolean
+field in the query, otherwise it is <span class="bcp14">OPTIONAL</span>. If it is present, it is followed by the answer section. The question section is
 encoded as specified in <a href="#sec_queries" class="auto internal xref">Section 3.3</a>.<a href="#section-3.4-6" class="pilcrow">¶</a></p>
 <p id="section-3.4-7">If the answer section is followed by one extra array, this array is the additional section.
 Like the answer section, the additional section is represented as an array of one or more DNS Resource Records (see <a href="#sec_rr" class="auto internal xref">Section 3.2</a>).<a href="#section-3.4-7" class="pilcrow">¶</a></p>
 <p id="section-3.4-8">If the answer section is followed by two extra arrays, the first is the authority section, and the second is the additional section.
 The authority section is also represented as an array of one or more DNS Resource Records (see
 <a href="#sec_rr" class="auto internal xref">Section 3.2</a>).<a href="#section-3.4-8" class="pilcrow">¶</a></p>
-<p id="section-3.4-9">The authority section is given precedence in elision over the additional section, as due to EDNS options or, e.g., CNAME answers that also provide the A/AAAA records. The additional section tends to show up more often than the authority section.<a href="#section-3.4-9" class="pilcrow">¶</a></p>
+<p id="section-3.4-9">The authority section is given precedence of elision over the additional section, as due to EDNS options or, e.g., CNAME answers that also provide the A/AAAA records. The additional section tends to show up more often than the authority section.<a href="#section-3.4-9" class="pilcrow">¶</a></p>
 <span id="name-dns-response-definition"></span><div id="fig_dns-response">
 <figure id="figure-11">
           <div class="lang-cddl sourcecode" id="section-3.4-10.1">
@@ -2241,7 +2244,10 @@ document for the RIOT operating system. It can only encode queries and decode re
       <h2 id="name-security-considerations">
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-6-1">TODO Security<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-1">The security considerations of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> and <span>[<a href="#I-D.ietf-cbor-packed" class="cite xref">I-D.ietf-cbor-packed</a>]</span> also apply for this document.
+For original binary wire format DNS data encoded as byte strings, such as RRs, RDATA,
+SvcParamValues, or EDNS OPT data, a parser <span class="bcp14">MUST</span> ensure that any encoded lengths within that byte
+string do not overflow the bounds of the byte string or fail otherwise.<a href="#section-6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
@@ -2445,6 +2451,14 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="BCP219">[BCP219]</dt>
+        <dd>
+<div class="refInstance">Best Current Practice 219, <span>&lt;<a href="https://www.rfc-editor.org/info/bcp219">https://www.rfc-editor.org/info/bcp219</a>&gt;</span>.<br><span>At the time of writing, this BCP comprises the following:</span>
+</div>
+<div class="refInstance" id="RFC9499">
+            <span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">K. Fujiwara</span>, <span class="refTitle">"DNS Terminology"</span>, <span class="seriesInfo">BCP 219</span>, <span class="seriesInfo">RFC 9499</span>, <span class="seriesInfo">DOI 10.17487/RFC9499</span>, <time datetime="2024-03" class="refDate">March 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9499">https://www.rfc-editor.org/info/rfc9499</a>&gt;</span>. </div>
+</dd>
+<dd class="break"></dd>
 <dt id="RFC4944">[RFC4944]</dt>
         <dd>
 <span class="refAuthor">Montenegro, G.</span>, <span class="refAuthor">Kushalnagar, N.</span>, <span class="refAuthor">Hui, J.</span>, and <span class="refAuthor">D. Culler</span>, <span class="refTitle">"Transmission of IPv6 Packets over IEEE 802.15.4 Networks"</span>, <span class="seriesInfo">RFC 4944</span>, <span class="seriesInfo">DOI 10.17487/RFC4944</span>, <time datetime="2007-09" class="refDate">September 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4944">https://www.rfc-editor.org/rfc/rfc4944</a>&gt;</span>. </dd>
@@ -2468,10 +2482,6 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
 <dt id="RFC8484">[RFC8484]</dt>
         <dd>
 <span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">P. McManus</span>, <span class="refTitle">"DNS Queries over HTTPS (DoH)"</span>, <span class="seriesInfo">RFC 8484</span>, <span class="seriesInfo">DOI 10.17487/RFC8484</span>, <time datetime="2018-10" class="refDate">October 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8484">https://www.rfc-editor.org/rfc/rfc8484</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC8499">[RFC8499]</dt>
-        <dd>
-<span class="refAuthor">Hoffman, P.</span>, <span class="refAuthor">Sullivan, A.</span>, and <span class="refAuthor">K. Fujiwara</span>, <span class="refTitle">"DNS Terminology"</span>, <span class="seriesInfo">RFC 8499</span>, <span class="seriesInfo">DOI 10.17487/RFC8499</span>, <time datetime="2019-01" class="refDate">January 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8499">https://www.rfc-editor.org/rfc/rfc8499</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8618">[RFC8618]</dt>
         <dd>
@@ -2516,8 +2526,8 @@ IANA is requested to allocate the tags defined in <a href="#tab-tag-values" clas
         <h3 id="name-cddl-model-for-e-applicatio">
 <a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-cddl-model-for-e-applicatio" class="section-name selfRef">CDDL model for <code>e''</code> application extension</a>
         </h3>
-<p id="appendix-A.1-1"><a href="#fig_e-cddl-model" class="auto internal xref">Figure 15</a> shows the CDDL model used for the <code>e''</code> application extension (see
-<span>[<a href="#I-D.ietf-cbor-edn-e-ref" class="cite xref">I-D.ietf-cbor-edn-e-ref</a>]</span>) in our examples.
+<p id="appendix-A.1-1"><a href="#fig_e-cddl-model" class="auto internal xref">Figure 15</a> shows the CDDL model used for the <code>e''</code> application extension for external
+references to values <span>[<a href="#I-D.ietf-cbor-edn-e-ref" class="cite xref">I-D.ietf-cbor-edn-e-ref</a>]</span> in our examples.
 <code>C-</code> contants define DNS classes as unsigned integers from the "DNS CLASSes" sub-registry of the
 IANA "Domain Name System (DNS) Parameters" registry.
 <code>RR-</code> constants define resource record types from the "Resource Record (RR) TYPEs" sub-registry of
@@ -2585,7 +2595,7 @@ application extension <span>[<a href="#I-D.ietf-cbor-edn-e-ref" class="cite xref
       01                # e'RR-A' (unsigned(1))
 </pre><a href="#appendix-A.2-8" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-9">A query of <code>ANY</code> record for that name is represented as<a href="#appendix-A.2-9" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-9">A query of an <code>ANY</code> record for that name is represented as<a href="#appendix-A.2-9" class="pilcrow">¶</a></p>
 <div class="lang-edn sourcecode" id="appendix-A.2-10">
 <pre>
 [["example", "org", e'RR-ANY', e'C-ANY']]
@@ -2699,7 +2709,7 @@ here with hexadecimal encoding (type and data noted in comment).<a href="#append
 <a href="#name-binary-of-the-unpacked-exam" class="selfRef">Binary of the unpacked example for implicit name compression (136 bytes).</a>
           </figcaption></figure>
 </div>
-<p id="appendix-A.3-5">This would generate the following virtual table <em>V</em>.<a href="#appendix-A.3-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.3-5">With name compression, <em>o</em> would generate the following virtual table <em>V</em>.<a href="#appendix-A.3-5" class="pilcrow">¶</a></p>
 <span id="name-implicit-table-of-shared-it"></span><div id="fig_name-compression-example-table">
 <figure id="figure-18">
           <div class="lang-edn sourcecode" id="appendix-A.3-6.1">
@@ -2825,9 +2835,9 @@ However, its suffix "example", "org" is not added to the table again, as it is a
 <a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-dns-responses-2" class="section-name selfRef">DNS Responses</a>
         </h3>
 <p id="appendix-A.4-1">The responses to the examples provided in <a href="#sec_query-examples" class="auto internal xref">Appendix A.2</a> are shown
-below. We use the CBOR extended diagnostic notation (EDN) (see <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc8610#appendix-G" class="relref">Appendix G</a> of [<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>)
-with <code>e''</code> application extension <span>[<a href="#I-D.ietf-cbor-edn-e-ref" class="cite xref">I-D.ietf-cbor-edn-e-ref</a>]</span>,
-most notably the "ip" extension to represent binary IP addresses as an IP address app-string literal.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
+below. We use the CBOR extended diagnostic notation (EDN) (see <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc8610#appendix-G" class="relref">Appendix G</a> of [<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>),
+most notably the "ip" extension to represent binary IP addresses as an IP address app-string literal,
+with <code>e''</code> application extension for external references to values <span>[<a href="#I-D.ietf-cbor-edn-e-ref" class="cite xref">I-D.ietf-cbor-edn-e-ref</a>]</span>.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
 <p id="appendix-A.4-2">To represent an <code>AAAA</code> record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
 response to <code>[["example", "org"]]</code> could be<a href="#appendix-A.4-2" class="pilcrow">¶</a></p>
 <div class="lang-edn sourcecode" id="appendix-A.4-3">
@@ -2869,8 +2879,8 @@ be valid:<a href="#appendix-A.4-7" class="pilcrow">¶</a></p>
             20010db8000000000000000000000001  # ip'2001:db8::1'
 </pre><a href="#appendix-A.4-10" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4-11">If the query can not be mapped to the response for some reason, a response
-would look like:<a href="#appendix-A.4-11" class="pilcrow">¶</a></p>
+<p id="appendix-A.4-11">If the query can not be mapped to the response for some reason or is explicitly requested by the
+client, a response would look like:<a href="#appendix-A.4-11" class="pilcrow">¶</a></p>
 <div class="lang-edn sourcecode" id="appendix-A.4-12">
 <pre>
 [["example", "org"], [[300, ip'2001:db8::1']]]
@@ -2910,8 +2920,8 @@ would look like:<a href="#appendix-A.4-11" class="pilcrow">¶</a></p>
             c0000201 # ip'192.0.2.1'
 </pre><a href="#appendix-A.4-18" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4-19">Note that here also the 1 of record type <code>A</code> can be elided, as this record
-type is specified in the question section.<a href="#appendix-A.4-19" class="pilcrow">¶</a></p>
+<p id="appendix-A.4-19">Note that here also record type <code>A</code> can be elided, as this record
+type is specified in the (equally elided) question section.<a href="#appendix-A.4-19" class="pilcrow">¶</a></p>
 <p id="appendix-A.4-20">Lastly, a response to <code>[["example", "org", e'RR-ANY', e'C-ANY']]</code> could be<a href="#appendix-A.4-20" class="pilcrow">¶</a></p>
 <div class="breakable lang-edn sourcecode" id="appendix-A.4-21">
 <pre>
@@ -3075,8 +3085,8 @@ Note the use of name compression (see <a href="#sec_name-compression" class="aut
         simple(2) / expands to "www", "example", "org" /
       ],
       [
-        simple(1) / expands to 3600,
-        simple(5) / expands to "svc", "www", "example", "org" /
+        simple(1) / expands to 3600 /,
+        simple(5) / expands to "svc", "www", "example", "org" /,
         ip'2001:db8::1'
       ]
     ],
@@ -3153,27 +3163,27 @@ TBD113(
     ["org", 3600],
     TBD28259(
       [
-        ["www", "example", simple(0)],
+        ["www", "example", simple(0) / expands to "org" /],
         [
           [
-            simple(1),
+            simple(1) / expands to 3600 /,
             simple(2) / expands to "www", "example", "org" /,
             e'RR-CNAME',
             "svc",
             simple(2) / expands to "www", "example", "org" /
           ],
           [
-            simple(1),
+            simple(1) / expands to 3600 /,
             simple(5) / expands to "svc", "www", "example", "org" /
             ip'2001:db8::1'
           ]
         ],
         [
           [
-            simple(1),
+            simple(1) / expands to 3600 /,
             simple(3) / expands to "example", "org" /,
             e'RR-NS',
-            simple(0),
+            simple(0) / expands to "org" /,
             simple(3) / expands to "example", "org" /,
           ]
         ],
@@ -3315,7 +3325,7 @@ function recursive_unpack_names(
             /* name suffix is spliced in */
             assume that (
               typeof(tag-content of packed_obj) is CBORArray containing
-              only CBORTextString and references to CBORTextSTring
+              only CBORTextString and references to CBORTextString
             )
             result = result concat tag-content of packed_obj
           }
