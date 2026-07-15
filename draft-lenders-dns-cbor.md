@@ -115,7 +115,7 @@ Fragmentation combined with high packet loss multiplies the likelihood of loss.
 Hence, a compression format that reduces fragmentation of DNS messages is beneficial.
 
 This document specifies a compact data format for DNS messages using Concise Binary Object Representation (CBOR) {{-cbor}} encoding. Additionally,  unnecessary or redundant information are stripped off DNS messages.  To use the outcome of this specification in DoH and DoC,
-this document also specifies a Media Type header for DoH and a Content-Format option for DoC.
+this document also specifies a Media Type header value for DoH and a Content-Format option value for DoC.
 
 Note, that there is another format that expresses DNS messages in CBOR, C-DNS {{-cdns}}.
 C-DNS is primarily a file format to minimize traces of multiple DNS messages and uses the fact that there are multiple messages to do its compression.
@@ -152,11 +152,12 @@ The term "constrained networks" is used as defined in {{-constr-terms}}.
 {::boilerplate bcp14-tagged}
 
 To define the representation of binary objects we use the Concise Data Definition Language (CDDL) {{-cddl}}.
-For examples, we use the CBOR Extended Diagnostic Notation {{-edn}} with the `e''` application extension {{-edn-e-ref}}.
+For examples, we use the CBOR Extended Diagnostic Notation {{-edn}} with the `e''` application extension for external references to values {{-edn-e-ref}}.
 
 # CBOR Representations (application/dns+cbor)
 
-DNS messages in "application/dns+cbor" are represented as CBOR arrays to minimize overhead.
+DNS messages in "application/dns+cbor" are represented as CBOR arrays to minimize overhead compared
+to, e.g., maps.
 All CBOR items used in this specification are of definite length.
 CBOR arrays that do not follow the length definitions of this or of follow-up specifications, MUST be silently ignored.
 CBOR arrays that exceed the message size provided by the transport, MUST be silently ignored.
@@ -168,10 +169,11 @@ dns-message = dns-query / dns-response
 {:cddl #fig:dns-msg title="This document defines both DNS Queries and Responses in CDDL"}
 
 If, for any reason, a DNS message cannot be represented in the CBOR format specified in this document, or if unreasonable overhead is introduced, a fallback to another DNS message format, e.g., the classic DNS format specified in {{-dns}}, MUST always be possible.
+The DNS transport MUST support a mechanism to distinguish different formats, e.g., the Media Type header with DoH.
 
 ## Domain Name Representation {#sec:domain-names}
 
-Domain names are represented by a sequence of one or more (Unicode) text strings.
+Domain names are represented by a sequence of one or more (Unicode) text strings, using one string per label.
 For instance, "example.org" would be represented as `"example","org"` in CBOR diagnostic notation.
 The root domain "." is represented as an empty string `""`.
 The absence of any label means the name is elided.
@@ -213,7 +215,7 @@ and EDNS option pseudo-RRs (see {{-edns}}.
 If for any reason, a resource record cannot be represented in the given formats, they can be
 represented in their binary wire-format form as a byte string.
 
-Further special records, e.g., TSIG {{?RFC8945}}, can be defined in follow-up specifications using the `$$structured-ts-rd`
+Further dedicated representations of standard resource records, e.g., for TSIG {{?RFC8945}}, can be defined in follow-up specifications using the `$$structured-ts-rd`
 extension point (see {{fig:dns-standard-rr}}) and are out of scope of this document.
 
 The representation of a DNS resource records is defined in {{fig:dns-rr}}.
@@ -247,6 +249,7 @@ When a record class is required to be expressed, the record type MUST also be pr
 
 The byte string format of the record data as a byte string follows the classic DNS format as specified in {{Section 3.3 of -dns}} (or other specifications of the respective record type).
 Note that the CBOR format does not include the RDLENGTH field from the classic format as this value is encoded in the length field of the CBOR header of the byte string.
+A parser of the format specified in this document MUST ensure that encoded lengths within this binary record do not overflow the bounds of the byte string or fail otherwise.
 
 If the record data represents a domain name (e.g., for CNAME or PTR records), the record data MAY be represented as domain name as specified in {{sec:domain-names}}.
 This way of representing the record data means that name compression (see {{sec:name-compression}}) can also be used on it.
@@ -396,12 +399,12 @@ The record data of RRs with `record-type` = 64 (SVCB) and `record-type` = 65 (HT
   (as byte string).
   The type of SvcParamValue may be extended in future specifications.
 
-If the SvcPriority is present can be determined by checking if the record data array starts with an unsigned integer or not.
+It can be determined if the SvcPriority is present by checking if the record data array starts with an unsigned integer or not.
 If the array does not start with an unsigned integer, the SvcPriority is elided and defaults to 0, i.e., the record is in AliasMode (see {{Section 2.4.2 of -svcb}}).
 If the array starts with an unsigned integer, it is the SvcPriority.
 
-If the TargetName is present can be determined by checking if the record data array has a domain name after the SvcPriority, i.e., if the SvcPriority is elided the array would start with a domain name.
-If there is no domain name after the SvcPriority, the TargetName is elided and defaults to the sequence of text strings `""` (i.e., the root domain "." in the common name representation defined in {{Section 2.3.1 of -dns}}, see {{sec:domain-names}}) and {{Section 2.5 of -svcb}}.
+It can be determined if the TargetName is present by checking if the record data array has a domain name after the SvcPriority, i.e., if the SvcPriority is elided the array would start with a domain name.
+If there is no domain name after the SvcPriority, the TargetName is elided and defaults to the sequence of text strings `""` (i.e., the root domain "." in the common name representation defined in {{Section 2.3.1 of -dns}}, see {{sec:domain-names}} and {{Section 2.5 of -svcb}}).
 If there is a domain name after the SvcPriority, the TargetName is not elided and in the domain name form specified in {{sec:domain-names}}.
 
 The definition for SVCB and HTTPS record data can be seen in {{fig:dns-rdata-svcb}}.
@@ -489,7 +492,7 @@ DNS queries are encoded as CBOR arrays containing up to 6 entries in the followi
 
 If the first item is a boolean and when true, it tells the responding resolver that it MUST include the question section in its response. If that boolean is not present, it is assumed to be false.
 
-If the first item of the query is an array, it is the question section, if it is an unsigned integer, it is as flag field and maps to the header flags in {{-dns}} and the "DNS Header Flags" IANA registry including the QR flag and the Opcode.
+If the first item of the query is an array, it is the question section, if it is an unsigned integer, it is as flag field and maps to the header flags in {{-dns}} and the "DNS Header Flags" IANA registry including the QR flag and the OPCODE.
 
 If the flags are elided, the value 0 is assumed.
 
@@ -518,8 +521,8 @@ If one extra array is in the query, it encodes the additional section of the que
 If two extra arrays are in the query, they encode, in that order, the authority and additional sections of the query each as an array of DNS resource records (see {{sec:rr}}).
 If three extra arrays are in the query, they encode, in that order, the answer section, the authority, and additional sections of the query each as an array of DNS resource records (see {{sec:rr}}).
 
-As such, the highest precedence in elision is given to the answer section, as it only occurs with mDNS to signify Known Answers {{?RFC6762}}.
-The lowest precedence is given to the additional section, as it may contain EDNS OPT Pseudo-RRs, which are common in queries (see {{sec:edns}}).
+As such, the highest precedence of elision is given to the answer section, as it only occurs with mDNS to signify Known Answers {{?RFC6762}}.
+The lowest precedence of elision is given to the additional section, as it may contain EDNS OPT Pseudo-RRs, which are common in queries (see {{sec:edns}}).
 
 The representation of a DNS query is defined in {{fig:dns-query}}.
 
@@ -575,8 +578,8 @@ If the response includes only one array, then the DNS answer section represents 
 array of one or more DNS Resource Records (see {{sec:rr}}).
 
 If the response includes more than 2 arrays, the first entry may be the question section, identified
-by not being an array of arrays. It MUST be included, if the client requested it using the boolean
-field in the query. If it is present, it is followed by the answer section. The question section is
+by just being a flat array and not an array of arrays. It MUST be included, if the client requested it using the boolean
+field in the query, otherwise it is OPTIONAL. If it is present, it is followed by the answer section. The question section is
 encoded as specified in {{sec:queries}}.
 
 If the answer section is followed by one extra array, this array is the additional section.
@@ -586,7 +589,7 @@ If the answer section is followed by two extra arrays, the first is the authorit
 The authority section is also represented as an array of one or more DNS Resource Records (see
 {{sec:rr}}).
 
-The authority section is given precedence in elision over the additional section, as due to EDNS options or, e.g., CNAME answers that also provide the A/AAAA records. The additional section tends to show up more often than the authority section.
+The authority section is given precedence of elision over the additional section, as due to EDNS options or, e.g., CNAME answers that also provide the A/AAAA records. The additional section tends to show up more often than the authority section.
 
 ~~~ cddl
 dns-response = [
@@ -842,8 +845,8 @@ IANA is requested to allocate the tags defined in {{tab-tag-values}}.
 
 ## CDDL model for `e''` application extension
 
-{{fig:e-cddl-model}} shows the CDDL model used for the `e''` application extension (see
-{{-edn-e-ref}}) in our examples.
+{{fig:e-cddl-model}} shows the CDDL model used for the `e''` application extension for external
+references to values {{-edn-e-ref}} in our examples.
 `C-` contants define DNS classes as unsigned integers from the "DNS CLASSes" sub-registry of the
 IANA "Domain Name System (DNS) Parameters" registry.
 `RR-` constants define resource record types from the "Resource Record (RR) TYPEs" sub-registry of
@@ -901,7 +904,7 @@ or in binary (15 bytes)
       01                # e'RR-A' (unsigned(1))
 ~~~
 
-A query of `ANY` record for that name is represented as
+A query of an `ANY` record for that name is represented as
 
 ~~~ edn
 [["example", "org", e'RR-ANY', e'C-ANY']]
@@ -1000,7 +1003,7 @@ here with hexadecimal encoding (type and data noted in comment).
 ~~~
 {: #fig:name-compression-example-unpacked-binary title="Binary of the unpacked example for implicit name compression (136 bytes)."}
 
-This would generate the following virtual table _V_.
+With name compression, _o_ would generate the following virtual table _V_.
 
 ~~~ edn
 [
@@ -1102,9 +1105,9 @@ In binary the packed representation of _o_ would be:
 ## DNS Responses {#sec:response-examples}
 
 The responses to the examples provided in {{sec:query-examples}} are shown
-below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}})
-with `e''` application extension {{-edn-e-ref}},
-most notably the "ip" extension to represent binary IP addresses as an IP address app-string literal.
+below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}}),
+most notably the "ip" extension to represent binary IP addresses as an IP address app-string literal,
+with `e''` application extension for external references to values {{-edn-e-ref}}.
 
 To represent an `AAAA` record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
 response to `[["example", "org"]]` could be
@@ -1148,8 +1151,8 @@ In binary that response looks like the following (35 bytes):
             20010db8000000000000000000000001  # ip'2001:db8::1'
 ~~~
 
-If the query can not be mapped to the response for some reason, a response
-would look like:
+If the query can not be mapped to the response for some reason or is explicitly requested by the
+client, a response would look like:
 
 ~~~ edn
 [["example", "org"], [[300, ip'2001:db8::1']]]
@@ -1189,8 +1192,8 @@ or in binary (11 bytes)
             c0000201 # ip'192.0.2.1'
 ~~~
 
-Note that here also the 1 of record type `A` can be elided, as this record
-type is specified in the question section.
+Note that here also record type `A` can be elided, as this record
+type is specified in the (equally elided) question section.
 
 Lastly, a response to `[["example", "org", e'RR-ANY', e'C-ANY']]` could be
 
@@ -1418,27 +1421,27 @@ TBD113(
     ["org", 3600],
     TBD28259(
       [
-        ["www", "example", simple(0)],
+        ["www", "example", simple(0) / expands to "org" /],
         [
           [
-            simple(1),
+            simple(1) / expands to 3600 /,
             simple(2) / expands to "www", "example", "org" /,
             e'RR-CNAME',
             "svc",
             simple(2) / expands to "www", "example", "org" /
           ],
           [
-            simple(1),
+            simple(1) / expands to 3600 /,
             simple(5) / expands to "svc", "www", "example", "org" /
             ip'2001:db8::1'
           ]
         ],
         [
           [
-            simple(1),
+            simple(1) / expands to 3600 /,
             simple(3) / expands to "example", "org" /,
             e'RR-NS',
-            simple(0),
+            simple(0) / expands to "org" /,
             simple(3) / expands to "example", "org" /,
           ]
         ],
