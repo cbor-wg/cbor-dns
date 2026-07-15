@@ -1048,7 +1048,7 @@ Assuming media type "application/dns+cbor;packed=0" (i.e., an implicit tag TBD28
     ],
     [
       3600,
-      simple(3) / expands to "svc", "www", "example", "org" /
+      simple(3) / expands to "svc", "www", "example", "org" /,
       ip'2001:db8::1'
     ]
   ],
@@ -1432,7 +1432,7 @@ TBD113(
           ],
           [
             simple(1) / expands to 3600 /,
-            simple(5) / expands to "svc", "www", "example", "org" /
+            simple(5) / expands to "svc", "www", "example", "org" /,
             ip'2001:db8::1'
           ]
         ],
