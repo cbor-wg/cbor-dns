@@ -1806,7 +1806,7 @@ Internet-Draft                  dns+cbor                       July 2026
        ],
        [
          3600,
-         simple(3) / expands to "svc", "www", "example", "org" /
+         simple(3) / expands to "svc", "www", "example", "org" /,
          ip'2001:db8::1'
        ]
      ],
@@ -2258,7 +2258,7 @@ Internet-Draft                  dns+cbor                       July 2026
              ],
              [
                simple(1) / expands to 3600 /,
-               simple(5) / expands to "svc", "www", "example", "org" /
+               simple(5) / expands to "svc", "www", "example", "org" /,
                ip'2001:db8::1'
              ]
            ],
