@@ -711,7 +711,7 @@ Level of maturity:
 : prototype
 
 Version compatibility:
-: draft-lenders-dns-cbor-10
+: draft-lenders-dns-cbor-18
 
 License:
 : MIT
@@ -720,7 +720,7 @@ Contact information:
 : `Martine Lenders <martine.lenders@tu-dresden.de>`
 
 Last update of this information:
-: July 2024
+: October 2026
 
 ## Embedded decoder/encoder
 
