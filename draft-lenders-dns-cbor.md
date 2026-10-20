@@ -867,8 +867,8 @@ RR-ANY = 255
 
 ## DNS Queries {#sec:query-examples}
 
-A DNS query of the record `AAAA` in class `IN` for name "example.org" is
-represented in CBOR extended diagnostic notation (EDN) {{-edn}} with `e''`
+A DNS query of the record AAAA in class IN for name "example.org" is
+represented in CBOR diagnostic notation {{-edn}} with `e''`
 application extension {{-edn-e-ref}} as follows:
 
 ~~~ edn
@@ -886,7 +886,7 @@ The binary (in hexadecimal encoding) of the query looks as follows (14 bytes):
          6f7267         # "org"
 ~~~
 
-A query of an `A` record for the same name is represented as
+A query of an A record for the same name is represented as
 
 ~~~ edn
 [["example", "org", e'RR-A']]
@@ -904,7 +904,7 @@ or in binary (15 bytes)
       01                # e'RR-A' (unsigned(1))
 ~~~
 
-A query of an `ANY` record for that name is represented as
+A query of an ANY record for that name is represented as
 
 ~~~ edn
 [["example", "org", e'RR-ANY', e'C-ANY']]
@@ -920,12 +920,12 @@ or in binary (18 bytes)
       63                # text(3)
          6f7267         # "org"
       18 ff             # e'RR-ANY' (unsigned(255))
-      18 ff             # e'RR-ANY' (unsigned(255))
+      18 ff             # e'C-ANY' (unsigned(255))
 ~~~
 
 ## Name Compression {#sec:name-compression-example}
 
-Take the following response _o_ in CBOR extended diagnostic notation (EDN) {{-edn}}.
+Take the following response _o_ in CBOR diagnostic notation {{-edn}}.
 It contains a question for the "www.example.org" AAAA record, with a "svc.www.example.org" CNAME answer and its AAAA record, as well as the "org.example.org" NS record for the "example.org" domain in the authority section, each record with TTL 3600:
 
 ~~~ edn
@@ -1105,11 +1105,11 @@ In binary the packed representation of _o_ would be:
 ## DNS Responses {#sec:response-examples}
 
 The responses to the examples provided in {{sec:query-examples}} are shown
-below. We use the CBOR extended diagnostic notation (EDN) (see {{-edn}} and {{Appendix G of -cddl}}),
+below. We use the CBOR diagnostic notation (see {{-edn}} and {{Appendix G of -cddl}}),
 most notably the "ip" extension to represent binary IP addresses as an IP address app-string literal,
 with `e''` application extension for external references to values {{-edn-e-ref}}.
 
-To represent an `AAAA` record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
+To represent an AAAA record with TTL 300 seconds for the IPv6 address 2001:db8::1, a minimal
 response to `[["example", "org"]]` could be
 
 ~~~ edn
@@ -1174,7 +1174,7 @@ In binary that response looks like the following (36 bytes):
             20010db8000000000000000000000001  # ip'2001:db8::1'
 ~~~
 
-To represent a minimal response of an `A` record with TTL 3600 seconds for the IPv4 address
+To represent a minimal response of an A record with TTL 300 seconds for the IPv4 address
 192.0.2.1, a minimal response to `[["example", "org", 1]]` could be
 
 ~~~ edn
@@ -1192,7 +1192,7 @@ or in binary (11 bytes)
             c0000201 # ip'192.0.2.1'
 ~~~
 
-Note that here also record type `A` can be elided, as this record
+Note that the record type A can also be elided here, as this record
 type is specified in the (equally elided) question section.
 
 Lastly, a response to `[["example", "org", e'RR-ANY', e'C-ANY']]` could be
@@ -1224,7 +1224,7 @@ Lastly, a response to `[["example", "org", e'RR-ANY', e'C-ANY']]` could be
   [
     [
       # NS (2) for "example.org"
-      # (name elided since its the same as in question)
+      # (name elided since it is the same as in question)
       # is "ns1.example.org" with TTL 3600
       3600, e'RR-NS',
       # appends 5 => ["ns1", simple(0)] to virtual packing table
@@ -1232,7 +1232,7 @@ Lastly, a response to `[["example", "org", e'RR-ANY', e'C-ANY']]` could be
     ],
     [
       # NS (2) for "example.org"
-      # (name elided since its the same as in question)
+      # (name elided since it is the same as in question)
       # is "ns2.example.org" with TTL 3600
       3600, e'RR-NS',
       # appends 6 => ["ns2", simple(0)] to virtual packing table
@@ -1262,7 +1262,7 @@ Lastly, a response to `[["example", "org", e'RR-ANY', e'C-ANY']]` could be
     [
       # AAAA (28) for "ns2.example.org"
       # is 2001:db8::3535 with TTL 3600
-      simple(6),    # expands to ["ns2", ["example", "org"]
+      simple(6),    # expands to ["ns2", ["example", "org"]]
       3600, e'RR-AAAA', ip'2001:db8::3535'
     ]
   ]
@@ -1372,7 +1372,7 @@ Note the use of name compression (see {{sec:name-compression}}) in this example.
 ~~~
 {: #fig:name-compression-example-packed-113 title="The packed representation of the example of a message marked with \"application/dns+cbor;packed=1\"."}
 
-Note, that the encoder needs to rewrite the references from {{fig:name-compression-example-unpacked}} as the implicit table _V_ is appended to the shared argument table `["org", 600]`.
+Note that the encoder needs to rewrite the references from {{fig:name-compression-example-unpacked}} as the implicit table _V_ is appended to the shared argument table `["org", 3600]`.
 
 In binary, that example looks like the following (represented in hexadecimal):
 
@@ -1381,7 +1381,7 @@ In binary, that example looks like the following (represented in hexadecimal):
    82                                   # array(2)
       63                                # text(3)
          6F7267                         # "org"
-      19 0E10                           # unsigned(600)
+      19 0E10                           # unsigned(3600)
    84                                   # array(4)
       83                                # array(3)
          63                             # text(3)
@@ -1404,7 +1404,7 @@ In binary, that example looks like the following (represented in hexadecimal):
                20010DB8000000000000000000000001 # ip'2001:db8::1'
       81                                # array(1)
          85                             # array(5)
-            E1                          # unsigned(600)
+            E1                          # simple(1)
             E3                          # simple(3)
             02                          # e'RR-NS' (unsigned(2))
             E0                          # simple(0)
@@ -1413,7 +1413,7 @@ In binary, that example looks like the following (represented in hexadecimal):
 ~~~
 {: #fig:name-compression-example-packed-113-binary title="The binary of the packed representation of the example marked with \"application/dns+cbor;packed=1\" (62 bytes)."}
 
-Implicitly, a decoder would interpret this as the following EDN:
+Implicitly, a decoder would interpret this in diagnostic notation as:
 
 ~~~ edn
 TBD113(
@@ -1467,7 +1467,7 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
       rump = obj
     },
     when 1 then {
-      /* except explicit 113 */
+      /* except explicit TBD113 */
       if (typeof(obj) is CBORTag and tag-number of obj == 113) {
         obj = tag-content of obj
       }
@@ -1475,9 +1475,9 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
       assume that typeof(obj) is CBORArray and obj.length == 2
       assume that typeof(obj[0]) is CBORArray  # packing table
 
-      /* step into tag 113 context for unpacker with all its references
-       * (simple values and tag 6) and function tags */
-      Tell `unpacker` that we are in rump of tag 113 now
+      /* step into tag TBD113 context for unpacker with all its references
+       * (simple values and tag TBD6) and function tags */
+      Tell `unpacker` that we are in rump of tag TBD113 now
 
       /* prepend to current packing table of unpacker */
       unpacker.packing_table = obj[0] concat unpacker.packing_table
@@ -1492,20 +1492,20 @@ function decode_cbor_dns(binary: bytes, packed: uint = 0): CBORObject {
 }
 
 function unpack_names(rump: Any, unpacker: Unpacker): CBORObject {
-  /* except explicit 28259 */
+  /* except explicit TBD28259 */
   if (typeof(rump) is CBORTag and tag-number of rump == 28259) {
     rump = tag-content of rump
   }
 
-  /* step into tag 28259 context for unpacker with all its references
-   * (simple values and tag 6) */
-  Tell `unpacker` that we are in rump of tag 28259 now
+  /* step into tag TBD28259 context for unpacker with all its references
+   * (simple values and tag TBD6) */
+  Tell `unpacker` that we are in rump of tag TBD28259 now
 
   return recursive_unpack_names(rump, unpacker, unpacker.packing_table.length)
 }
 
 function is_splice_tag(obj: CBORObject): bool {
-  return (typeof(packed_idx) is CBORTag and tag-number of packed_idx == 1115)
+  return (typeof(obj) is CBORTag and tag-number of obj == 1115)
 }
 
 function recursive_unpack_names(
@@ -1526,26 +1526,26 @@ function recursive_unpack_names(
            * and all its suffixes */
           if (name_start_idx is null) {
             unpacker.packing_table = unpacker.packing_table concat [
-              CBORTag(tag-number = 1115, tag-content = []))
+              CBORTag(tag-number = 1115, tag-content = [])
             ]
             name_start_idx = unpacker.packing_table.length - 1
           }
           else {
             /* create packing table entry for new suffix */
             unpacker.packing_table = unpacker.packing_table concat [
-              CBORTag(tag-number = 1115, tag-content = []))
+              CBORTag(tag-number = 1115, tag-content = [])
             ]
           }
 
           /* Append to all suffixes in local name reference */
           for (i from i == name_start_idx
-                 to i < unpacker.packing_table.length)) {
+                 to i < unpacker.packing_table.length) {
             append elem to tag-content of unpacker.packing_table[i]
           }
           append elem to result
         }
-        elif (unpacker.is_shared_reference(elem)) {   /* is simple() or 6() */
-          /* calculate index from simple() or 6() */
+        elif (unpacker.is_shared_reference(elem)) {   /* is simple() or TBD6() */
+          /* calculate index from simple() or TBD6() */
           ref_idx: uint = unpacker.ref_idx(elem)
           assume that (ref_idx < unpacker.packing_table.length)
 
@@ -1558,7 +1558,7 @@ function recursive_unpack_names(
               /* if name_start_idx is already set, append to all suffixes
                * from name_start_idx to end of packing table */
               for (i from i == name_start_idx
-                     to i < unpacker.packing_table.length)) {
+                     to i < unpacker.packing_table.length) {
                 append elem to tag-content of unpacker.packing_table[i]
               }
 
@@ -1682,7 +1682,7 @@ a name overhead of 1 byte to its CBOR type header.[^10]{: mlenders}
       <td align="right">16&nbsp;+&nbsp;name&nbsp;len. + rdata&nbsp;len. + name&nbsp;overheads</td>
     </tr>
     <tr>
-      <td align="left">EDNS Opt Pseudo-RR</td>
+      <td align="left">EDNS OPT Pseudo-RR</td>
       <td align="right">11 + options</td>
       <td align="right">2 + options</td>
       <td align="right">6 + options</td>
@@ -1743,10 +1743,10 @@ a name overhead of 1 byte to its CBOR type header.[^10]{: mlenders}
       <td align="right">Type &gt; 255,<br/>Class &gt; 255,<br/>label len. &gt; 23<br/>name uncompressed</td>
     </tr>
     <tr>
-      <td align="left">EDNS Opt Pseudo-RR</td>
+      <td align="left">EDNS OPT Pseudo-RR</td>
       <td align="right">All EDNS(0) fields elided</td>
-      <td align="right">Rcode &lt; 24,<br/>DO flag set,<br/></td>
-      <td align="right">UDP payload<br/>len. &gt; 255<br/>Rcode &gt; 255<br/>Version &gt; 255<br/>DO flag set</td>
+      <td align="right">RCODE &lt; 24,<br/>DO flag set,<br/></td>
+      <td align="right">UDP payload<br/>len. &gt; 255<br/>RCODE &gt; 255<br/>Version &gt; 255<br/>DO flag set</td>
     </tr>
     <tr>
       <td align="left">EDNS Option</td>
