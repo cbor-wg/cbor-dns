@@ -40,8 +40,8 @@ and a note about policy.
 
 Here are two ways to create a pull request ("PR"):
 
-- Copy the repository and make a pull request using the Git command-line
-tool, using the [GitHub documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) if needed.
+- Copy the repository and make a pull request using the Git command-line tool;
+  see the [GitHub documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) for more.
 
 - You can use the GitHub UI as follows:
   - View the draft source
