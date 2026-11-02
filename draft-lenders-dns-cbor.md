@@ -1760,6 +1760,12 @@ a name overhead of 1 byte to its CBOR type header. [^10]{: mlenders}
 
 # Change Log
 
+Since [draft-lenders-dns-cbor-18]
+---------------------------------
+- Update Python implementation information
+- Fix examples (pseudo-code, unified formatting, ...)
+- Editorial pass (wording, spelling, grammar, ...)
+
 Since [draft-lenders-dns-cbor-17]
 ---------------------------------
 - Re-instate appendix
@@ -1891,6 +1897,7 @@ Since [draft-lenders-dns-cbor-00]
 - Name and Address compression utilizing CBOR-packed
 - Minor fixes to CBOR EDN and CDDL
 
+[draft-lenders-dns-cbor-18]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-18
 [draft-lenders-dns-cbor-17]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-17
 [draft-lenders-dns-cbor-16]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-16
 [draft-lenders-dns-cbor-15]: https://datatracker.ietf.org/doc/html/draft-lenders-dns-cbor-15
